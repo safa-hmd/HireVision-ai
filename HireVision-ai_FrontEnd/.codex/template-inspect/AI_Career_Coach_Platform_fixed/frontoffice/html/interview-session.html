@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Entretien — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <style>
+    body{background:#0F172A}
+    .interview-header{background:#1E293B;border-bottom:1px solid rgba(255,255,255,.08);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+    .interview-header *{color:#E2E8F0}
+    .interview-header h2{font-family:var(--font-head);font-size:1.1rem;margin:0}
+    .interview-header p{font-size:.83rem;opacity:.6;margin:0}
+    .timer-display{font-family:monospace;font-size:1.8rem;font-weight:700;color:#fff}
+    .cam-bg{background:linear-gradient(135deg,#1E293B,#0F172A);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);overflow:hidden;position:relative}
+    .cam-bg svg{width:56px;height:56px;opacity:.25;color:#fff}
+    .question-card{background:#1E293B;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px}
+    .question-card h3,.question-card p{color:#E2E8F0}
+    .ai-label{width:44px;height:44px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;color:#fff;flex-shrink:0}
+    .metrics-card{background:#1E293B;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:20px}
+    .metrics-card h3{color:#E2E8F0;margin-bottom:16px;font-size:.95rem}
+    .metric-label-live{font-size:.82rem;color:#94A3B8;display:flex;justify-content:space-between;margin-bottom:4px}
+    .metric-label-live span:last-child{color:#fff;font-weight:600}
+    .progress-wrap-dark{background:rgba(255,255,255,.1);border-radius:100px;height:7px;overflow:hidden;margin-bottom:12px}
+    .cam-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
+    .cam-btn{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);color:#fff;transition:all .15s}
+    .cam-btn:hover{background:rgba(255,255,255,.25)}
+    .cam-btn.danger{background:#EF4444}
+    .progress-info{background:#1E293B;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:16px}
+    .progress-info p{color:#94A3B8;font-size:.85rem;margin-top:6px}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="interview-header">
+  <div class="flex items-center gap-4">
+    <a href="interview-prep.html" class="btn btn-ghost btn-sm" style="color:#94A3B8"><i data-lucide="arrow-left"></i> Quitter</a>
+    <div>
+      <h2 id="session-title">Entretien Java</h2>
+      <p id="question-progress">Question 1 sur 15</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-6">
+    <div class="timer-display" id="timer">00:00</div>
+    <button id="btn-end" class="btn btn-danger" onclick="endInterview()" disabled>Terminer</button>
+  </div>
+</div>
+
+<!-- Body -->
+<div style="display:grid;grid-template-columns:1fr 300px;gap:20px;padding:24px;max-width:1280px;margin:0 auto">
+
+  <!-- Left -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+
+    <!-- Camera -->
+    <div class="cam-bg" id="cam-area">
+      <div style="text-align:center;color:#fff;opacity:.3">
+        <i data-lucide="video" style="width:56px;height:56px;display:block;margin:0 auto 8px"></i>
+        <p style="font-size:.85rem">Flux webcam (démo)</p>
+      </div>
+      <div class="recording-badge" id="rec-badge" style="display:none"><span>●</span> Enregistrement</div>
+      <div class="cam-controls">
+        <button class="cam-btn" id="btn-mic" onclick="toggleMic()"><i data-lucide="mic" id="mic-icon"></i></button>
+        <button class="cam-btn" id="btn-cam" onclick="toggleCam()"><i data-lucide="video" id="cam-icon"></i></button>
+      </div>
+    </div>
+
+    <!-- Current question -->
+    <div class="question-card">
+      <div class="flex gap-4">
+        <div class="ai-label">IA</div>
+        <div>
+          <h3 style="margin-bottom:8px">Question Actuelle</h3>
+          <p id="current-question">Parlez-moi de vous et de votre expérience en Java.</p>
+        </div>
+      </div>
+      <div style="margin-top:20px;display:flex;gap:10px">
+        <button id="btn-start" class="btn btn-success" onclick="startSession()"><i data-lucide="circle"></i> Démarrer l'enregistrement</button>
+        <button id="btn-next" class="btn btn-primary" onclick="nextQuestion()" style="display:none"><i data-lucide="arrow-right"></i> Question suivante</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-info">
+      <div class="flex justify-between text-sm" style="color:#94A3B8;margin-bottom:6px">
+        <span>Progression</span>
+        <span id="progress-txt">1/15</span>
+      </div>
+      <div class="progress-wrap-dark"><div class="progress-bar progress-primary" id="progress-bar" style="width:6.7%"></div></div>
+      <p id="progress-msg">1 question complétée sur 15</p>
+    </div>
+  </div>
+
+  <!-- Right — Analytics -->
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="metrics-card">
+      <h3>Analyses en Temps Réel</h3>
+      <div class="metric-bar"><div class="metric-label-live"><span>Contact visuel</span><span>85%</span></div><div class="progress-wrap-dark"><div class="progress-bar progress-success" style="width:85%"></div></div></div>
+      <div class="metric-bar"><div class="metric-label-live"><span>Posture</span><span>78%</span></div><div class="progress-wrap-dark"><div class="progress-bar progress-primary" style="width:78%"></div></div></div>
+      <div class="metric-bar"><div class="metric-label-live"><span>Engagement</span><span>92%</span></div><div class="progress-wrap-dark"><div class="progress-bar progress-success" style="width:92%"></div></div></div>
+      <div class="metric-bar"><div class="metric-label-live"><span>Clarté vocale</span><span>90%</span></div><div class="progress-wrap-dark"><div class="progress-bar progress-success" style="width:90%"></div></div></div>
+      <div class="metric-bar"><div class="metric-label-live"><span>Confiance</span><span>82%</span></div><div class="progress-wrap-dark"><div class="progress-bar progress-primary" style="width:82%"></div></div></div>
+      <div class="metric-bar"><div class="metric-label-live"><span>Niveau de stress</span><span>35%</span></div><div class="progress-wrap-dark"><div class="progress-bar" style="width:35%;background:var(--warning)"></div></div></div>
+    </div>
+
+    <div class="metrics-card">
+      <h3>Conseils IA</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.84rem;color:#94A3B8">
+        <li>• Maintenez le contact visuel avec la caméra</li>
+        <li>• Parlez clairement et avec confiance</li>
+        <li>• Faites de courtes pauses avant de répondre</li>
+        <li>• Utilisez des exemples concrets</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  const questions = [
+    'Parlez-moi de vous et de votre expérience en Java.',
+    'Quelles sont vos principales forces dans ce domaine ?',
+    'Décrivez un projet difficile sur lequel vous avez travaillé récemment.',
+    'Comment vous tenez-vous informé des nouvelles technologies ?',
+    'Où vous voyez-vous dans 5 ans ?'
+  ];
+  let currentQ = 1, recording = false, micOn = true, camOn = true;
+  const total = 15;
+  const cat = new URLSearchParams(location.search).get('cat') || 'Java';
+  document.getElementById('session-title').textContent = 'Entretien ' + cat;
+
+  function startSession() {
+    recording = true;
+    document.getElementById('btn-start').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'inline-flex';
+    document.getElementById('btn-end').disabled = false;
+    document.getElementById('rec-badge').style.display = 'flex';
+    startTimer('timer');
+    showToast('Session démarrée !', 'success');
+  }
+
+  function nextQuestion() {
+    if (currentQ < total) {
+      currentQ++;
+      document.getElementById('current-question').textContent = questions[(currentQ - 1) % questions.length];
+      document.getElementById('question-progress').textContent = 'Question ' + currentQ + ' sur ' + total;
+      document.getElementById('progress-txt').textContent = currentQ + '/' + total;
+      document.getElementById('progress-bar').style.width = ((currentQ / total) * 100) + '%';
+      document.getElementById('progress-msg').textContent = currentQ + ' question(s) complétée(s) sur ' + total;
+    }
+  }
+
+  function endInterview() {
+    stopTimer();
+    showToast('Entretien terminé ! Génération du rapport…', 'success');
+    setTimeout(() => { window.location.href = 'feedback.html'; }, 1500);
+  }
+
+  function toggleMic() {
+    micOn = !micOn;
+    document.getElementById('mic-icon').setAttribute('data-lucide', micOn ? 'mic' : 'mic-off');
+    document.getElementById('btn-mic').style.background = micOn ? 'rgba(255,255,255,.15)' : '#EF4444';
+    lucide.createIcons();
+  }
+  function toggleCam() {
+    camOn = !camOn;
+    document.getElementById('cam-icon').setAttribute('data-lucide', camOn ? 'video' : 'video-off');
+    document.getElementById('btn-cam').style.background = camOn ? 'rgba(255,255,255,.15)' : '#EF4444';
+    lucide.createIcons();
+  }
+</script>
+</body>
+</html>

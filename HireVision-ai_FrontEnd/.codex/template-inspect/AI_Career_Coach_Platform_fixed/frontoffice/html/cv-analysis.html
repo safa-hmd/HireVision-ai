@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyse CV — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <style>
+    .drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:48px;text-align:center;cursor:pointer;transition:all .2s}
+    .drop-zone:hover,.drop-zone.dragging{border-color:var(--primary);background:var(--primary-light)}
+    .drop-zone input{display:none}
+    .drop-zone svg{width:48px;height:48px;color:var(--text-muted);margin-bottom:12px}
+    #upload-section{display:block}
+    #results-section{display:none}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html" class="active"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Analyse CV</h1><p class="page-subtitle">Uploadez votre CV pour une analyse IA complète</p></div>
+    </header>
+    <div class="page-body">
+
+      <!-- Upload section -->
+      <div id="upload-section">
+        <div class="card">
+          <div class="card-body text-center" style="padding:48px 24px">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('cv-file').click()">
+              <input type="file" id="cv-file" accept=".pdf,.doc,.docx" />
+              <i data-lucide="upload-cloud" style="width:56px;height:56px;color:var(--primary);margin-bottom:16px"></i>
+              <h3 style="color:var(--text);margin-bottom:8px">Déposez votre CV ici</h3>
+              <p style="margin-bottom:20px">Format PDF, DOC ou DOCX — max 5 Mo</p>
+              <button class="btn btn-primary btn-lg"><i data-lucide="upload"></i> Choisir un fichier</button>
+            </div>
+            <button onclick="simulateUpload()" class="btn btn-outline mt-4">Simuler l'analyse (démo)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results section -->
+      <div id="results-section">
+        <div class="alert alert-success mb-6" style="display:flex;align-items:center;gap:12px">
+          <i data-lucide="check-circle" style="flex-shrink:0"></i>
+          <div><strong>CV Analysé avec succès !</strong> Jean_Dupont_CV.pdf</div>
+        </div>
+
+        <div class="grid-2 mb-6">
+          <div class="card">
+            <div class="card-header"><h3>Compétences Extraites</h3><p>Compétences techniques et comportementales</p></div>
+            <div class="card-body">
+              <div>
+                <span class="tag">Java</span><span class="tag">Spring Boot</span><span class="tag">Microservices</span>
+                <span class="tag">REST API</span><span class="tag">Angular</span><span class="tag">TypeScript</span>
+                <span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">MySQL</span>
+                <span class="tag">MongoDB</span><span class="tag">Git</span><span class="tag">CI/CD</span>
+                <span class="tag">Agile</span><span class="tag">Leadership</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Formation</h3><p>Parcours académique</p></div>
+            <div class="card-body">
+              <div style="border-left:3px solid var(--primary);padding-left:14px;margin-bottom:16px">
+                <div class="font-medium">Master en Informatique</div>
+                <div class="text-sm text-muted">Université Paris-Saclay</div>
+                <div class="text-xs text-muted">2020 – 2022</div>
+              </div>
+              <div style="border-left:3px solid var(--border);padding-left:14px">
+                <div class="font-medium">Licence Génie Logiciel</div>
+                <div class="text-sm text-muted">INSA Lyon</div>
+                <div class="text-xs text-muted">2017 – 2020</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Expérience</h3><p>Historique professionnel</p></div>
+            <div class="card-body space-y-4">
+              <div>
+                <div class="font-medium">Ingénieur Logiciel Senior</div>
+                <div class="text-sm text-muted">Tech Corp SARL</div>
+                <div class="text-xs text-muted">2022 – Présent</div>
+                <div class="text-sm mt-2">Architecture microservices pour 1 M+ utilisateurs</div>
+              </div>
+              <div>
+                <div class="font-medium">Développeur Full Stack</div>
+                <div class="text-sm text-muted">StartupXYZ</div>
+                <div class="text-xs text-muted">2020 – 2022</div>
+                <div class="text-sm mt-2">Applications Java Spring + Angular</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Certifications</h3><p>Certifications professionnelles</p></div>
+            <div class="card-body space-y-4">
+              <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">AWS Certified Solutions Architect</span></div>
+              <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Oracle Certified Java Professional</span></div>
+              <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Certified Kubernetes Administrator</span></div>
+              <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Google Cloud Professional Developer</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-6">
+          <div class="card-header"><h3>Langues</h3><p>Compétences linguistiques</p></div>
+          <div class="card-body">
+            <div class="grid-4">
+              <div class="list-item flex-col text-center" style="padding:16px">
+                <div class="font-medium">Français</div><div class="text-sm text-muted">Natif</div>
+              </div>
+              <div class="list-item flex-col text-center" style="padding:16px">
+                <div class="font-medium">Anglais</div><div class="text-sm text-muted">Courant</div>
+              </div>
+              <div class="list-item flex-col text-center" style="padding:16px">
+                <div class="font-medium">Espagnol</div><div class="text-sm text-muted">Intermédiaire</div>
+              </div>
+              <div class="list-item flex-col text-center" style="padding:16px">
+                <div class="font-medium">Arabe</div><div class="text-sm text-muted">Notions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="resetUpload()" class="btn btn-outline"><i data-lucide="refresh-cw"></i> Analyser un autre CV</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  function simulateUpload() {
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('results-section').style.display = 'block';
+    showToast('CV analysé avec succès !');
+    lucide.createIcons();
+  }
+  function resetUpload() {
+    document.getElementById('upload-section').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+  }
+  document.getElementById('cv-file').addEventListener('change', () => {
+    setTimeout(simulateUpload, 800);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Connexion — HireVision AI</title>
+  <link rel="stylesheet" href="login.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<div class="auth-card">
+  <div class="brand">
+    <span class="brand-icon">🧠</span>
+    <h1>HireVision AI</h1>
+    <p>Connectez-vous à votre espace</p>
+  </div>
+
+  <!-- Social login -->
+  <button class="btn-social" onclick="handleSocial('Google')">
+    <div class="social-icon" style="background:#EA4335">G</div>
+    Continuer avec Google
+  </button>
+  <button class="btn-social" onclick="handleSocial('LinkedIn')">
+    <div class="social-icon" style="background:#0077B5">in</div>
+    Continuer avec LinkedIn
+  </button>
+
+  <div class="divider"><span>ou avec votre email</span></div>
+
+  <!-- Form -->
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label class="form-label">Adresse email</label>
+      <div class="input-wrap">
+        <i data-lucide="mail"></i>
+        <input class="form-input" id="email" type="email" placeholder="jean@exemple.com" autocomplete="email" />
+      </div>
+      <p class="error-msg" id="email-err">Email invalide ou introuvable.</p>
+    </div>
+
+    <div class="form-group">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <label class="form-label" style="margin:0">Mot de passe</label>
+        <a href="forgot-password.html" class="auth-link" style="font-size:.82rem">Mot de passe oublié ?</a>
+      </div>
+      <div class="input-wrap">
+        <i data-lucide="lock"></i>
+        <input class="form-input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+        <button type="button" class="eye-btn" onclick="togglePwd('password','eye1')"><i data-lucide="eye" id="eye1"></i></button>
+      </div>
+      <p class="error-msg" id="pwd-err">Mot de passe incorrect.</p>
+    </div>
+
+    <div class="check-group mb-4" style="margin-bottom:18px">
+      <input type="checkbox" id="remember" />
+      <label for="remember">Se souvenir de moi pendant 30 jours</label>
+    </div>
+
+    <button type="submit" class="btn-submit" id="login-btn">
+      <i data-lucide="log-in" id="btn-icon" style="width:18px;height:18px"></i>
+      <span id="btn-label">Se connecter</span>
+    </button>
+
+    <div class="auth-footer">
+      Pas encore de compte ? <a href="register.html" class="auth-link">Créer un compte</a>
+    </div>
+
+    <!-- Demo shortcuts -->
+    <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:10px">Accès rapide démo :</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button type="button" class="btn-social" style="width:auto;padding:7px 14px;font-size:.8rem" onclick="demoLogin('candidate')">🎯 Candidat</button>
+        <button type="button" class="btn-social" style="width:auto;padding:7px 14px;font-size:.8rem" onclick="demoLogin('admin')">⚙️ Admin</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script src="login.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

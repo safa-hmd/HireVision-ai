@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Abonnements — HireVision AI Admin</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div><div class="brand-sub">Administration</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Tableau de Bord</a>
+      <a href="users.html"><i data-lucide="users"></i> Utilisateurs</a>
+      <a href="interviews.html"><i data-lucide="video"></i> Entretiens</a>
+      <a href="analytics.html"><i data-lucide="bar-chart-2"></i> Analytics</a>
+      <span class="sidebar-section-label">Gestion</span>
+      <a href="questions.html"><i data-lucide="help-circle"></i> Questions</a>
+      <a href="subscriptions.html" class="active"><i data-lucide="credit-card"></i> Abonnements</a>
+      <a href="settings.html"><i data-lucide="settings"></i> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Abonnements & Revenus</h1><p class="page-subtitle">Gestion des plans et paiements</p></div>
+      <div class="page-header-actions">
+        <button class="btn btn-outline btn-sm" onclick="showToast('Export généré !')"><i data-lucide="download"></i> Exporter</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Revenue KPIs -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card" style="border-color:#10B981">
+          <div class="stat-label">MRR (Revenus Mensuels)</div>
+          <div class="stat-value text-success" data-countup="18450" data-suffix="€">0€</div>
+          <div class="stat-change text-success">↑ +22% vs mois dernier</div>
+        </div>
+        <div class="stat-card" style="border-color:#4F46E5">
+          <div class="stat-label">ARR (Annuel Estimé)</div>
+          <div class="stat-value" style="color:#4F46E5" data-countup="221400" data-suffix="€">0€</div>
+          <div class="stat-change text-success">↑ Croissance forte</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Abonnés Payants</div>
+          <div class="stat-value text-primary" data-countup="687">0</div>
+          <div class="stat-change text-muted">Sur 1 247 utilisateurs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Revenu Moyen / User</div>
+          <div class="stat-value text-warning" data-countup="26.8" data-suffix="€">0€</div>
+          <div class="stat-change text-success">↑ +1.2€</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header"><h3>Évolution des Revenus</h3><p>6 derniers mois</p></div>
+          <div class="card-body"><div style="height:230px"><canvas id="chart-rev"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Répartition des Plans</h3><p>Distribution actuelle</p></div>
+          <div class="card-body"><div style="height:230px"><canvas id="chart-pie"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Plans cards -->
+      <div class="grid-3 mb-6">
+        <div class="card" style="border-color:var(--border)">
+          <div class="card-body text-center">
+            <div class="badge badge-muted" style="margin-bottom:12px;font-size:.82rem">Gratuit</div>
+            <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px">0€</div>
+            <div class="text-sm text-muted mb-4">/mois</div>
+            <div class="text-sm space-y-3">
+              <div>5 entretiens / mois</div><div>Feedback basique</div><div>1 CV</div>
+            </div>
+            <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+              <div class="stat-value" style="font-size:1.4rem;color:var(--text-muted)" data-countup="560">0</div>
+              <div class="text-xs text-muted">utilisateurs</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:#4F46E5;border-width:2px">
+          <div class="card-body text-center">
+            <div class="badge badge-admin" style="margin-bottom:12px;font-size:.82rem">Pro ★ Populaire</div>
+            <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px;color:#4F46E5">29€</div>
+            <div class="text-sm text-muted mb-4">/mois</div>
+            <div class="text-sm space-y-3">
+              <div>Entretiens illimités</div><div>Analyse IA avancée</div><div>CV illimités</div><div>Plan carrière</div>
+            </div>
+            <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+              <div class="stat-value" style="font-size:1.4rem;color:#4F46E5" data-countup="437">0</div>
+              <div class="text-xs text-muted">utilisateurs</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:#F59E0B;border-width:2px">
+          <div class="card-body text-center">
+            <div class="badge badge-warning" style="margin-bottom:12px;font-size:.82rem">Premium</div>
+            <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px;color:#F59E0B">59€</div>
+            <div class="text-sm text-muted mb-4">/mois</div>
+            <div class="text-sm space-y-3">
+              <div>Tout le plan Pro</div><div>Coach IA dédié</div><div>Simulation réelle</div><div>Support prioritaire</div>
+            </div>
+            <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+              <div class="stat-value" style="font-size:1.4rem;color:#F59E0B" data-countup="250">0</div>
+              <div class="text-xs text-muted">utilisateurs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent transactions -->
+      <div class="card">
+        <div class="card-header"><h3>Transactions Récentes</h3><p>Derniers paiements reçus</p></div>
+        <div class="card-body" style="padding:0">
+          <table>
+            <thead><tr><th>Utilisateur</th><th>Plan</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
+            <tbody>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm">JD</div> Jean Dupont</div></td><td>Pro</td><td><strong>29€</strong></td><td class="text-xs text-muted">1 Juin 2026</td><td><span class="badge badge-success">Payé</span></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#F59E0B">TM</div> Thomas Martin</div></td><td>Premium</td><td><strong>59€</strong></td><td class="text-xs text-muted">1 Juin 2026</td><td><span class="badge badge-success">Payé</span></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#10B981">MD</div> Marie Dubois</div></td><td>Premium</td><td><strong>59€</strong></td><td class="text-xs text-muted">31 Mai 2026</td><td><span class="badge badge-success">Payé</span></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#7C3AED">LR</div> Lucie Renard</div></td><td>Pro</td><td><strong>29€</strong></td><td class="text-xs text-muted">30 Mai 2026</td><td><span class="badge badge-danger">Échoué</span></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#06B6D4">SC</div> Sara Chadi</div></td><td>Pro</td><td><strong>29€</strong></td><td class="text-xs text-muted">29 Mai 2026</td><td><span class="badge badge-warning">En attente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  drawLineChart('chart-rev',[{label:'Jan',value:12000},{label:'Fév',value:13500},{label:'Mar',value:14200},{label:'Avr',value:15800},{label:'Mai',value:16900},{label:'Jun',value:18450}],'Revenus €','#10B981');
+  drawDoughnutChart('chart-pie',[{label:'Gratuit (0€)',value:45,color:'#94A3B8'},{label:'Pro (29€)',value:35,color:'#4F46E5'},{label:'Premium (59€)',value:20,color:'#F59E0B'}]);
+</script>
+</body>
+</html>

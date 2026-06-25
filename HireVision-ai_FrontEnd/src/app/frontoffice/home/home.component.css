@@ -1,0 +1,12 @@
+.sidebar-logo {
+  padding: 15px;
+  text-align: center;
+}
+
+.sidebar-logo-img {
+  width: 100%;          /* Prend toute la largeur du conteneur */
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Créer un compte — HireVision AI</title>
+  <link rel="stylesheet" href="login.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<div class="auth-card" style="max-width:500px">
+  <div class="brand">
+    <span class="brand-icon">🧠</span>
+    <h1>Créer un compte</h1>
+    <p id="step-progress">Étape 1 sur 3</p>
+  </div>
+
+  <!-- Step indicators -->
+  <div class="steps">
+    <div class="step active" title="Informations"></div>
+    <div class="step" title="Mot de passe"></div>
+    <div class="step" title="Plan"></div>
+  </div>
+
+  <form id="reg-form" onsubmit="handleRegister(event)">
+
+    <!-- ─── Step 1 : Personal info ─── -->
+    <div class="register-step" data-step="1">
+      <h3 style="font-family:var(--font-head);font-size:1.05rem;margin-bottom:18px;color:var(--text)">Vos informations</h3>
+
+      <!-- Social -->
+      <button type="button" class="btn-social" onclick="handleSocial('Google')">
+        <div class="social-icon" style="background:#EA4335">G</div> Continuer avec Google
+      </button>
+      <button type="button" class="btn-social" onclick="handleSocial('LinkedIn')">
+        <div class="social-icon" style="background:#0077B5">in</div> Continuer avec LinkedIn
+      </button>
+      <div class="divider"><span>ou manuellement</span></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Prénom</label>
+          <div class="input-wrap">
+            <i data-lucide="user"></i>
+            <input class="form-input" id="firstName" placeholder="Jean" autocomplete="given-name" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Nom</label>
+          <div class="input-wrap">
+            <i data-lucide="user"></i>
+            <input class="form-input" id="lastName" placeholder="Dupont" autocomplete="family-name" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Adresse email</label>
+        <div class="input-wrap">
+          <i data-lucide="mail"></i>
+          <input class="form-input" id="reg-email" type="email" placeholder="jean@exemple.com" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Téléphone (optionnel)</label>
+        <div class="input-wrap">
+          <i data-lucide="phone"></i>
+          <input class="form-input" id="phone" type="tel" placeholder="+33 6 00 00 00 00" autocomplete="tel" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Je suis</label>
+        <select class="form-input no-icon" style="padding-left:14px">
+          <option value="">Sélectionner un profil…</option>
+          <option>Développeur Backend</option>
+          <option>Développeur Frontend</option>
+          <option>Développeur Full Stack</option>
+          <option>DevOps / SRE</option>
+          <option>Data Scientist / ML Engineer</option>
+          <option>Autre</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-submit" onclick="nextStep()">
+        <span>Continuer</span>
+        <i data-lucide="arrow-right" style="width:17px;height:17px"></i>
+      </button>
+    </div>
+
+    <!-- ─── Step 2 : Password ─── -->
+    <div class="register-step" data-step="2" style="display:none">
+      <h3 style="font-family:var(--font-head);font-size:1.05rem;margin-bottom:18px;color:var(--text)">Sécurisez votre compte</h3>
+
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <i data-lucide="lock"></i>
+          <input class="form-input" id="reg-pwd" type="password" placeholder="Minimum 8 caractères"
+                 oninput="updateStrength('reg-pwd','strength-bar','strength-label')" autocomplete="new-password" />
+          <button type="button" class="eye-btn" onclick="togglePwd('reg-pwd','eye-reg1')">
+            <i data-lucide="eye" id="eye-reg1"></i>
+          </button>
+        </div>
+        <!-- Strength -->
+        <div class="strength-bar" id="strength-bar" style="margin-top:8px">
+          <div></div><div></div><div></div><div></div>
+        </div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmer le mot de passe</label>
+        <div class="input-wrap">
+          <i data-lucide="lock"></i>
+          <input class="form-input" id="reg-pwd2" type="password" placeholder="Répétez votre mot de passe" autocomplete="new-password" />
+          <button type="button" class="eye-btn" onclick="togglePwd('reg-pwd2','eye-reg2')">
+            <i data-lucide="eye" id="eye-reg2"></i>
+          </button>
+        </div>
+      </div>
+
+      <div style="background:#F8FAFF;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px;font-size:.83rem;color:var(--text-muted)">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div id="rule-len"  style="display:flex;gap:6px;align-items:center"><i data-lucide="x-circle" style="width:14px;height:14px;color:#EF4444"></i> Minimum 8 caractères</div>
+          <div id="rule-upper" style="display:flex;gap:6px;align-items:center"><i data-lucide="x-circle" style="width:14px;height:14px;color:#EF4444"></i> Une lettre majuscule</div>
+          <div id="rule-num"  style="display:flex;gap:6px;align-items:center"><i data-lucide="x-circle" style="width:14px;height:14px;color:#EF4444"></i> Un chiffre</div>
+        </div>
+      </div>
+
+      <div class="check-group" style="margin-bottom:18px">
+        <input type="checkbox" id="cgu" required />
+        <label for="cgu">J'accepte les <a href="#" class="auth-link">Conditions d'utilisation</a> et la <a href="#" class="auth-link">Politique de confidentialité</a></label>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button type="button" class="btn-submit" style="background:#F1F5F9;color:var(--text);flex:0 0 auto;width:48px;padding:0;justify-content:center" onclick="prevStep()">
+          <i data-lucide="arrow-left" style="width:17px;height:17px"></i>
+        </button>
+        <button type="button" class="btn-submit" style="flex:1" onclick="nextStep()">
+          <span>Choisir mon plan</span>
+          <i data-lucide="arrow-right" style="width:17px;height:17px"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── Step 3 : Plan choice ─── -->
+    <div class="register-step" data-step="3" style="display:none">
+      <h3 style="font-family:var(--font-head);font-size:1.05rem;margin-bottom:6px;color:var(--text)">Choisissez votre plan</h3>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px">Commencez gratuitement, évoluez quand vous voulez.</p>
+
+      <div class="plans-grid">
+        <div class="plan-card" data-plan="free" onclick="selectPlan(this,'free')">
+          <div class="price">0€ <span>/mois</span></div>
+          <h4 style="margin-top:6px">Gratuit</h4>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:8px;line-height:1.6">
+            5 entretiens/mois<br>Feedback basique<br>1 CV
+          </div>
+        </div>
+        <div class="plan-card selected" data-plan="pro" onclick="selectPlan(this,'pro')">
+          <div class="plan-badge plan-pro" style="font-size:.7rem;padding:3px 8px;margin-bottom:6px">⭐ Populaire</div>
+          <div class="price" style="color:var(--primary)">29€ <span>/mois</span></div>
+          <h4 style="margin-top:6px">Pro</h4>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:8px;line-height:1.6">
+            Illimité<br>Analyse IA avancée<br>Plan carrière
+          </div>
+        </div>
+        <div class="plan-card" data-plan="premium" onclick="selectPlan(this,'premium')">
+          <div class="price" style="color:#F59E0B">59€ <span>/mois</span></div>
+          <h4 style="margin-top:6px">Premium</h4>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:8px;line-height:1.6">
+            Tout Pro +<br>Coach IA dédié<br>Support prioritaire
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;font-size:.83rem;color:#166534;margin-bottom:18px;display:flex;align-items:center;gap:8px">
+        <i data-lucide="shield-check" style="width:16px;height:16px;flex-shrink:0"></i>
+        Essai gratuit 14 jours sur tous les plans payants — aucune carte requise.
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button type="button" class="btn-submit" style="background:#F1F5F9;color:var(--text);flex:0 0 auto;width:48px;padding:0;justify-content:center" onclick="prevStep()">
+          <i data-lucide="arrow-left" style="width:17px;height:17px"></i>
+        </button>
+        <button type="submit" class="btn-submit" id="reg-btn" style="flex:1">
+          <i data-lucide="user-plus" style="width:17px;height:17px"></i>
+          <span>Créer mon compte</span>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+  <div class="auth-footer" style="margin-top:18px">
+    Déjà inscrit ? <a href="login.html" class="auth-link">Se connecter</a>
+  </div>
+</div>
+
+<script src="login.js"></script>
+<script>
+  lucide.createIcons();
+
+  // Live password rules feedback
+  document.getElementById('reg-pwd')?.addEventListener('input', function() {
+    const v = this.value;
+    const set = (id, ok) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.querySelector('i').setAttribute('data-lucide', ok ? 'check-circle' : 'x-circle');
+      el.querySelector('i').style.color = ok ? '#10B981' : '#EF4444';
+      lucide.createIcons();
+    };
+    set('rule-len',   v.length >= 8);
+    set('rule-upper', /[A-Z]/.test(v));
+    set('rule-num',   /[0-9]/.test(v));
+  });
+</script>
+</body>
+</html>

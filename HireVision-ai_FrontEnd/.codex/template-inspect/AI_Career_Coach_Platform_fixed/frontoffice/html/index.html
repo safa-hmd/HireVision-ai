@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand-text">🧠 HireVision AI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html" class="active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Bienvenue, Jean! 👋</h1>
+        <p class="page-subtitle">Votre progression de préparation aux entretiens</p>
+      </div>
+      <div class="page-header-actions">
+        <a href="interview-prep.html" class="btn btn-primary"><i data-lucide="play"></i> Démarrer un entretien</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#DBEAFE">
+            <i data-lucide="file-text" style="color:#2563EB;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Complétion du Profil</div>
+          <div class="stat-value text-primary" data-countup="75" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-primary" style="width:75%"></div></div>
+          <div class="stat-change text-muted">Complétez votre CV</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#D1FAE5">
+            <i data-lucide="graduation-cap" style="color:#10B981;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Entretiens Complétés</div>
+          <div class="stat-value text-primary" data-countup="12">0</div>
+          <div class="stat-change text-success">+3 cette semaine</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#FEF3C7">
+            <i data-lucide="award" style="color:#F59E0B;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Score Moyen</div>
+          <div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div>
+          <div class="stat-change text-success">+5% vs semaine dernière</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#EDE9FE">
+            <i data-lucide="briefcase" style="color:#7C3AED;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Offres Correspondantes</div>
+          <div class="stat-value text-primary" data-countup="8">0</div>
+          <div class="stat-change text-muted">Basé sur vos compétences</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header">
+            <h3>Performance aux Entretiens</h3>
+            <p>Scores sur la dernière semaine</p>
+          </div>
+          <div class="card-body">
+            <div style="height:240px"><canvas id="chart-perf"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Niveau de Compétences</h3>
+            <p>Évaluation actuelle</p>
+          </div>
+          <div class="card-body">
+            <div style="height:240px"><canvas id="chart-skills"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Banner -->
+      <div class="gradient-banner mb-6">
+        <div class="flex items-center gap-4 mb-4">
+          <i data-lucide="brain" style="width:28px;height:28px"></i>
+          <h3>Recommandations IA</h3>
+        </div>
+        <p style="margin-bottom:16px">Basé sur votre profil et vos performances récentes :</p>
+        <div class="flex gap-3" style="flex-wrap:wrap">
+          <a href="interview-prep.html" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Pratiquer Java</a>
+          <a href="cv-analysis.html"   class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Améliorer le CV</a>
+          <a href="career-roadmap.html" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Plan Carrière</a>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Activité Récente</h3>
+          <p>Dernières sessions d'entretien</p>
+        </div>
+        <div class="card-body space-y-4">
+          <div class="list-item">
+            <div>
+              <div class="font-medium">Entretien Technique Java</div>
+              <div class="text-sm text-muted">Aujourd'hui, 10h30</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-primary">85%</span>
+              <a href="feedback.html" class="btn btn-outline btn-sm">Voir Rapport</a>
+            </div>
+          </div>
+          <div class="list-item">
+            <div>
+              <div class="font-medium">Session Spring Boot</div>
+              <div class="text-sm text-muted">Hier, 14h15</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-primary">78%</span>
+              <a href="feedback.html" class="btn btn-outline btn-sm">Voir Rapport</a>
+            </div>
+          </div>
+          <div class="list-item">
+            <div>
+              <div class="font-medium">Pratique DevOps</div>
+              <div class="text-sm text-muted">6 Juin, 16h00</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-primary">72%</span>
+              <a href="feedback.html" class="btn btn-outline btn-sm">Voir Rapport</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  drawLineChart('chart-perf', [
+    {label:'Lun',value:65},{label:'Mar',value:72},{label:'Mer',value:68},
+    {label:'Jeu',value:78},{label:'Ven',value:82},{label:'Sam',value:75},{label:'Dim',value:85}
+  ]);
+  drawBarChart('chart-skills', [
+    {label:'Java',value:85},{label:'Spring',value:75},{label:'Angular',value:70},{label:'DevOps',value:60}
+  ]);
+</script>
+</body>
+</html>

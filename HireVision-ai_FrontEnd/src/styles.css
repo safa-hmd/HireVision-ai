@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'assets/css/style.css';
+
+/* ── Fix global scroll ── */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+/* ── Angular Host Elements Compatibility ── */
+app-menu,
+app-home,
+app-cv-analyse,
+app-job-match,
+app-interview-preparation,
+app-plan-carriere,
+app-profil {
+  display: contents;
+}

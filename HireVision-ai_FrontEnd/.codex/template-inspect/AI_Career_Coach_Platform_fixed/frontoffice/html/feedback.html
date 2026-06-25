@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rapport de Feedback — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html" class="active"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Rapport de Feedback</h1><p class="page-subtitle">Entretien Java — Session #1</p></div>
+      <div class="page-header-actions">
+        <a href="video-replay.html" class="btn btn-outline"><i data-lucide="play-circle"></i> Revoir la vidéo</a>
+        <button class="btn btn-primary" onclick="showToast('Téléchargement en cours…')"><i data-lucide="download"></i> Télécharger</button>
+      </div>
+    </header>
+    <div class="page-body">
+
+      <!-- Overall score banner -->
+      <div class="card mb-6" style="background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.03));border-color:var(--success)">
+        <div class="card-body flex items-center gap-6">
+          <div style="width:96px;height:96px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;text-align:center">
+            <div><div style="font-size:2rem;font-weight:700;font-family:var(--font-head);line-height:1">82</div><div style="font-size:.75rem">Global</div></div>
+          </div>
+          <div>
+            <h2 style="margin-bottom:4px">Excellent travail ! 🎉</h2>
+            <p>Vous avez obtenu des résultats au-dessus de la moyenne. Vos connaissances techniques et vos compétences de communication sont impressionnantes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score cards -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card">
+          <div class="stat-label">Connaissances Techniques</div>
+          <div class="stat-value text-primary" data-countup="85" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-primary" style="width:85%"></div></div>
+          <div class="stat-change text-success">↑ +5%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Communication</div>
+          <div class="stat-value" style="color:var(--success)" data-countup="78" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-success" style="width:78%"></div></div>
+          <div class="stat-change text-success">↑ +3%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Confiance</div>
+          <div class="stat-value" style="color:var(--accent)" data-countup="82" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar" style="width:82%;background:var(--accent)"></div></div>
+          <div class="stat-change text-success">↑ +7%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Score Global</div>
+          <div class="stat-value text-primary" data-countup="82" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-primary" style="width:82%"></div></div>
+          <div class="stat-change text-success">↑ +4%</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header"><h3>Vue d'ensemble des performances</h3><p>Analyse multidimensionnelle</p></div>
+          <div class="card-body"><div style="height:280px"><canvas id="chart-radar"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Scores par Question</h3><p>Performance par question</p></div>
+          <div class="card-body"><div style="height:280px"><canvas id="chart-bar"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Body metrics -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card"><div class="stat-label">Contact Visuel</div><div class="stat-value text-success" data-countup="88" data-suffix="%">0%</div><div class="progress-wrap mt-2"><div class="progress-bar progress-success" style="width:88%"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Posture</div><div class="stat-value text-warning" data-countup="75" data-suffix="%">0%</div><div class="progress-wrap mt-2"><div class="progress-bar" style="width:75%;background:var(--warning)"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Qualité Vocale</div><div class="stat-value text-success" data-countup="90" data-suffix="%">0%</div><div class="progress-wrap mt-2"><div class="progress-bar progress-success" style="width:90%"></div></div></div>
+        <div class="stat-card"><div class="stat-label">Niveau de Stress</div><div class="stat-value text-success" data-countup="35" data-suffix="%">0%</div><div class="progress-wrap mt-2"><div class="progress-bar" style="width:35%;background:var(--success)"></div></div></div>
+      </div>
+
+      <!-- Strengths -->
+      <div class="card mb-6">
+        <div class="card-header"><h3 class="flex items-center gap-2"><i data-lucide="award" style="color:var(--success);width:20px;height:20px"></i> Points Forts</h3></div>
+        <div class="card-body space-y-4">
+          <div class="flex gap-3"><i data-lucide="trending-up" style="color:var(--success);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Excellente maîtrise des concepts Java et principes POO</span></div>
+          <div class="flex gap-3"><i data-lucide="trending-up" style="color:var(--success);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Style de communication clair et articulé</span></div>
+          <div class="flex gap-3"><i data-lucide="trending-up" style="color:var(--success);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Bons exemples fournis pour les scénarios techniques</span></div>
+          <div class="flex gap-3"><i data-lucide="trending-up" style="color:var(--success);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Fort contact visuel maintenu tout au long</span></div>
+        </div>
+      </div>
+
+      <!-- Improvements -->
+      <div class="card mb-6">
+        <div class="card-header"><h3 class="flex items-center gap-2"><i data-lucide="alert-circle" style="color:var(--warning);width:20px;height:20px"></i> Points à Améliorer</h3></div>
+        <div class="card-body space-y-4">
+          <div class="flex gap-3"><i data-lucide="trending-down" style="color:var(--warning);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Fournir des exemples plus spécifiques sur les projets passés</span></div>
+          <div class="flex gap-3"><i data-lucide="trending-down" style="color:var(--warning);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Réduire les mots de remplissage ("euh", "voilà") pour plus de professionnalisme</span></div>
+          <div class="flex gap-3"><i data-lucide="trending-down" style="color:var(--warning);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i><span>Approfondir les concepts avancés de multithreading</span></div>
+        </div>
+      </div>
+
+      <!-- Next steps -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(37,99,235,.05),rgba(124,58,237,.05));border-color:rgba(37,99,235,.2)">
+        <div class="card-header"><h3>Prochaines Étapes</h3></div>
+        <div class="card-body space-y-4">
+          <div class="flex gap-3"><div style="width:28px;height:28px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0">1</div><span>Revoir la vidéo pour identifier les moments à améliorer</span></div>
+          <div class="flex gap-3"><div style="width:28px;height:28px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0">2</div><span>Pratiquer le multithreading et la concurrence</span></div>
+          <div class="flex gap-3"><div style="width:28px;height:28px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0">3</div><span>Planifier une nouvelle session pour suivre vos progrès</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  drawRadarChart('chart-radar', [
+    {label:'Technique',value:85},{label:'Communication',value:78},
+    {label:'Confiance',value:82},{label:'Contact Visuel',value:88},
+    {label:'Posture',value:75},{label:'Clarté',value:90}
+  ]);
+  drawBarChart('chart-bar', [
+    {label:'Q1',value:90},{label:'Q2',value:85},{label:'Q3',value:70},
+    {label:'Q4',value:88},{label:'Q5',value:92},{label:'Q6',value:78}
+  ]);
+</script>
+</body>
+</html>

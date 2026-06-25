@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon Profil — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html" class="active"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Paramètres du Profil</h1><p class="page-subtitle">Gérez votre compte et vos préférences</p></div>
+    </header>
+    <div class="page-body">
+
+      <div class="tabs-root">
+        <div class="tabs-list">
+          <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
+          <button class="tab-trigger" data-tab="cvs">Mes CV</button>
+          <button class="tab-trigger" data-tab="interviews">Entretiens</button>
+          <button class="tab-trigger" data-tab="achievements">Réalisations</button>
+        </div>
+
+        <!-- Personal -->
+        <div class="tab-panel" data-panel="personal">
+          <div class="card">
+            <div class="card-header"><h3>Informations Personnelles</h3><p>Mettez à jour vos données</p></div>
+            <div class="card-body">
+              <div class="flex items-center gap-6 mb-6">
+                <div style="position:relative">
+                  <div class="avatar avatar-xl">JD</div>
+                  <button class="btn btn-outline btn-sm" style="position:absolute;bottom:-8px;right:-8px;padding:4px 8px;font-size:.72rem">Modifier</button>
+                </div>
+                <div><h3>Photo de Profil</h3><p class="text-sm">Téléchargez une photo professionnelle</p></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Nom Complet</label><input class="form-input" value="Jean Dupont" /></div>
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" value="jean.dupont@exemple.com" /></div>
+                <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="tel" value="+33 6 12 34 56 78" /></div>
+                <div class="form-group"><label class="form-label">Localisation</label><input class="form-input" value="Paris, France" /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">Titre Professionnel</label><input class="form-input" value="Ingénieur Logiciel Senior" /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">LinkedIn</label><input class="form-input" value="linkedin.com/in/jeandupont" /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">GitHub</label><input class="form-input" value="github.com/jeandupont" /></div>
+              </div>
+              <button class="btn btn-primary" onclick="showToast('Profil mis à jour !')"><i data-lucide="save"></i> Enregistrer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CVs -->
+        <div class="tab-panel" data-panel="cvs">
+          <div class="card">
+            <div class="card-header"><h3>CV Uploadés</h3><p>Gérez vos documents</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div class="flex items-center gap-4">
+                  <div style="width:44px;height:44px;background:var(--primary-light);border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="file-text" style="color:var(--primary)"></i></div>
+                  <div><div class="font-medium">Jean_Dupont_CV_2026.pdf</div><div class="text-sm text-muted">8 Juin 2026 • 245 Ko</div></div>
+                </div>
+                <div class="flex items-center gap-2"><span class="badge badge-success">Actif</span><button class="btn btn-outline btn-sm">Voir</button><button class="btn btn-ghost btn-sm">Supprimer</button></div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-4">
+                  <div style="width:44px;height:44px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="file-text" style="color:var(--text-muted)"></i></div>
+                  <div><div class="font-medium">Jean_Dupont_CV_2025.pdf</div><div class="text-sm text-muted">15 Déc 2025 • 198 Ko</div></div>
+                </div>
+                <div class="flex items-center gap-2"><span class="badge badge-muted">Inactif</span><button class="btn btn-outline btn-sm">Voir</button><button class="btn btn-ghost btn-sm">Supprimer</button></div>
+              </div>
+              <button class="btn btn-outline w-full" onclick="showToast('Sélection de fichier…')"><i data-lucide="upload"></i> Uploader un Nouveau CV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interviews -->
+        <div class="tab-panel" data-panel="interviews">
+          <div class="card">
+            <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Entretien Technique Java</div><div class="text-sm text-muted">8 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">85%</span><a href="feedback.html" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Session Spring Boot</div><div class="text-sm text-muted">7 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">78%</span><a href="feedback.html" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Entretien RH Comportemental</div><div class="text-sm text-muted">6 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-success">RH</span><span class="font-bold text-success">90%</span><a href="feedback.html" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Pratique DevOps</div><div class="text-sm text-muted">5 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">72%</span><a href="feedback.html" class="btn btn-outline btn-sm">Rapport</a></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="tab-panel" data-panel="achievements">
+          <div class="card mb-6">
+            <div class="card-header"><h3>Réalisations & Badges</h3><p>Vos jalons et accomplissements</p></div>
+            <div class="card-body">
+              <div class="grid-3" style="gap:14px">
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#F59E0B;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Premier Entretien</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#2563EB;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">5 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#7C3AED;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">10 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                  <div style="width:60px;height:60px;background:#10B981;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Score Parfait</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#F97316;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Série Hebdo</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                  <div style="width:60px;height:60px;background:#EF4444;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Niveau Maître</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Statistiques</h3><p>Aperçu de vos performances</p></div>
+            <div class="card-body">
+              <div class="grid-4">
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-primary" data-countup="12">0</div><div class="text-sm text-muted">Total Entretiens</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div><div class="text-sm text-muted">Score Moyen</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--accent)" data-countup="5">0</div><div class="text-sm text-muted">Badges Obtenus</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-warning" data-countup="24">0</div><div class="text-sm text-muted">Heures Pratiquées</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

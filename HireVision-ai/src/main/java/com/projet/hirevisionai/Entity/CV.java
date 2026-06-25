@@ -1,20 +1,38 @@
 package com.projet.hirevisionai.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Entity
-@Getter
+import java.time.LocalDate;
+import java.util.List;
+
 @Setter
+@Getter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CV {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int idCv;
-    private String filePath;
-    private String uploadDate;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;                    // ← enlever "private"
+
+    String filePath;
+    LocalDate uploadDate;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "cv_skill",
+            joinColumns = @JoinColumn(name = "cv_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    List<Skill> skills;
+
+    @OneToMany(mappedBy = "cv")
+    List<MatchingResult> matchingResults;
 }

@@ -1,6 +1,7 @@
 package com.projet.hirevisionai.ServiceImpl;
 
 import com.projet.hirevisionai.Dto.*;
+import com.projet.hirevisionai.Entity.Role;
 import com.projet.hirevisionai.Entity.User;
 import com.projet.hirevisionai.Repository.UserRepository;
 import com.projet.hirevisionai.Security.CustomUserDetailsService;
@@ -61,7 +62,8 @@ public class IAuthServiceImp implements IAuthService {
                 .fullName(req.fullName() == null ? "Not Available" : req.fullName())
                 .email(req.email())
                 .password(passwordEncoder.encode(req.password()))
-                .role(req.role())
+                .role(req.role() != null ? req.role() : Role.CANDIDATE)  // ← défaut CANDIDATE
+                .age(req.age())
                 .enabled(true)
                 .build();
 

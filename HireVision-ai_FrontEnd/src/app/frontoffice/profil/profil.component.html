@@ -1,0 +1,137 @@
+<div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Paramètres du Profil</h1><p class="page-subtitle">Gérez votre compte et vos préférences</p></div>
+    </header>
+    <div class="page-body">
+
+      <div class="tabs-root">
+        <div class="tabs-list">
+          <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
+          <button class="tab-trigger" data-tab="cvs">Mes CV</button>
+          <button class="tab-trigger" data-tab="interviews">Entretiens</button>
+          <button class="tab-trigger" data-tab="achievements">Réalisations</button>
+        </div>
+
+        <!-- Personal -->
+        <div class="tab-panel" data-panel="personal">
+          <div class="card">
+            <div class="card-header"><h3>Informations Personnelles</h3><p>Mettez à jour vos données</p></div>
+            <div class="card-body">
+              <div class="flex items-center gap-6 mb-6">
+                <div style="position:relative">
+                  <div class="avatar avatar-xl">JD</div>
+                  <button class="btn btn-outline btn-sm" style="position:absolute;bottom:-8px;right:-8px;padding:4px 8px;font-size:.72rem">Modifier</button>
+                </div>
+                <div><h3>Photo de Profil</h3><p class="text-sm">Téléchargez une photo professionnelle</p></div>
+              </div>
+              <form (ngSubmit)="saveProfile()" class="grid-2">
+                <div class="form-group"><label class="form-label">Nom Complet</label><input class="form-input" [(ngModel)]="user.fullName" name="fullName" required /></div>
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" [(ngModel)]="user.email" name="email" required /></div>
+                <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="tel" value="+33 6 12 34 56 78" name="phone" /></div>
+                <div class="form-group"><label class="form-label">Âge</label><input class="form-input" type="number" [(ngModel)]="user.age" name="age" required /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">Titre Professionnel</label><input class="form-input" value="Ingénieur Logiciel Senior" name="title" /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">LinkedIn</label><input class="form-input" value="linkedin.com/in/jeandupont" name="linkedin" /></div>
+                <div class="form-group" style="grid-column:1/-1"><label class="form-label">GitHub</label><input class="form-input" value="github.com/jeandupont" name="github" /></div>
+                <div style="grid-column:1/-1">
+                  <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Enregistrer</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- CVs -->
+        <div class="tab-panel" data-panel="cvs">
+          <div class="card">
+            <div class="card-header"><h3>CV Uploadés</h3><p>Gérez vos documents</p></div>
+            <div class="card-body space-y-4">
+              <input type="file" id="new-cv-file" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" style="display:none" />
+              
+              <div *ngIf="userCvs.length === 0" class="text-center text-muted" style="padding: 24px 0">
+                Aucun CV mis en ligne pour le moment.
+              </div>
+              
+              <div class="list-item" *ngFor="let cv of userCvs; let i = index">
+                <div class="flex items-center gap-4">
+                  <div style="width:44px;height:44px;background:var(--primary-light);border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="file-text" style="color:var(--primary)"></i></div>
+                  <div>
+                    <div class="font-medium">{{ cv.filePath.split('/').pop() || 'CV_' + cv.id }}</div>
+                    <div class="text-sm text-muted">Mis en ligne le {{ cv.uploadDate }}</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="badge" [ngClass]="i === 0 ? 'badge-success' : 'badge-muted'">
+                    {{ i === 0 ? 'Actif' : 'Inactif' }}
+                  </span>
+                  <a [href]="'http://localhost:8086/HireVision/' + cv.filePath" target="_blank" class="btn btn-outline btn-sm">Voir</a>
+                  <button class="btn btn-ghost btn-sm" (click)="deleteCv(cv.id)">Supprimer</button>
+                </div>
+              </div>
+              
+              <button class="btn btn-outline w-full" (click)="uploadCv()"><i data-lucide="upload"></i> Uploader un Nouveau CV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interviews -->
+        <div class="tab-panel" data-panel="interviews">
+          <div class="card">
+            <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Entretien Technique Java</div><div class="text-sm text-muted">8 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">85%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Session Spring Boot</div><div class="text-sm text-muted">7 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">78%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Entretien RH Comportemental</div><div class="text-sm text-muted">6 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-success">RH</span><span class="font-bold text-success">90%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
+              <div class="list-item"><div><div class="font-medium">Pratique DevOps</div><div class="text-sm text-muted">5 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">72%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="tab-panel" data-panel="achievements">
+          <div class="card mb-6">
+            <div class="card-header"><h3>Réalisations & Badges</h3><p>Vos jalons et accomplissements</p></div>
+            <div class="card-body">
+              <div class="grid-3" style="gap:14px">
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#F59E0B;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Premier Entretien</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#2563EB;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">5 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#7C3AED;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">10 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                  <div style="width:60px;height:60px;background:#10B981;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Score Parfait</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                  <div style="width:60px;height:60px;background:#F97316;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Série Hebdo</div><div class="text-xs text-success mt-1">Obtenu</div>
+                </div>
+                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                  <div style="width:60px;height:60px;background:#EF4444;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                  <div class="font-medium">Niveau Maître</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Statistiques</h3><p>Aperçu de vos performances</p></div>
+            <div class="card-body">
+              <div class="grid-4">
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-primary" data-countup="12">0</div><div class="text-sm text-muted">Total Entretiens</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div><div class="text-sm text-muted">Score Moyen</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--accent)" data-countup="5">0</div><div class="text-sm text-muted">Badges Obtenus</div></div>
+                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-warning" data-countup="24">0</div><div class="text-sm text-muted">Heures Pratiquées</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>

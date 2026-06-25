@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Détail Utilisateur — HireVision AI Admin</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div><div class="brand-sub">Administration</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Tableau de Bord</a>
+      <a href="users.html" class="active"><i data-lucide="users"></i> Utilisateurs</a>
+      <a href="interviews.html"><i data-lucide="video"></i> Entretiens</a>
+      <a href="analytics.html"><i data-lucide="bar-chart-2"></i> Analytics</a>
+      <span class="sidebar-section-label">Gestion</span>
+      <a href="questions.html"><i data-lucide="help-circle"></i> Questions</a>
+      <a href="subscriptions.html"><i data-lucide="credit-card"></i> Abonnements</a>
+      <a href="settings.html"><i data-lucide="settings"></i> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div class="flex items-center gap-3">
+        <a href="users.html" class="btn btn-ghost btn-sm"><i data-lucide="arrow-left"></i></a>
+        <div><h1 class="page-title">Jean Dupont</h1><p class="page-subtitle">Profil détaillé de l'utilisateur</p></div>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-outline btn-sm" onclick="showToast('Email envoyé !')"><i data-lucide="mail"></i> Contacter</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmAction('Suspendre cet utilisateur ?',()=>showToast('Compte suspendu','danger'))"><i data-lucide="ban"></i> Suspendre</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:22px">
+
+        <!-- Left profile card -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="avatar avatar-lg" style="margin:0 auto 14px">JD</div>
+              <h3 style="margin-bottom:2px">Jean Dupont</h3>
+              <p class="text-sm">Ingénieur Logiciel Senior</p>
+              <span class="badge badge-admin" style="margin-top:8px">Plan Pro</span>
+              <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;text-align:left">
+                <div class="flex items-center gap-2 text-sm mb-2"><i data-lucide="mail" style="width:15px;height:15px;color:var(--text-muted)"></i> jean@exemple.com</div>
+                <div class="flex items-center gap-2 text-sm mb-2"><i data-lucide="map-pin" style="width:15px;height:15px;color:var(--text-muted)"></i> Paris, France</div>
+                <div class="flex items-center gap-2 text-sm mb-2"><i data-lucide="calendar" style="width:15px;height:15px;color:var(--text-muted)"></i> Inscrit le 1 Juin 2026</div>
+                <div class="flex items-center gap-2 text-sm"><i data-lucide="clock" style="width:15px;height:15px;color:var(--text-muted)"></i> Dernière connexion : aujourd'hui</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Statistiques</h3></div>
+            <div class="card-body space-y-3">
+              <div class="flex justify-between text-sm"><span class="text-muted">Entretiens</span><strong>12</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-muted">Score moyen</span><strong class="text-success">78%</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-muted">Meilleur score</span><strong class="text-success">92%</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-muted">Heures pratiquées</span><strong>24h</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-muted">CV uploadés</span><strong>2</strong></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Actions Rapides</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-outline btn-sm w-full" onclick="showToast('Email envoyé !')"><i data-lucide="mail"></i> Envoyer un email</button>
+              <button class="btn btn-outline btn-sm w-full" onclick="showToast('Plan mis à jour !')"><i data-lucide="arrow-up-circle"></i> Changer de plan</button>
+              <button class="btn btn-outline btn-sm w-full" onclick="showToast('Mot de passe réinitialisé','warning')"><i data-lucide="key"></i> Réinitialiser MDP</button>
+              <button class="btn btn-danger btn-sm w-full" onclick="confirmAction('Supprimer ?',()=>showToast('Supprimé','danger'))"><i data-lucide="trash-2"></i> Supprimer le compte</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right details -->
+        <div>
+          <div class="tabs-root">
+            <div class="tabs-list">
+              <button class="tab-trigger" data-tab="activity">Activité</button>
+              <button class="tab-trigger" data-tab="interviews">Entretiens</button>
+              <button class="tab-trigger" data-tab="performance">Performance</button>
+              <button class="tab-trigger" data-tab="billing">Facturation</button>
+            </div>
+
+            <!-- Activity -->
+            <div class="tab-panel" data-panel="activity">
+              <div class="card mb-4">
+                <div class="card-header"><h3>Évolution du Score</h3><p>Performance sur les 30 derniers jours</p></div>
+                <div class="card-body"><div style="height:220px"><canvas id="chart-progress"></canvas></div></div>
+              </div>
+              <div class="card">
+                <div class="card-header"><h3>Journal d'Activité</h3></div>
+                <div class="card-body space-y-3">
+                  <div class="flex gap-3 text-sm"><span class="text-muted" style="width:120px;flex-shrink:0">Aujourd'hui 10h30</span><span>Entretien Java complété — Score : 85%</span></div>
+                  <div class="flex gap-3 text-sm"><span class="text-muted" style="width:120px;flex-shrink:0">Hier 14h15</span><span>CV mis à jour</span></div>
+                  <div class="flex gap-3 text-sm"><span class="text-muted" style="width:120px;flex-shrink:0">7 Juin 16h00</span><span>Session Spring Boot complétée — Score : 78%</span></div>
+                  <div class="flex gap-3 text-sm"><span class="text-muted" style="width:120px;flex-shrink:0">6 Juin 09h20</span><span>Profil complété à 75%</span></div>
+                  <div class="flex gap-3 text-sm"><span class="text-muted" style="width:120px;flex-shrink:0">1 Juin 11h00</span><span>Compte créé — Plan Pro activé</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interviews -->
+            <div class="tab-panel" data-panel="interviews">
+              <div class="card">
+                <div class="card-body" style="padding:0">
+                  <table>
+                    <thead><tr><th>Date</th><th>Type</th><th>Score</th><th>Durée</th><th>Actions</th></tr></thead>
+                    <tbody>
+                      <tr><td class="text-sm">8 Juin 2026</td><td><span class="badge badge-primary">Java</span></td><td><strong class="text-success">85%</strong></td><td class="text-muted">45 min</td><td><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button></td></tr>
+                      <tr><td class="text-sm">7 Juin 2026</td><td><span class="badge badge-primary">Spring Boot</span></td><td><strong class="text-primary">78%</strong></td><td class="text-muted">60 min</td><td><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button></td></tr>
+                      <tr><td class="text-sm">6 Juin 2026</td><td><span class="badge badge-success">RH</span></td><td><strong class="text-success">90%</strong></td><td class="text-muted">30 min</td><td><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button></td></tr>
+                      <tr><td class="text-sm">5 Juin 2026</td><td><span class="badge badge-warning">DevOps</span></td><td><strong class="text-warning">72%</strong></td><td class="text-muted">45 min</td><td><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="tab-panel" data-panel="performance">
+              <div class="grid-2 mb-4">
+                <div class="card">
+                  <div class="card-header"><h3>Compétences Radar</h3></div>
+                  <div class="card-body"><div style="height:220px"><canvas id="chart-radar"></canvas></div></div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><h3>Métriques Comportementales</h3></div>
+                  <div class="card-body">
+                    <div class="metric-row"><div class="metric-row-header"><span>Contact visuel</span><span>88%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:88%"></div></div></div>
+                    <div class="metric-row"><div class="metric-row-header"><span>Posture</span><span>75%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:75%"></div></div></div>
+                    <div class="metric-row"><div class="metric-row-header"><span>Confiance</span><span>82%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:82%"></div></div></div>
+                    <div class="metric-row"><div class="metric-row-header"><span>Clarté vocale</span><span>90%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:90%"></div></div></div>
+                    <div class="metric-row"><div class="metric-row-header"><span>Niveau de stress</span><span>35%</span></div><div class="progress-wrap"><div class="progress-bar progress-warning" style="width:35%"></div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing -->
+            <div class="tab-panel" data-panel="billing">
+              <div class="card mb-4">
+                <div class="card-header"><h3>Abonnement Actuel</h3></div>
+                <div class="card-body">
+                  <div class="flex items-center justify-between">
+                    <div><div class="flex items-center gap-2"><span class="badge badge-admin" style="font-size:.85rem;padding:5px 14px">Plan Pro</span></div><div class="text-sm text-muted mt-2">29€ / mois — Renouvellement le 1er Juillet 2026</div></div>
+                    <button class="btn btn-outline btn-sm" onclick="showToast('Plan modifié')">Modifier</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><h3>Historique de Paiements</h3></div>
+                <div class="card-body" style="padding:0">
+                  <table>
+                    <thead><tr><th>Date</th><th>Description</th><th>Montant</th><th>Statut</th></tr></thead>
+                    <tbody>
+                      <tr><td class="text-sm">1 Juin 2026</td><td>Plan Pro — Mensuel</td><td><strong>29€</strong></td><td><span class="badge badge-success">Payé</span></td></tr>
+                      <tr><td class="text-sm">1 Mai 2026</td><td>Plan Pro — Mensuel</td><td><strong>29€</strong></td><td><span class="badge badge-success">Payé</span></td></tr>
+                      <tr><td class="text-sm">1 Avr 2026</td><td>Upgrade Pro</td><td><strong>29€</strong></td><td><span class="badge badge-success">Payé</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  drawLineChart('chart-progress',[{label:'S1',value:62},{label:'S2',value:68},{label:'S3',value:72},{label:'S4',value:78}],'Score','#4F46E5');
+  drawRadarChart('chart-radar',[{label:'Java',value:85},{label:'Spring',value:75},{label:'Angular',value:70},{label:'DevOps',value:60},{label:'RH',value:88},{label:'Leadership',value:80}]);
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Paramètres — HireVision AI Admin</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <style>
+    .toggle{position:relative;display:inline-block;width:44px;height:24px}
+    .toggle input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;inset:0;background:#CBD5E1;border-radius:100px;transition:.3s}
+    .slider:before{position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+    input:checked+.slider{background:var(--primary)}
+    input:checked+.slider:before{transform:translateX(20px)}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div><div class="brand-sub">Administration</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Tableau de Bord</a>
+      <a href="users.html"><i data-lucide="users"></i> Utilisateurs</a>
+      <a href="interviews.html"><i data-lucide="video"></i> Entretiens</a>
+      <a href="analytics.html"><i data-lucide="bar-chart-2"></i> Analytics</a>
+      <span class="sidebar-section-label">Gestion</span>
+      <a href="questions.html"><i data-lucide="help-circle"></i> Questions</a>
+      <a href="subscriptions.html"><i data-lucide="credit-card"></i> Abonnements</a>
+      <a href="settings.html" class="active"><i data-lucide="settings"></i> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Paramètres</h1><p class="page-subtitle">Configuration de la plateforme</p></div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="showToast('Paramètres sauvegardés !')"><i data-lucide="save"></i> Sauvegarder</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="tabs-root">
+        <div class="tabs-list">
+          <button class="tab-trigger" data-tab="general">Général</button>
+          <button class="tab-trigger" data-tab="ai">IA & Modèle</button>
+          <button class="tab-trigger" data-tab="notifs">Notifications</button>
+          <button class="tab-trigger" data-tab="security">Sécurité</button>
+          <button class="tab-trigger" data-tab="integrations">Intégrations</button>
+        </div>
+
+        <!-- Général -->
+        <div class="tab-panel" data-panel="general">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Informations de la Plateforme</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Nom de la plateforme</label><input class="form-input" value="HireVision AI" /></div>
+                <div class="form-group"><label class="form-label">URL du site</label><input class="form-input" value="https://hirevision.ai" /></div>
+                <div class="form-group"><label class="form-label">Email de support</label><input class="form-input" type="email" value="support@hirevision.ai" /></div>
+                <div class="form-group"><label class="form-label">Fuseau horaire</label><select class="form-select"><option>Europe/Paris (UTC+2)</option><option>UTC</option><option>Africa/Tunis (UTC+1)</option></select></div>
+                <div class="form-group"><label class="form-label">Langue par défaut</label><select class="form-select"><option>Français</option><option>English</option><option>العربية</option></select></div>
+                <div class="form-group"><label class="form-label">Devise</label><select class="form-select"><option>EUR (€)</option><option>USD ($)</option><option>TND (د.ت)</option></select></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Limites de la Plateforme</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Entretiens / mois (Gratuit)</label><input class="form-input" type="number" value="5" /></div>
+                <div class="form-group"><label class="form-label">Durée max. entretien (min)</label><input class="form-input" type="number" value="90" /></div>
+                <div class="form-group"><label class="form-label">Taille max. CV (Mo)</label><input class="form-input" type="number" value="5" /></div>
+                <div class="form-group"><label class="form-label">CV max. par utilisateur</label><input class="form-input" type="number" value="10" /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IA -->
+        <div class="tab-panel" data-panel="ai">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Configuration du Modèle IA</h3><p>Paramètres du moteur d'analyse</p></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Modèle principal</label><select class="form-select"><option>claude-sonnet-4</option><option>claude-opus-4</option><option>claude-haiku-4</option></select></div>
+                <div class="form-group"><label class="form-label">Température (créativité)</label><input class="form-input" type="number" step="0.1" min="0" max="1" value="0.7" /></div>
+                <div class="form-group"><label class="form-label">Max tokens par réponse</label><input class="form-input" type="number" value="1024" /></div>
+                <div class="form-group"><label class="form-label">Langue des réponses IA</label><select class="form-select"><option>Automatique</option><option>Français</option><option>English</option></select></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Analyse Comportementale</h3><p>Paramètres de la vision par ordinateur</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Détection du contact visuel</div><div class="text-sm text-muted">Analyser la direction du regard du candidat</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Analyse de la posture</div><div class="text-sm text-muted">Évaluer la posture et le langage corporel</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Analyse des émotions</div><div class="text-sm text-muted">Détecter les émotions via les expressions faciales</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Analyse vocale</div><div class="text-sm text-muted">Analyser le rythme, la clarté et le ton de la voix</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Détection de stress</div><div class="text-sm text-muted">Mesurer le niveau de stress en temps réel</div></div><label class="toggle"><input type="checkbox" /><span class="slider"></span></label></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="tab-panel" data-panel="notifs">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Notifications Admin</h3><p>Alertes envoyées aux administrateurs</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Nouvel utilisateur inscrit</div><div class="text-sm text-muted">Email immédiat</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Paiement reçu</div><div class="text-sm text-muted">Email immédiat</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Rapport quotidien</div><div class="text-sm text-muted">Résumé envoyé chaque matin à 8h</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Paiement échoué</div><div class="text-sm text-muted">Alerte immédiate</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Signalement utilisateur</div><div class="text-sm text-muted">Modération de contenu</div></div><label class="toggle"><input type="checkbox" /><span class="slider"></span></label></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Configuration Email</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Serveur SMTP</label><input class="form-input" value="smtp.sendgrid.net" /></div>
+                <div class="form-group"><label class="form-label">Port</label><input class="form-input" value="587" /></div>
+                <div class="form-group"><label class="form-label">Expéditeur</label><input class="form-input" value="noreply@hirevision.ai" /></div>
+                <div class="form-group"><label class="form-label">Clé API</label><input class="form-input" type="password" value="••••••••••••••••" /></div>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Email de test envoyé !')"><i data-lucide="send"></i> Envoyer un test</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="tab-panel" data-panel="security">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Authentification</h3></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Double authentification (2FA)</div><div class="text-sm text-muted">Exiger le 2FA pour tous les admins</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Connexion sociale (Google/LinkedIn)</div><div class="text-sm text-muted">Autoriser les connexions OAuth</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Durée de session</div></div>
+                <select class="form-select" style="width:140px"><option>30 minutes</option><option>1 heure</option><option>8 heures</option><option>24 heures</option></select>
+              </div>
+              <div class="list-item"><div><div class="font-medium">Tentatives de connexion max</div></div>
+                <input class="form-input" type="number" value="5" style="width:80px" />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Données & Confidentialité</h3></div>
+            <div class="card-body space-y-4">
+              <div class="list-item"><div><div class="font-medium">Chiffrement des vidéos</div><div class="text-sm text-muted">AES-256 pour toutes les sessions</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+              <div class="list-item"><div><div class="font-medium">Rétention des données (jours)</div></div>
+                <input class="form-input" type="number" value="365" style="width:100px" />
+              </div>
+              <div class="list-item"><div><div class="font-medium">Conformité RGPD</div><div class="text-sm text-muted">Activation du mode conformité RGPD</div></div><label class="toggle"><input type="checkbox" checked /><span class="slider"></span></label></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integrations -->
+        <div class="tab-panel" data-panel="integrations">
+          <div class="card">
+            <div class="card-header"><h3>Intégrations & API</h3><p>Services tiers connectés</p></div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div class="flex items-center gap-3"><div style="width:40px;height:40px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">G</div><div><div class="font-medium">Google OAuth</div><div class="text-sm text-muted">Connexion sociale Google</div></div></div>
+                <div class="flex items-center gap-3"><span class="badge badge-success">Connecté</span><button class="btn btn-outline btn-sm" onclick="showToast('Déconnecté','warning')">Déconnecter</button></div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3"><div style="width:40px;height:40px;background:#0077B5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">in</div><div><div class="font-medium">LinkedIn OAuth</div><div class="text-sm text-muted">Connexion & import de profil</div></div></div>
+                <div class="flex items-center gap-3"><span class="badge badge-success">Connecté</span><button class="btn btn-outline btn-sm">Déconnecter</button></div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3"><div style="width:40px;height:40px;background:#635BFF;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">S</div><div><div class="font-medium">Stripe</div><div class="text-sm text-muted">Paiements en ligne</div></div></div>
+                <div class="flex items-center gap-3"><span class="badge badge-success">Connecté</span><button class="btn btn-outline btn-sm">Configurer</button></div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3"><div style="width:40px;height:40px;background:#1A1A1A;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.8rem">API</div><div><div class="font-medium">Anthropic Claude API</div><div class="text-sm text-muted">Moteur IA des entretiens</div></div></div>
+                <div class="flex items-center gap-3"><span class="badge badge-success">Actif</span><button class="btn btn-outline btn-sm" onclick="showToast('Clé copiée !')">Voir la clé</button></div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3"><div style="width:40px;height:40px;background:#F4645F;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">SG</div><div><div class="font-medium">SendGrid</div><div class="text-sm text-muted">Envoi d'emails transactionnels</div></div></div>
+                <div class="flex items-center gap-3"><span class="badge badge-success">Connecté</span><button class="btn btn-outline btn-sm">Configurer</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

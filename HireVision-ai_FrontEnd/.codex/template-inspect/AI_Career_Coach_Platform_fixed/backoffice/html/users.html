@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Utilisateurs — HireVision AI Admin</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <style>
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--surface);border-radius:var(--radius);padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal h3{margin-bottom:20px}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div><div class="brand-sub">Administration</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Principal</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Tableau de Bord</a>
+      <a href="users.html" class="active"><i data-lucide="users"></i> Utilisateurs</a>
+      <a href="interviews.html"><i data-lucide="video"></i> Entretiens</a>
+      <a href="analytics.html"><i data-lucide="bar-chart-2"></i> Analytics</a>
+      <span class="sidebar-section-label">Gestion</span>
+      <a href="questions.html"><i data-lucide="help-circle"></i> Questions</a>
+      <a href="subscriptions.html"><i data-lucide="credit-card"></i> Abonnements</a>
+      <a href="settings.html"><i data-lucide="settings"></i> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Gestion des Utilisateurs</h1><p class="page-subtitle">1 247 utilisateurs inscrits</p></div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="user-plus"></i> Ajouter un utilisateur</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Filters -->
+      <div class="card mb-6">
+        <div class="card-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:220px">
+            <i data-lucide="search"></i>
+            <input class="form-input" id="user-search" placeholder="Rechercher par nom, email…" />
+          </div>
+          <select class="form-select" style="width:160px" onchange="filterTable()">
+            <option value="">Tous les plans</option>
+            <option>Gratuit</option><option>Pro</option><option>Premium</option>
+          </select>
+          <select class="form-select" style="width:160px" onchange="filterTable()">
+            <option value="">Tous les statuts</option>
+            <option>Actif</option><option>Inactif</option><option>Suspendu</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Export CSV généré !')"><i data-lucide="download"></i> Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" onclick="toggleAll(this)" /></th>
+                <th>Utilisateur</th><th>Email</th><th>Plan</th><th>Entretiens</th><th>Score Moy.</th><th>Statut</th><th>Inscrit le</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm">JD</div><div><div class="font-medium">Jean Dupont</div></div></div></td><td class="text-muted text-sm">jean@exemple.com</td><td><span class="badge badge-admin">Pro</span></td><td>12</td><td><strong class="text-success">78%</strong></td><td><span class="badge badge-success">Actif</span></td><td class="text-xs text-muted">1 Juin 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm" onclick="showToast('Utilisateur modifié')"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm" onclick="confirmAction('Supprimer ?',()=>showToast('Supprimé','danger'))"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#10B981">MD</div><div><div class="font-medium">Marie Dubois</div></div></div></td><td class="text-muted text-sm">marie@exemple.com</td><td><span class="badge badge-warning">Premium</span></td><td>24</td><td><strong class="text-success">85%</strong></td><td><span class="badge badge-success">Actif</span></td><td class="text-xs text-muted">15 Mai 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm" onclick="showToast('Utilisateur modifié')"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm" onclick="confirmAction('Supprimer ?',()=>showToast('Supprimé','danger'))"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#F59E0B">AB</div><div><div class="font-medium">Ahmed Bensali</div></div></div></td><td class="text-muted text-sm">ahmed@exemple.com</td><td><span class="badge badge-success">Gratuit</span></td><td>5</td><td><strong class="text-primary">65%</strong></td><td><span class="badge badge-success">Actif</span></td><td class="text-xs text-muted">2 Juin 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#EF4444">LR</div><div><div class="font-medium">Lucie Renard</div></div></div></td><td class="text-muted text-sm">lucie@exemple.com</td><td><span class="badge badge-admin">Pro</span></td><td>8</td><td><strong class="text-warning">71%</strong></td><td><span class="badge badge-muted">Inactif</span></td><td class="text-xs text-muted">20 Avr 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#7C3AED">TM</div><div><div class="font-medium">Thomas Martin</div></div></div></td><td class="text-muted text-sm">thomas@exemple.com</td><td><span class="badge badge-warning">Premium</span></td><td>31</td><td><strong class="text-success">91%</strong></td><td><span class="badge badge-success">Actif</span></td><td class="text-xs text-muted">10 Mar 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td><input type="checkbox" /></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#06B6D4">SC</div><div><div class="font-medium">Sara Chadi</div></div></div></td><td class="text-muted text-sm">sara@exemple.com</td><td><span class="badge badge-success">Gratuit</span></td><td>3</td><td><strong class="text-primary">60%</strong></td><td><span class="badge badge-danger">Suspendu</span></td><td class="text-xs text-muted">5 Juin 2026</td><td><div class="flex gap-1"><a href="user-detail.html" class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></a><button class="btn btn-ghost btn-sm"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span class="text-sm text-muted">Affichage 1–6 sur 1 247</span>
+          <div class="flex gap-2">
+            <button class="btn btn-outline btn-sm">Précédent</button>
+            <button class="btn btn-primary btn-sm">1</button>
+            <button class="btn btn-outline btn-sm">2</button>
+            <button class="btn btn-outline btn-sm">3</button>
+            <button class="btn btn-outline btn-sm">Suivant</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add user modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Ajouter un Utilisateur</h3>
+    <div class="form-group"><label class="form-label">Nom complet</label><input class="form-input" placeholder="Jean Dupont" /></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="jean@exemple.com" /></div>
+    <div class="form-group"><label class="form-label">Plan</label><select class="form-select"><option>Gratuit</option><option>Pro</option><option>Premium</option></select></div>
+    <div class="flex gap-3 mt-4">
+      <button class="btn btn-primary flex-1" onclick="closeModal();showToast('Utilisateur créé !')">Créer</button>
+      <button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  initTableSearch('user-search','users-table');
+  function openModal(){ document.getElementById('modal').classList.add('open'); }
+  function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+  document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+  function toggleAll(cb){ document.querySelectorAll('#users-table tbody input[type=checkbox]').forEach(c=>c.checked=cb.checked); }
+  function filterTable(){ showToast('Filtre appliqué','info'); }
+</script>
+</body>
+</html>

@@ -1,20 +1,42 @@
 package com.projet.hirevisionai.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Setter
 @Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel. PRIVATE)
 public class Interview {
     @Id
-    private int idInterview;
-    private LocalDateTime date;
-    private String title;
-    private String status;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDateTime startDate;
+    private int durationMinutes;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne @JoinColumn(name = "cv_id")
+    private CV cv;
+
+    @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL)
+    private List<Question> questions;
+
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL)
+    private Feedback feedback;
+
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL)
+    private VoiceAnalysis voiceAnalysis;
+
+    @OneToOne(mappedBy = "interview", cascade = CascadeType.ALL)
+    private BehaviorAnalysis behaviorAnalysis;
 }

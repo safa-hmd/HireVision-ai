@@ -1,0 +1,10 @@
+  
+ 
+    .category-card{cursor:pointer;transition:transform .15s,box-shadow .15s}
+    .category-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+    .cat-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .cat-icon svg{width:28px;height:28px;color:#fff}
+    .diff-badge{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:100px}
+    .diff-beginner{background:#D1FAE5;color:#065F46}
+    .diff-intermediate{background:#FEF3C7;color:#92400E}
+    .diff-advanced{background:#FEE2E2;color:#991B1B}

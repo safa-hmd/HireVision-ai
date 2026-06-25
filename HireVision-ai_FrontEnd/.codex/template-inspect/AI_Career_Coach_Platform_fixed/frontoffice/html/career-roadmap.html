@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de Carrière — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html" class="active"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Plan de Carrière IA</h1><p class="page-subtitle">Parcours d'apprentissage personnalisé vers vos objectifs</p></div>
+    </header>
+    <div class="page-body">
+
+      <!-- Goal banner -->
+      <div class="gradient-banner mb-6">
+        <div class="flex items-center gap-6">
+          <i data-lucide="trending-up" style="width:48px;height:48px;opacity:.8"></i>
+          <div style="flex:1">
+            <h2 style="margin-bottom:4px">Objectif : Développeur Full Stack Senior</h2>
+            <p style="margin-bottom:12px">Durée estimée : 12–16 semaines avec une pratique régulière</p>
+            <div class="progress-wrap" style="background:rgba(255,255,255,.2)">
+              <div class="progress-bar" style="width:35%;background:#fff"></div>
+            </div>
+            <p style="margin-top:8px;font-size:.85rem;opacity:.8">35% terminé — Vous progressez très bien !</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="grid-3 mb-6">
+        <div class="stat-card" style="border-color:var(--success);background:rgba(16,185,129,.04)">
+          <div style="text-align:center">
+            <i data-lucide="check-circle-2" style="width:40px;height:40px;color:var(--success);margin-bottom:8px"></i>
+            <div class="stat-value" style="color:var(--success)" data-countup="7">0</div>
+            <div class="stat-label">Compétences Maîtrisées</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:var(--warning);background:rgba(245,158,11,.04)">
+          <div style="text-align:center">
+            <i data-lucide="circle" style="width:40px;height:40px;color:var(--warning);margin-bottom:8px"></i>
+            <div class="stat-value text-warning" data-countup="5">0</div>
+            <div class="stat-label">En Cours</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color:var(--primary);background:rgba(37,99,235,.04)">
+          <div style="text-align:center">
+            <i data-lucide="trophy" style="width:40px;height:40px;color:var(--primary);margin-bottom:8px"></i>
+            <div class="stat-value text-primary" data-countup="8">0</div>
+            <div class="stat-label">À Apprendre</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missing skills -->
+      <div class="card mb-6">
+        <div class="card-header"><h3>Analyse des Compétences Manquantes</h3><p>Compétences nécessaires pour atteindre votre objectif</p></div>
+        <div class="card-body space-y-4">
+          <div class="list-item"><div><div class="font-medium">GraphQL</div><div class="text-xs text-muted">Backend</div></div><div class="flex items-center gap-3"><span class="badge badge-danger">Haute Priorité</span><span class="text-sm text-muted">2 sem.</span></div></div>
+          <div class="list-item"><div><div class="font-medium">Redis Caching</div><div class="text-xs text-muted">Backend</div></div><div class="flex items-center gap-3"><span class="badge badge-danger">Haute Priorité</span><span class="text-sm text-muted">1 sem.</span></div></div>
+          <div class="list-item"><div><div class="font-medium">AWS Lambda</div><div class="text-xs text-muted">Cloud</div></div><div class="flex items-center gap-3"><span class="badge badge-warning">Priorité Moyenne</span><span class="text-sm text-muted">3 sem.</span></div></div>
+          <div class="list-item"><div><div class="font-medium">React Native</div><div class="text-xs text-muted">Mobile</div></div><div class="flex items-center gap-3"><span class="badge badge-warning">Priorité Moyenne</span><span class="text-sm text-muted">4 sem.</span></div></div>
+          <div class="list-item"><div><div class="font-medium">Machine Learning</div><div class="text-xs text-muted">IA/ML</div></div><div class="flex items-center gap-3"><span class="badge badge-muted">Basse Priorité</span><span class="text-sm text-muted">6 sem.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Weekly plan -->
+      <div class="card mb-6">
+        <div class="card-header"><h3>Plan Hebdomadaire</h3><p>Feuille de route structurée pour les 4 prochaines semaines</p></div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i data-lucide="check" style="width:12px;height:12px;color:#fff"></i></div>
+              <h4>Semaine 1 <span class="badge badge-success" style="margin-left:8px">Terminée</span></h4>
+              <div style="margin-top:8px;padding:14px;background:var(--surface-2);border-radius:8px">
+                <div class="text-sm">Java Concepts Avancés • Spring Boot Fondamentaux</div>
+                <div class="text-xs text-muted mt-2">15 heures estimées</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i data-lucide="check" style="width:12px;height:12px;color:#fff"></i></div>
+              <h4>Semaine 2 <span class="badge badge-success" style="margin-left:8px">Terminée</span></h4>
+              <div style="margin-top:8px;padding:14px;background:var(--surface-2);border-radius:8px">
+                <div class="text-sm">Architecture Microservices • Conception REST API</div>
+                <div class="text-xs text-muted mt-2">18 heures estimées</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"><i data-lucide="circle" style="width:12px;height:12px;color:#fff;fill:#fff"></i></div>
+              <h4>Semaine 3 <span class="badge badge-primary" style="margin-left:8px">En cours</span></h4>
+              <div style="margin-top:8px;padding:14px;border:1.5px solid var(--primary);border-radius:8px;background:var(--primary-light)">
+                <div class="text-sm">Implémentation GraphQL • Intégration Redis</div>
+                <div class="text-xs text-muted mt-2">20 heures estimées</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot future"></div>
+              <h4>Semaine 4 <span class="badge badge-muted" style="margin-left:8px">À venir</span></h4>
+              <div style="margin-top:8px;padding:14px;background:var(--surface-2);border-radius:8px">
+                <div class="text-sm">Déploiement AWS Lambda • Architecture Serverless</div>
+                <div class="text-xs text-muted mt-2">16 heures estimées</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Courses -->
+      <div class="card">
+        <div class="card-header"><h3>Formations Recommandées</h3><p>Ressources d'apprentissage sélectionnées</p></div>
+        <div class="card-body">
+          <div class="grid-2" style="gap:14px">
+            <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px">
+              <div class="flex justify-between w-full mb-2">
+                <div class="font-medium">GraphQL Avancé avec Node.js</div>
+                <span class="text-sm font-bold text-primary">49$</span>
+              </div>
+              <div class="text-sm text-muted mb-3">Udemy • 12 heures • ⭐ 4.8</div>
+              <a href="#" class="btn btn-outline btn-sm w-full"><i data-lucide="book"></i> Voir le cours</a>
+            </div>
+            <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px">
+              <div class="flex justify-between w-full mb-2">
+                <div class="font-medium">Masterclass Redis Caching</div>
+                <span class="text-sm font-bold text-success">Gratuit</span>
+              </div>
+              <div class="text-sm text-muted mb-3">Pluralsight • 8 heures • ⭐ 4.6</div>
+              <a href="#" class="btn btn-outline btn-sm w-full"><i data-lucide="book"></i> Voir le cours</a>
+            </div>
+            <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px">
+              <div class="flex justify-between w-full mb-2">
+                <div class="font-medium">AWS Lambda & Serverless</div>
+                <span class="text-sm font-bold text-primary">39$</span>
+              </div>
+              <div class="text-sm text-muted mb-3">A Cloud Guru • 15 heures • ⭐ 4.9</div>
+              <a href="#" class="btn btn-outline btn-sm w-full"><i data-lucide="book"></i> Voir le cours</a>
+            </div>
+            <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px">
+              <div class="flex justify-between w-full mb-2">
+                <div class="font-medium">React Native Guide Complet</div>
+                <span class="text-sm font-bold text-primary">59$</span>
+              </div>
+              <div class="text-sm text-muted mb-3">Coursera • 20 heures • ⭐ 4.7</div>
+              <a href="#" class="btn btn-outline btn-sm w-full"><i data-lucide="book"></i> Voir le cours</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

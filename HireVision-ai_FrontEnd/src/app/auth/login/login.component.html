@@ -1,0 +1,53 @@
+<div class="auth-card">
+  <div class="brand">
+    <span class="brand-icon">🧠</span>
+    <h1>HireVision AI</h1>
+    <p>Connectez-vous à votre espace</p>
+  </div>
+
+  <button class="btn-social" type="button" (click)="loginWithGoogle()">
+    <div class="social-icon" style="background:#EA4335">G</div>
+    Continuer avec Google
+  </button>
+
+  <div class="divider"><span>ou avec votre email</span></div>
+
+  <form (ngSubmit)="handleLogin()">
+
+    <div class="form-group">
+      <label class="form-label">Adresse email</label>
+      <div class="input-wrap">
+        <input class="form-input" [(ngModel)]="email" name="email"
+               type="email" placeholder="jean@exemple.com" autocomplete="email" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <label class="form-label" style="margin:0">Mot de passe</label>
+        <a routerLink="/auth/forgot-password" class="auth-link" style="font-size:.82rem">
+          Mot de passe oublié ?
+        </a>
+      </div>
+      <div class="input-wrap">
+        <input class="form-input" [(ngModel)]="password" name="password"
+               [type]="showPwd ? 'text' : 'password'"
+               placeholder="••••••••" autocomplete="current-password" />
+        <button type="button" class="eye-btn" (click)="showPwd = !showPwd">
+          👁
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="errorMsg" class="error-msg">{{ errorMsg }}</div>
+
+    <button type="submit" class="btn-submit" [disabled]="loading">
+      {{ loading ? 'Connexion…' : 'Se connecter' }}
+    </button>
+
+    <div class="auth-footer">
+      Pas encore de compte ?
+      <a routerLink="/auth/register" class="auth-link">Créer un compte</a>
+    </div>
+  </form>
+</div>

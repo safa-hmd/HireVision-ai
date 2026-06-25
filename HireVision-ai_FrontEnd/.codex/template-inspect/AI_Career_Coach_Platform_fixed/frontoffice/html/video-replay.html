@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Replay Vidéo — HireVision AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <style>
+    .highlight-dot{width:14px;height:14px;border-radius:50%;position:absolute;top:-3px;cursor:pointer;transform:translateX(-50%);transition:transform .15s}
+    .highlight-dot:hover{transform:translateX(-50%) scale(1.5)}
+    .video-controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:20px 16px 12px}
+    .ctrl-btn{background:transparent;border:none;color:#fff;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background .15s}
+    .ctrl-btn:hover{background:rgba(255,255,255,.15)}
+    .ctrl-btn svg{width:22px;height:22px}
+    .timeline-bar{background:rgba(255,255,255,.2);height:5px;border-radius:100px;margin-bottom:10px;position:relative;cursor:pointer}
+    .timeline-progress{background:var(--primary);height:100%;border-radius:100px}
+    .highlight-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background .12s}
+    .highlight-item:hover{background:var(--surface-2)}
+    .hl-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="brand-text">🧠 HireVision AI</div></div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="cv-analysis.html"><i data-lucide="file-text"></i> Analyse CV</a>
+      <a href="job-matching.html"><i data-lucide="briefcase"></i> Matching Emploi</a>
+      <a href="interview-prep.html" class="active"><i data-lucide="graduation-cap"></i> Préparation Entretien</a>
+      <a href="career-roadmap.html"><i data-lucide="trending-up"></i> Plan de Carrière</a>
+      <a href="profile.html"><i data-lucide="user"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer"><a href="../../login/login.html"><i data-lucide="log-out"></i> Déconnexion</a></div>
+  </aside>
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Replay Vidéo</h1><p class="page-subtitle">Revoyez votre entretien avec les analyses IA</p></div>
+      <div class="page-header-actions"><a href="feedback.html" class="btn btn-outline"><i data-lucide="bar-chart-2"></i> Voir le Rapport</a></div>
+    </header>
+    <div class="page-body">
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:24px">
+
+        <!-- Left -->
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div class="card" style="overflow:hidden">
+            <div class="cam-bg" id="player" style="aspect-ratio:16/9;border-radius:0">
+              <div class="video-placeholder">
+                <i data-lucide="play-circle" style="width:64px;height:64px;display:block;margin:0 auto 8px"></i>
+                <p>Enregistrement d'entretien</p>
+              </div>
+              <!-- Timeline -->
+              <div class="video-controls">
+                <div class="timeline-bar" id="timeline">
+                  <div class="timeline-progress" id="progress" style="width:0%"></div>
+                  <!-- Highlight dots -->
+                  <div class="highlight-dot" style="left:10.7%;background:#10B981" title="Bonne réponse — 45s"></div>
+                  <div class="highlight-dot" style="left:28.6%;background:#EF4444" title="Réponse faible — 120s"></div>
+                  <div class="highlight-dot" style="left:42.9%;background:#F59E0B" title="Mauvais contact visuel — 180s"></div>
+                  <div class="highlight-dot" style="left:57.1%;background:#2563EB" title="Haute confiance — 240s"></div>
+                  <div class="highlight-dot" style="left:71.4%;background:#F97316" title="Pic de stress — 300s"></div>
+                  <div class="highlight-dot" style="left:85.7%;background:#10B981" title="Bonne réponse — 360s"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <button class="ctrl-btn" id="play-btn" onclick="togglePlay()"><i data-lucide="play" id="play-icon"></i></button>
+                    <button class="ctrl-btn"><i data-lucide="skip-back"></i></button>
+                    <button class="ctrl-btn"><i data-lucide="skip-forward"></i></button>
+                    <span style="color:#fff;font-size:.85rem;font-family:monospace" id="time-display">0:00 / 7:00</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button class="ctrl-btn"><i data-lucide="volume-2"></i></button>
+                    <button class="ctrl-btn"><i data-lucide="maximize"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Analyse du Moment Actuel</h3><p>Insights IA pour ce timestamp</p></div>
+            <div class="card-body">
+              <div class="grid-2 mb-4">
+                <div><div class="text-sm text-muted">Niveau de Confiance</div><div class="font-bold text-success" style="font-size:1.3rem">Élevé</div></div>
+                <div><div class="text-sm text-muted">Contact Visuel</div><div class="font-bold text-primary" style="font-size:1.3rem">Bon</div></div>
+                <div><div class="text-sm text-muted">Clarté Vocale</div><div class="font-bold text-success" style="font-size:1.3rem">Excellent</div></div>
+                <div><div class="text-sm text-muted">Posture</div><div class="font-bold text-warning" style="font-size:1.3rem">Moyen</div></div>
+              </div>
+              <div style="background:var(--surface-2);border-radius:10px;padding:14px;font-size:.88rem">
+                <strong>Question :</strong> "Pouvez-vous expliquer le concept d'injection de dépendances dans Spring Boot ?"<br><br>
+                <strong>Votre réponse :</strong> "L'injection de dépendances est un design pattern où les objets reçoivent leurs dépendances de sources externes plutôt que de les créer eux-mêmes…"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right — Highlights -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <div class="card-header"><h3>Moments Clés</h3><p>Points importants de l'entretien</p></div>
+            <div class="card-body space-y-4" style="max-height:480px;overflow-y:auto">
+              <div class="highlight-item" onclick="seekTo(45)">
+                <div class="hl-icon" style="background:#10B981"><i data-lucide="trending-up" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Bonne Réponse</div><div class="text-xs text-muted">0:45</div></div><div class="text-xs text-muted mt-1">Excellente explication des principes POO</div></div>
+              </div>
+              <div class="highlight-item" onclick="seekTo(120)">
+                <div class="hl-icon" style="background:#EF4444"><i data-lucide="trending-down" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Réponse Faible</div><div class="text-xs text-muted">2:00</div></div><div class="text-xs text-muted mt-1">Réponse confuse sur le multithreading</div></div>
+              </div>
+              <div class="highlight-item" onclick="seekTo(180)">
+                <div class="hl-icon" style="background:#F59E0B"><i data-lucide="eye" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Contact Visuel Faible</div><div class="text-xs text-muted">3:00</div></div><div class="text-xs text-muted mt-1">Regard ailleurs que la caméra</div></div>
+              </div>
+              <div class="highlight-item" onclick="seekTo(240)">
+                <div class="hl-icon" style="background:#2563EB"><i data-lucide="trending-up" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Haute Confiance</div><div class="text-xs text-muted">4:00</div></div><div class="text-xs text-muted mt-1">Livraison claire et assurée</div></div>
+              </div>
+              <div class="highlight-item" onclick="seekTo(300)">
+                <div class="hl-icon" style="background:#F97316"><i data-lucide="alert-circle" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Pic de Stress</div><div class="text-xs text-muted">5:00</div></div><div class="text-xs text-muted mt-1">Indicateurs de stress détectés</div></div>
+              </div>
+              <div class="highlight-item" onclick="seekTo(360)">
+                <div class="hl-icon" style="background:#10B981"><i data-lucide="trending-up" style="width:16px;height:16px"></i></div>
+                <div><div class="flex justify-between"><div class="font-medium text-sm">Bonne Réponse</div><div class="text-xs text-muted">6:00</div></div><div class="text-xs text-muted mt-1">Excellent exemple d'utilisation Spring Boot</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="background:linear-gradient(135deg,rgba(37,99,235,.05),rgba(124,58,237,.05));border-color:rgba(37,99,235,.2)">
+            <div class="card-header"><h3 class="text-sm">Légende</h3></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
+              <div class="flex items-center gap-2"><div style="width:12px;height:12px;background:#10B981;border-radius:50%"></div> Bonne Réponse</div>
+              <div class="flex items-center gap-2"><div style="width:12px;height:12px;background:#EF4444;border-radius:50%"></div> Réponse Faible</div>
+              <div class="flex items-center gap-2"><div style="width:12px;height:12px;background:#F59E0B;border-radius:50%"></div> Contact Visuel</div>
+              <div class="flex items-center gap-2"><div style="width:12px;height:12px;background:#2563EB;border-radius:50%"></div> Haute Confiance</div>
+              <div class="flex items-center gap-2"><div style="width:12px;height:12px;background:#F97316;border-radius:50%"></div> Pic de Stress</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+  lucide.createIcons();
+  const duration = 420;
+  let currentTime = 0, playing = false, interval = null;
+
+  function togglePlay() {
+    playing = !playing;
+    document.getElementById('play-icon').setAttribute('data-lucide', playing ? 'pause' : 'play');
+    lucide.createIcons();
+    if (playing) {
+      interval = setInterval(() => {
+        if (currentTime >= duration) { clearInterval(interval); playing = false; return; }
+        currentTime++;
+        updateDisplay();
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+  }
+
+  function seekTo(secs) {
+    currentTime = secs;
+    updateDisplay();
+    showToast('Navigation vers ' + formatTime(secs), 'info');
+  }
+
+  function updateDisplay() {
+    const pct = (currentTime / duration) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+    document.getElementById('time-display').textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
+  }
+
+  function formatTime(s) { return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+</script>
+</body>
+</html>
