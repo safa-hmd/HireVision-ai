@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Controller;
 
+import com.projet.hirevisionai.Dto.JobMatchRequestDTO;
 import com.projet.hirevisionai.Dto.MatchingResultDTO;
 import com.projet.hirevisionai.ServiceInterface.IMatchingResultService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class MatchingResultController {
     @GetMapping("/cv/{cvId}/best")
     public ResponseEntity<MatchingResultDTO> getBestByCvId(@PathVariable Long cvId) {
         return ResponseEntity.ok(matchingResultService.getBestByCvId(cvId));
+    }
+
+    @PostMapping("/match")
+    public ResponseEntity<MatchingResultDTO> matchAndSave(@RequestBody JobMatchRequestDTO request) {
+        return ResponseEntity.ok(matchingResultService.matchAndSave(request));
     }
 }

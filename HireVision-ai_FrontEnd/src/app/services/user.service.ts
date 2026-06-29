@@ -8,6 +8,12 @@ export interface UserDTO {
   email: string;
   age: number;
   role?: string;
+  phone?: string;      
+  title?: string;
+  linkedin?: string;
+  github?: string;
+  profilePicture?: string; // Add this line for the profile picture filename
+
 }
 
 @Injectable({
@@ -33,4 +39,15 @@ export class UserService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  // user.service.ts — ajouter
+uploadPicture(id: number, file: File): Observable<UserDTO> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return this.http.post<UserDTO>(`${this.baseUrl}/${id}/upload-picture`, formData);
+}
+
+getPictureUrl(filename: string): string {
+  return `http://localhost:8086/HireVision/users/pictures/${filename}`;
+}
 }

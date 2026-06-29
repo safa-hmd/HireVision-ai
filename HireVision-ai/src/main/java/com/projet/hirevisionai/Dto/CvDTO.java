@@ -26,7 +26,11 @@ public class CvDTO {
                 .filePath(cv.getFilePath())
                 .uploadDate(cv.getUploadDate())
                 .userId(cv.getUser() != null ? cv.getUser().getIdUser() : null)
-                .skillNames(List.of())   // ← ne pas toucher cv.getSkills() ici
+                .skillNames(cv.getSkills() != null    // ← Fix ici
+                        ? cv.getSkills().stream()
+                        .map(Skill::getName)
+                        .collect(Collectors.toList())
+                        : List.of())
                 .build();
     }
 }

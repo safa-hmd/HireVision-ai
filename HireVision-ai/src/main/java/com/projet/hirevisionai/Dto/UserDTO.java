@@ -13,8 +13,15 @@ public class UserDTO {
     private String email;
     private int    age;
     private String role;
+    private String phone;
+    private String title;
+    private String linkedin;
+    private String github;
+    private String profilePicture;
 
-    // ── Mapping Entity → DTO ──────────────────────────────────────
+
+
+
     public static UserDTO fromEntity(User user) {
         return UserDTO.builder()
                 .idUser(user.getIdUser())
@@ -22,6 +29,11 @@ public class UserDTO {
                 .email(user.getEmail())
                 .age(user.getAge())
                 .role(user.getRole() != null ? user.getRole().name() : null)
+                .phone(user.getPhone())
+                .title(user.getTitle())
+                .linkedin(user.getLinkedin())
+                .github(user.getGithub())
+                .profilePicture(user.getProfilePicture())
                 .build();
     }
 }

@@ -16,6 +16,11 @@ public class MatchingResultDTO {
     private float                score;
     private Long                 cvId;
     private List<MissedSkillDTO> missedSkills;
+    private String        label;
+    private String        message;
+    private Boolean       compatible;
+    private List<String>  matched;
+    private List<String>  missingSkills;
 
     public static MatchingResultDTO fromEntity(MatchingResult mr) {
         if (mr == null) return null;

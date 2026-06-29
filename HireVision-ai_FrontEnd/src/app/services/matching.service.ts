@@ -2,33 +2,32 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export interface MissedSkillDTO {
-  id?: number;
-  skillName: string;
-  matchingResultId: number;
+export interface JobMatchRequestDTO {
+  cvId: number;
+  cvSkills: string[];
+  jobSkills: string[];
 }
 
 export interface MatchingResultDTO {
   id?: number;
   score: number;
   cvId: number;
-  missedSkills?: MissedSkillDTO[];
+  label?: string;
+  message?: string;
+  compatible?: boolean;
+  matched?: string[];
+  missingSkills?: string[];
+  missedSkills?: { id?: number; skillName: string; matchingResultId: number }[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MatchingService {
   private baseUrl = 'http://localhost:8086/HireVision/matching-results';
 
   constructor(private http: HttpClient) {}
 
-  create(dto: MatchingResultDTO): Observable<MatchingResultDTO> {
-    return this.http.post<MatchingResultDTO>(`${this.baseUrl}/add`, dto);
-  }
-
-  getById(id: number): Observable<MatchingResultDTO> {
-    return this.http.get<MatchingResultDTO>(`${this.baseUrl}/${id}`);
+  matchAndSave(request: JobMatchRequestDTO): Observable<MatchingResultDTO> {
+    return this.http.post<MatchingResultDTO>(`${this.baseUrl}/match`, request);
   }
 
   getByCvId(cvId: number): Observable<MatchingResultDTO[]> {

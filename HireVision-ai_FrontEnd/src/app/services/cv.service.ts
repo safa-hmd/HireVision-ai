@@ -10,14 +10,40 @@ export interface CvDTO {
   skillNames: string[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface CvAnalysis {
+  skills: string[];
+  education: { degree: string; institution: string; period: string; }[];
+  experience: { title: string; company: string; period: string; description: string; }[];
+  certifications: string[];
+  languages: { language: string; level: string; }[];
+  summary: string;
+  // Nouveaux champs ML
+  profile?: string;
+  confidence?: number;
+  global_score?: number;
+  skill_scores?: { [key: string]: number };
+}
+
+export interface CvUploadResponse {
+  cv: CvDTO;
+  analysis: CvAnalysis;
+}
+
+@Injectable({ providedIn: 'root' })
 export class CvService {
   private baseUrl = 'http://localhost:8086/HireVision/cvs';
 
   constructor(private http: HttpClient) {}
 
+  // ← Nouveau endpoint avec analyse IA
+  uploadAndAnalyze(file: File, userId: number): Observable<CvUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', String(userId));
+    return this.http.post<CvUploadResponse>(`${this.baseUrl}/upload-and-analyze`, formData);
+  }
+
+  // Anciens endpoints conservés
   upload(file: File, userId: number): Observable<CvDTO> {
     const formData = new FormData();
     formData.append('file', file);

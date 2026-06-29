@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'assets/css/style.css';
+@import '../node_modules/cropperjs/dist/cropper.min.css';
 
 /* ── Fix global scroll ── */
 html, body {
@@ -19,6 +20,8 @@ app-cv-analyse,
 app-job-match,
 app-interview-preparation,
 app-plan-carriere,
-app-profil {
+app-profil,
+app-interview-session,
+app-interview-feedback {
   display: contents;
 }

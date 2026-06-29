@@ -1,6 +1,7 @@
 package com.projet.hirevisionai.Controller;
 
 import com.projet.hirevisionai.Dto.CvDTO;
+import com.projet.hirevisionai.Dto.CvUploadResponseDTO;
 import com.projet.hirevisionai.ServiceInterface.ICvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 public class CvController {
 
     private final ICvService cvService;
+
 
     @PostMapping("/upload")
     public ResponseEntity<CvDTO> upload(
@@ -42,5 +44,12 @@ public class CvController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         cvService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/upload-and-analyze")
+    public ResponseEntity<CvUploadResponseDTO> uploadAndAnalyze(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("userId") Long userId) {
+        return ResponseEntity.ok(cvService.uploadAndAnalyze(file, userId));
     }
 }

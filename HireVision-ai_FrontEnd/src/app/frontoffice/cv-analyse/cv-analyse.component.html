@@ -12,17 +12,27 @@
     <div id="upload-section" [style.display]="showResults ? 'none' : 'block'">
       <div class="card">
         <div class="card-body text-center" style="padding:48px 24px">
-          <div class="drop-zone" id="drop-zone" (click)="triggerFileInput()">
+
+          <!-- Loading state -->
+          <div *ngIf="isLoading" style="padding:32px 0">
+            <div class="spinner" style="margin:0 auto 20px"></div>
+            <h3 style="margin-bottom:8px">Analyse IA en cours...</h3>
+            <p class="text-muted">Extraction des compétences et expériences</p>
+          </div>
+
+          <!-- Drop zone -->
+          <div *ngIf="!isLoading" class="drop-zone" id="drop-zone" (click)="triggerFileInput()">
             <input type="file" id="cv-file" #cvFile accept=".pdf,.doc,.docx"
                    (change)="onFileSelected($event)" style="display:none" />
             <i data-lucide="upload-cloud" style="width:56px;height:56px;color:var(--primary);margin-bottom:16px"></i>
-            <h3 style="color:var(--text);margin-bottom:8px">Déposez votre CV ici</h3>
-            <p style="margin-bottom:20px">Format PDF, DOC ou DOCX — max 5 Mo</p>
+            <h3 style="margin-bottom:8px">Déposez votre CV ici</h3>
+            <p class="text-muted" style="margin-bottom:20px">Format PDF, DOC ou DOCX — max 5 Mo</p>
             <button type="button" class="btn btn-primary btn-lg">
               <i data-lucide="upload"></i> Choisir un fichier
             </button>
           </div>
-          <button type="button" (click)="simulateUpload()" class="btn btn-outline mt-4">
+
+          <button *ngIf="!isLoading" type="button" (click)="simulateUpload()" class="btn btn-outline mt-4">
             Simuler l'analyse (démo)
           </button>
         </div>
@@ -31,84 +41,145 @@
 
     <!-- Results section -->
     <div id="results-section" [style.display]="showResults ? 'block' : 'none'">
+
+      <!-- Success banner -->
       <div class="alert alert-success mb-6" style="display:flex;align-items:center;gap:12px">
         <i data-lucide="check-circle" style="flex-shrink:0"></i>
-        <div><strong>CV Analysé avec succès !</strong> Jean_Dupont_CV.pdf</div>
+        <div>
+          <strong>CV analysé avec succès !</strong> {{ fileName }}
+        </div>
       </div>
 
+      <!-- Résumé IA -->
+      <div class="card mb-6" *ngIf="analysis?.summary">
+        <div class="card-header">
+          <h3><i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Résumé IA</h3>
+        </div>
+        <div class="card-body">
+          <p style="line-height:1.6;margin:0">{{ analysis?.summary }}</p>
+        </div>
+      </div>
+
+      <!-- Profil ML -->
+<div class="card mb-6" *ngIf="analysis?.profile">
+  <div class="card-header">
+    <h3><i data-lucide="cpu" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Profil IA détecté</h3>
+  </div>
+  <div class="card-body" style="display:flex;align-items:center;gap:16px">
+    <span class="tag" style="font-size:16px;padding:8px 16px">{{ analysis?.profile }}</span>
+    <span class="text-muted">Confiance : <strong>{{ analysis?.confidence }}%</strong></span>
+    <span class="text-muted">Score global : <strong>{{ analysis?.global_score }}/100</strong></span>
+  </div>
+</div>
+
+      <!-- Grille principale -->
       <div class="grid-2 mb-6">
+
+        <!-- Compétences -->
         <div class="card">
-          <div class="card-header"><h3>Compétences Extraites</h3><p>Compétences techniques et comportementales</p></div>
+          <div class="card-header">
+            <h3>Compétences extraites</h3>
+            <p>Compétences techniques et comportementales</p>
+          </div>
           <div class="card-body">
-            <span class="tag">Java</span><span class="tag">Spring Boot</span><span class="tag">Microservices</span>
-            <span class="tag">REST API</span><span class="tag">Angular</span><span class="tag">TypeScript</span>
-            <span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">MySQL</span>
-            <span class="tag">MongoDB</span><span class="tag">Git</span><span class="tag">CI/CD</span>
-            <span class="tag">Agile</span><span class="tag">Leadership</span>
+            <ng-container *ngIf="analysis?.skills?.length; else noSkills">
+              <span class="tag" *ngFor="let skill of analysis?.skills">{{ skill }}</span>
+            </ng-container>
+            <ng-template #noSkills>
+              <p class="text-muted text-sm">Aucune compétence détectée</p>
+            </ng-template>
           </div>
         </div>
 
+        <!-- Formation -->
         <div class="card">
-          <div class="card-header"><h3>Formation</h3><p>Parcours académique</p></div>
+          <div class="card-header">
+            <h3>Formation</h3>
+            <p>Parcours académique</p>
+          </div>
           <div class="card-body">
-            <div style="border-left:3px solid var(--primary);padding-left:14px;margin-bottom:16px">
-              <div class="font-medium">Master en Informatique</div>
-              <div class="text-sm text-muted">Université Paris-Saclay</div>
-              <div class="text-xs text-muted">2020 – 2022</div>
-            </div>
-            <div style="border-left:3px solid var(--border);padding-left:14px">
-              <div class="font-medium">Licence Génie Logiciel</div>
-              <div class="text-sm text-muted">INSA Lyon</div>
-              <div class="text-xs text-muted">2017 – 2020</div>
-            </div>
+            <ng-container *ngIf="analysis?.education?.length; else noEdu">
+              <div *ngFor="let edu of analysis?.education; let last = last"
+                   [style.margin-bottom]="last ? '0' : '16px'"
+                   style="border-left:3px solid var(--primary);padding-left:14px">
+                <div class="font-medium">{{ edu.degree }}</div>
+                <div class="text-sm text-muted">{{ edu.institution }}</div>
+                <div class="text-xs text-muted">{{ edu.period }}</div>
+              </div>
+            </ng-container>
+            <ng-template #noEdu>
+              <p class="text-muted text-sm">Aucune formation détectée</p>
+            </ng-template>
           </div>
         </div>
 
+        <!-- Expérience -->
         <div class="card">
-          <div class="card-header"><h3>Expérience</h3><p>Historique professionnel</p></div>
+          <div class="card-header">
+            <h3>Expérience</h3>
+            <p>Historique professionnel</p>
+          </div>
           <div class="card-body space-y-4">
-            <div>
-              <div class="font-medium">Ingénieur Logiciel Senior</div>
-              <div class="text-sm text-muted">Tech Corp SARL</div>
-              <div class="text-xs text-muted">2022 – Présent</div>
-              <div class="text-sm mt-2">Architecture microservices pour 1 M+ utilisateurs</div>
-            </div>
-            <div>
-              <div class="font-medium">Développeur Full Stack</div>
-              <div class="text-sm text-muted">StartupXYZ</div>
-              <div class="text-xs text-muted">2020 – 2022</div>
-              <div class="text-sm mt-2">Applications Java Spring + Angular</div>
-            </div>
+            <ng-container *ngIf="analysis?.experience?.length; else noExp">
+              <div *ngFor="let exp of analysis?.experience">
+                <div class="font-medium">{{ exp.title }}</div>
+                <div class="text-sm text-muted">{{ exp.company }}</div>
+                <div class="text-xs text-muted">{{ exp.period }}</div>
+                <div class="text-sm mt-2">{{ exp.description }}</div>
+              </div>
+            </ng-container>
+            <ng-template #noExp>
+              <p class="text-muted text-sm">Aucune expérience détectée</p>
+            </ng-template>
           </div>
         </div>
 
+        <!-- Certifications -->
         <div class="card">
-          <div class="card-header"><h3>Certifications</h3></div>
+          <div class="card-header">
+            <h3>Certifications</h3>
+          </div>
           <div class="card-body space-y-4">
-            <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">AWS Certified Solutions Architect</span></div>
-            <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Oracle Certified Java Professional</span></div>
-            <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Certified Kubernetes Administrator</span></div>
-            <div class="flex items-center gap-3"><i data-lucide="check-circle" style="color:var(--success);flex-shrink:0"></i><span class="text-sm">Google Cloud Professional Developer</span></div>
+            <ng-container *ngIf="analysis?.certifications?.length; else noCert">
+              <div class="flex items-center gap-3" *ngFor="let cert of analysis?.certifications">
+                <i data-lucide="check-circle" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i>
+                <span class="text-sm">{{ cert }}</span>
+              </div>
+            </ng-container>
+            <ng-template #noCert>
+              <p class="text-muted text-sm">Aucune certification détectée</p>
+            </ng-template>
           </div>
         </div>
+
       </div>
 
+      <!-- Langues -->
       <div class="card mb-6">
         <div class="card-header"><h3>Langues</h3></div>
         <div class="card-body">
-          <div class="grid-4">
-            <div class="list-item flex-col text-center" style="padding:16px"><div class="font-medium">Français</div><div class="text-sm text-muted">Natif</div></div>
-            <div class="list-item flex-col text-center" style="padding:16px"><div class="font-medium">Anglais</div><div class="text-sm text-muted">Courant</div></div>
-            <div class="list-item flex-col text-center" style="padding:16px"><div class="font-medium">Espagnol</div><div class="text-sm text-muted">Intermédiaire</div></div>
-            <div class="list-item flex-col text-center" style="padding:16px"><div class="font-medium">Arabe</div><div class="text-sm text-muted">Notions</div></div>
-          </div>
+          <ng-container *ngIf="analysis?.languages?.length; else noLang">
+            <div class="grid-4">
+              <div class="list-item flex-col text-center" style="padding:16px"
+                   *ngFor="let lang of analysis?.languages">
+                <div class="font-medium">{{ lang.language }}</div>
+                <div class="text-sm text-muted">{{ lang.level }}</div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noLang>
+            <p class="text-muted text-sm">Aucune langue détectée</p>
+          </ng-template>
         </div>
       </div>
 
-      <button type="button" (click)="resetUpload()" class="btn btn-outline">
-        <i data-lucide="refresh-cw"></i> Analyser un autre CV
-      </button>
-    </div>
+      <!-- Actions -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button type="button" (click)="resetUpload()" class="btn btn-outline">
+          <i data-lucide="refresh-cw"></i> Analyser un autre CV
+        </button>
+      </div>
 
+    </div>
   </div>
 </div>

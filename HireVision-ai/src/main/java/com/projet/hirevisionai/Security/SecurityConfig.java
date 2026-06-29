@@ -67,7 +67,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/auth/**").permitAll()          // ✅ couvre /auth/complete-google-register
+                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/users/pictures/**").permitAll()
+                        .requestMatchers("/cvs/**").permitAll()
+                        .requestMatchers("/matching-results/**").permitAll()
 
                                 // Tout autre endpoint nécessite une authentification
 

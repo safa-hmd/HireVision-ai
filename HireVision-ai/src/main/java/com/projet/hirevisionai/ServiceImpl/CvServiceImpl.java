@@ -1,20 +1,33 @@
 package com.projet.hirevisionai.ServiceImpl;
 
+import com.projet.hirevisionai.Dto.CvAnalysisDTO;
 import com.projet.hirevisionai.Dto.CvDTO;
+import com.projet.hirevisionai.Dto.CvUploadResponseDTO;
 import com.projet.hirevisionai.Entity.CV;
+import com.projet.hirevisionai.Entity.Skill;
 import com.projet.hirevisionai.Entity.User;
 import com.projet.hirevisionai.Repository.CvRepository;
+import com.projet.hirevisionai.Repository.SkillRepository;
 import com.projet.hirevisionai.Repository.UserRepository;
 import com.projet.hirevisionai.ServiceInterface.ICvService;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+
+
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,8 +36,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CvServiceImpl implements ICvService {
 
+    private final RestTemplate restTemplate;
     private final CvRepository   cvRepository;
     private final UserRepository userRepository;
+    private final SkillRepository skillRepository;
 
     private static final String UPLOAD_DIR = "uploads/cvs/";
 
@@ -79,5 +94,67 @@ public class CvServiceImpl implements ICvService {
         if (!cvRepository.existsById(id))
             throw new RuntimeException("CV not found: " + id);
         cvRepository.deleteById(id);
+    }
+
+    @Override
+    public CvUploadResponseDTO uploadAndAnalyze(MultipartFile file, Long userId) {
+
+        // 1. Sauvegarder le fichier
+        CvDTO savedCv = upload(file, userId);
+        CV cv = cvRepository.findById(savedCv.getId())
+                .orElseThrow(() -> new RuntimeException("CV introuvable"));
+
+        // 2. Appeler Python
+        byte[] fileBytes;
+        try { fileBytes = file.getBytes(); }
+        catch (IOException e) { throw new RuntimeException(e); }
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new ByteArrayResource(fileBytes) {
+            @Override public String getFilename() { return file.getOriginalFilename(); }
+        });
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<CvAnalysisDTO> response = restTemplate.exchange(
+                "http://localhost:8000/analyze",
+                HttpMethod.POST,
+                requestEntity,
+                CvAnalysisDTO.class
+        );
+
+        CvAnalysisDTO analysis = response.getBody();
+
+// 3. Sauvegarder les skills en DB
+        if (analysis != null && analysis.getSkills() != null) {
+            for (String skillName : analysis.getSkills()) {
+                Skill skill = skillRepository.findByName(skillName)
+                        .orElseGet(() -> skillRepository.save(
+                                Skill.builder()
+                                        .name(skillName)
+                                        .category("Technical")
+                                        .build()
+                        ));
+                if (cv.getSkills() == null) {
+                    cv.setSkills(new ArrayList<>());
+                }
+                if (!cv.getSkills().contains(skill)) {
+                    cv.getSkills().add(skill);
+                }
+            }
+            cvRepository.save(cv);
+        }
+
+        return CvUploadResponseDTO.builder()
+                .cv(CvDTO.fromEntity(cv))
+                .analysis(analysis)
+                .build();
+    }
+
+    private byte[] getFileBytes(MultipartFile file) {
+        try { return file.getBytes(); }
+        catch (IOException e) { throw new RuntimeException(e); }
     }
 }

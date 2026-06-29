@@ -14,6 +14,8 @@ import { JobMatchComponent } from './job-match/job-match.component';
 import { ProfilComponent } from './profil/profil.component';
 import { PlanCarriereComponent } from './plan-carriere/plan-carriere.component';
 import { InterviewPreparationComponent } from './interview-preparation/interview-preparation.component';
+import { InterviewSessionComponent } from './interview-session/interview-session.component';
+import { InterviewFeedbackComponent } from './interview-feedback/interview-feedback.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { InterviewPreparationComponent } from './interview-preparation/interview
     JobMatchComponent,
     ProfilComponent,
     PlanCarriereComponent,
-    InterviewPreparationComponent
+    InterviewPreparationComponent,
+    InterviewSessionComponent,
+    InterviewFeedbackComponent
   ],
   imports: [
     CommonModule,

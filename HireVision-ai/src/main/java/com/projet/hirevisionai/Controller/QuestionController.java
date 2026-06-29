@@ -1,15 +1,18 @@
 package com.projet.hirevisionai.Controller;
 
+import com.projet.hirevisionai.Dto.GenerateQuestionsRequestDTO;
 import com.projet.hirevisionai.Dto.QuestionCreateRequestDTO;
 import com.projet.hirevisionai.Dto.QuestionDTO;
 import com.projet.hirevisionai.Entity.Question;
 import com.projet.hirevisionai.ServiceInterface.IQuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/questions")
@@ -48,5 +51,10 @@ public class QuestionController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         questionService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<Map> generateQuestions(@RequestBody GenerateQuestionsRequestDTO request) {
+        return ResponseEntity.ok(questionService.generateFromPython(request));
     }
 }

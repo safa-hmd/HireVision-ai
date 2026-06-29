@@ -1,137 +1,355 @@
 <div class="main-content">
-    <header class="page-header">
-      <div><h1 class="page-title">Paramètres du Profil</h1><p class="page-subtitle">Gérez votre compte et vos préférences</p></div>
-    </header>
-    <div class="page-body">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Paramètres du Profil</h1>
+      <p class="page-subtitle">Gérez votre compte et vos préférences</p>
+    </div>
+  </header>
 
-      <div class="tabs-root">
-        <div class="tabs-list">
-          <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
-          <button class="tab-trigger" data-tab="cvs">Mes CV</button>
-          <button class="tab-trigger" data-tab="interviews">Entretiens</button>
-          <button class="tab-trigger" data-tab="achievements">Réalisations</button>
-        </div>
+  <div class="page-body">
+    <div class="tabs-root">
+      <div class="tabs-list">
+        <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
+        <button class="tab-trigger" data-tab="cvs">Mes CV</button>
+        <button class="tab-trigger" data-tab="interviews">Entretiens</button>
+        <button class="tab-trigger" data-tab="achievements">Réalisations</button>
+      </div>
 
-        <!-- Personal -->
-        <div class="tab-panel" data-panel="personal">
-          <div class="card">
-            <div class="card-header"><h3>Informations Personnelles</h3><p>Mettez à jour vos données</p></div>
-            <div class="card-body">
-              <div class="flex items-center gap-6 mb-6">
-                <div style="position:relative">
-                  <div class="avatar avatar-xl">JD</div>
-                  <button class="btn btn-outline btn-sm" style="position:absolute;bottom:-8px;right:-8px;padding:4px 8px;font-size:.72rem">Modifier</button>
+      <!-- ══════════════ TAB PERSONAL ══════════════ -->
+      <div class="tab-panel" data-panel="personal">
+
+        <!-- Card infos personnelles -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Informations Personnelles</h3>
+            <p>Mettez à jour vos données</p>
+          </div>
+          <div class="card-body">
+
+            <!-- Zone Avatar -->
+            <div class="flex items-center gap-6 mb-6">
+
+              <div style="position:relative;width:88px;height:88px;cursor:pointer" (click)="triggerFileInput()">
+
+                <!-- Preview avant confirmation -->
+                <img *ngIf="previewUrl"
+                     [src]="previewUrl"
+                     alt="Aperçu"
+                     style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)" />
+
+                <!-- Photo sauvegardée -->
+                <img *ngIf="!previewUrl && user.profilePicture"
+                     [src]="getProfilePicUrl()"
+                     alt="Photo de profil"
+                     style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border)" />
+
+                <!-- Initiales si aucune photo -->
+                <div *ngIf="!previewUrl && !user.profilePicture"
+                     class="avatar avatar-xl">
+                  {{ getInitials() }}
                 </div>
-                <div><h3>Photo de Profil</h3><p class="text-sm">Téléchargez une photo professionnelle</p></div>
+
+                <!-- Overlay caméra au hover -->
+                <div class="avatar-overlay">
+                  <i data-lucide="camera" style="width:20px;height:20px;color:#fff"></i>
+                </div>
               </div>
-              <form (ngSubmit)="saveProfile()" class="grid-2">
-                <div class="form-group"><label class="form-label">Nom Complet</label><input class="form-input" [(ngModel)]="user.fullName" name="fullName" required /></div>
-                <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" [(ngModel)]="user.email" name="email" required /></div>
-                <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="tel" value="+33 6 12 34 56 78" name="phone" /></div>
-                <div class="form-group"><label class="form-label">Âge</label><input class="form-input" type="number" [(ngModel)]="user.age" name="age" required /></div>
-                <div class="form-group" style="grid-column:1/-1"><label class="form-label">Titre Professionnel</label><input class="form-input" value="Ingénieur Logiciel Senior" name="title" /></div>
-                <div class="form-group" style="grid-column:1/-1"><label class="form-label">LinkedIn</label><input class="form-input" value="linkedin.com/in/jeandupont" name="linkedin" /></div>
-                <div class="form-group" style="grid-column:1/-1"><label class="form-label">GitHub</label><input class="form-input" value="github.com/jeandupont" name="github" /></div>
-                <div style="grid-column:1/-1">
-                  <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Enregistrer</button>
+
+              <!-- Input file caché -->
+              <input type="file" #pictureInput accept="image/*"
+                     (change)="onPictureSelected($event)" style="display:none" />
+
+              <div>
+                <h3>Photo de Profil</h3>
+                <p class="text-sm text-muted">JPG, PNG ou WebP — max 2 Mo</p>
+                <!-- Boutons confirmer/annuler si preview -->
+                <div *ngIf="previewUrl" style="display:flex;gap:8px;margin-top:8px">
+                  <button class="btn btn-primary btn-sm" (click)="confirmUpload()">
+                    <i data-lucide="check"></i> Confirmer
+                  </button>
+                  <button class="btn btn-ghost btn-sm" (click)="cancelPreview()">
+                    Annuler
+                  </button>
                 </div>
-              </form>
+              </div>
+            </div>
+            <!-- Fin Zone Avatar -->
+
+            <!-- Formulaire -->
+            <form (ngSubmit)="saveProfile()" class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Nom Complet</label>
+                <input class="form-input" [(ngModel)]="user.fullName" name="fullName" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" [(ngModel)]="user.email" name="email" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Téléphone</label>
+                <input class="form-input" type="tel" [(ngModel)]="user.phone" name="phone" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Âge</label>
+                <input class="form-input" type="number" [(ngModel)]="user.age" name="age" required />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">Titre Professionnel</label>
+                <input class="form-input" [(ngModel)]="user.title" name="title" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">LinkedIn</label>
+                <input class="form-input" [(ngModel)]="user.linkedin" name="linkedin" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">GitHub</label>
+                <input class="form-input" [(ngModel)]="user.github" name="github" />
+              </div>
+              <div style="grid-column:1/-1">
+                <button type="submit" class="btn btn-primary">
+                  <i data-lucide="save"></i> Enregistrer
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+        <!-- Fin Card infos -->
+
+        <!-- ── Zone Danger ── -->
+        <div class="card" style="border-color:#dc2626;margin-top:24px">
+          <div class="card-header">
+            <h3 style="color:#dc2626">Zone Danger</h3>
+            <p>Actions irréversibles</p>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div>
+                <div class="font-medium">Supprimer mon compte</div>
+                <div class="text-sm text-muted">Toutes vos données seront définitivement supprimées</div>
+              </div>
+              <button class="btn btn-danger btn-sm" (click)="openDeleteModal()">
+                <i data-lucide="trash-2"></i> Supprimer le compte
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- CVs -->
-        <div class="tab-panel" data-panel="cvs">
-          <div class="card">
-            <div class="card-header"><h3>CV Uploadés</h3><p>Gérez vos documents</p></div>
-            <div class="card-body space-y-4">
-              <input type="file" id="new-cv-file" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" style="display:none" />
-              
-              <div *ngIf="userCvs.length === 0" class="text-center text-muted" style="padding: 24px 0">
-                Aucun CV mis en ligne pour le moment.
-              </div>
-              
-              <div class="list-item" *ngFor="let cv of userCvs; let i = index">
-                <div class="flex items-center gap-4">
-                  <div style="width:44px;height:44px;background:var(--primary-light);border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="file-text" style="color:var(--primary)"></i></div>
-                  <div>
-                    <div class="font-medium">{{ cv.filePath.split('/').pop() || 'CV_' + cv.id }}</div>
-                    <div class="text-sm text-muted">Mis en ligne le {{ cv.uploadDate }}</div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="badge" [ngClass]="i === 0 ? 'badge-success' : 'badge-muted'">
-                    {{ i === 0 ? 'Actif' : 'Inactif' }}
-                  </span>
-                  <a [href]="'http://localhost:8086/HireVision/' + cv.filePath" target="_blank" class="btn btn-outline btn-sm">Voir</a>
-                  <button class="btn btn-ghost btn-sm" (click)="deleteCv(cv.id)">Supprimer</button>
-                </div>
-              </div>
-              
-              <button class="btn btn-outline w-full" (click)="uploadCv()"><i data-lucide="upload"></i> Uploader un Nouveau CV</button>
+      </div>
+      <!-- Fin tab personal -->
+
+      <!-- ══════════════ TAB CVS ══════════════ -->
+      <div class="tab-panel" data-panel="cvs">
+        <div class="card">
+          <div class="card-header"><h3>CV Uploadés</h3><p>Gérez vos documents</p></div>
+          <div class="card-body space-y-4">
+
+            <input type="file" id="new-cv-file" accept=".pdf,.doc,.docx"
+                   (change)="onFileSelected($event)" style="display:none" />
+
+            <div *ngIf="userCvs.length === 0" class="text-center text-muted" style="padding:24px 0">
+              Aucun CV mis en ligne pour le moment.
             </div>
+
+            <div class="list-item" *ngFor="let cv of userCvs; let i = index">
+              <div class="flex items-center gap-4">
+                <div style="width:44px;height:44px;background:var(--primary-light);border-radius:10px;display:flex;align-items:center;justify-content:center">
+                  <i data-lucide="file-text" style="color:var(--primary)"></i>
+                </div>
+                <div>
+                  <div class="font-medium">{{ cv.filePath.split('/').pop() || 'CV_' + cv.id }}</div>
+                  <div class="text-sm text-muted">Mis en ligne le {{ cv.uploadDate }}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge" [ngClass]="i === 0 ? 'badge-success' : 'badge-muted'">
+                  {{ i === 0 ? 'Actif' : 'Inactif' }}
+                </span>
+                <a [href]="'http://localhost:8086/HireVision/' + cv.filePath"
+                   target="_blank" class="btn btn-outline btn-sm">Voir</a>
+                <button class="btn btn-ghost btn-sm" (click)="deleteCv(cv.id)">Supprimer</button>
+              </div>
+            </div>
+
+            <button class="btn btn-outline w-full" (click)="uploadCv()">
+              <i data-lucide="upload"></i> Uploader un Nouveau CV
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- Interviews -->
-        <div class="tab-panel" data-panel="interviews">
-          <div class="card">
-            <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
-            <div class="card-body space-y-4">
-              <div class="list-item"><div><div class="font-medium">Entretien Technique Java</div><div class="text-sm text-muted">8 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">85%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
-              <div class="list-item"><div><div class="font-medium">Session Spring Boot</div><div class="text-sm text-muted">7 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">78%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
-              <div class="list-item"><div><div class="font-medium">Entretien RH Comportemental</div><div class="text-sm text-muted">6 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-success">RH</span><span class="font-bold text-success">90%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
-              <div class="list-item"><div><div class="font-medium">Pratique DevOps</div><div class="text-sm text-muted">5 Juin 2026</div></div><div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">72%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div></div>
+      <!-- ══════════════ TAB INTERVIEWS ══════════════ -->
+      <div class="tab-panel" data-panel="interviews">
+        <div class="card">
+          <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
+          <div class="card-body space-y-4">
+            <div class="list-item">
+              <div><div class="font-medium">Entretien Technique Java</div><div class="text-sm text-muted">8 Juin 2026</div></div>
+              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">85%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
             </div>
-          </div>
-        </div>
-
-        <!-- Achievements -->
-        <div class="tab-panel" data-panel="achievements">
-          <div class="card mb-6">
-            <div class="card-header"><h3>Réalisations & Badges</h3><p>Vos jalons et accomplissements</p></div>
-            <div class="card-body">
-              <div class="grid-3" style="gap:14px">
-                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                  <div style="width:60px;height:60px;background:#F59E0B;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">Premier Entretien</div><div class="text-xs text-success mt-1">Obtenu</div>
-                </div>
-                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                  <div style="width:60px;height:60px;background:#2563EB;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">5 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
-                </div>
-                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                  <div style="width:60px;height:60px;background:#7C3AED;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">10 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
-                </div>
-                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
-                  <div style="width:60px;height:60px;background:#10B981;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">Score Parfait</div><div class="text-xs text-muted mt-1">Verrouillé</div>
-                </div>
-                <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                  <div style="width:60px;height:60px;background:#F97316;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">Série Hebdo</div><div class="text-xs text-success mt-1">Obtenu</div>
-                </div>
-                <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
-                  <div style="width:60px;height:60px;background:#EF4444;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                  <div class="font-medium">Niveau Maître</div><div class="text-xs text-muted mt-1">Verrouillé</div>
-                </div>
-              </div>
+            <div class="list-item">
+              <div><div class="font-medium">Session Spring Boot</div><div class="text-sm text-muted">7 Juin 2026</div></div>
+              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">78%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><h3>Statistiques</h3><p>Aperçu de vos performances</p></div>
-            <div class="card-body">
-              <div class="grid-4">
-                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-primary" data-countup="12">0</div><div class="text-sm text-muted">Total Entretiens</div></div>
-                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div><div class="text-sm text-muted">Score Moyen</div></div>
-                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value" style="color:var(--accent)" data-countup="5">0</div><div class="text-sm text-muted">Badges Obtenus</div></div>
-                <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px"><div class="stat-value text-warning" data-countup="24">0</div><div class="text-sm text-muted">Heures Pratiquées</div></div>
-              </div>
+            <div class="list-item">
+              <div><div class="font-medium">Entretien RH Comportemental</div><div class="text-sm text-muted">6 Juin 2026</div></div>
+              <div class="flex items-center gap-4"><span class="badge badge-success">RH</span><span class="font-bold text-success">90%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
+            </div>
+            <div class="list-item">
+              <div><div class="font-medium">Pratique DevOps</div><div class="text-sm text-muted">5 Juin 2026</div></div>
+              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">72%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- ══════════════ TAB ACHIEVEMENTS ══════════════ -->
+      <div class="tab-panel" data-panel="achievements">
+
+        <div class="card mb-6">
+          <div class="card-header"><h3>Réalisations & Badges</h3><p>Vos jalons et accomplissements</p></div>
+          <div class="card-body">
+            <div class="grid-3" style="gap:14px">
+              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                <div style="width:60px;height:60px;background:#F59E0B;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">Premier Entretien</div><div class="text-xs text-success mt-1">Obtenu</div>
+              </div>
+              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                <div style="width:60px;height:60px;background:#2563EB;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">5 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+              </div>
+              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                <div style="width:60px;height:60px;background:#7C3AED;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">10 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
+              </div>
+              <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                <div style="width:60px;height:60px;background:#10B981;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">Score Parfait</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+              </div>
+              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
+                <div style="width:60px;height:60px;background:#F97316;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">Série Hebdo</div><div class="text-xs text-success mt-1">Obtenu</div>
+              </div>
+              <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
+                <div style="width:60px;height:60px;background:#EF4444;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
+                <div class="font-medium">Niveau Maître</div><div class="text-xs text-muted mt-1">Verrouillé</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Statistiques</h3><p>Aperçu de vos performances</p></div>
+          <div class="card-body">
+            <div class="grid-4">
+              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
+                <div class="stat-value text-primary" data-countup="12">0</div>
+                <div class="text-sm text-muted">Total Entretiens</div>
+              </div>
+              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
+                <div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div>
+                <div class="text-sm text-muted">Score Moyen</div>
+              </div>
+              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
+                <div class="stat-value" style="color:var(--accent)" data-countup="5">0</div>
+                <div class="text-sm text-muted">Badges Obtenus</div>
+              </div>
+              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
+                <div class="stat-value text-warning" data-countup="24">0</div>
+                <div class="text-sm text-muted">Heures Pratiquées</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Fin tab achievements -->
+
     </div>
   </div>
+</div>
+
+<!-- ══════ MODAL CROP PHOTO ══════ -->
+<div class="modal-overlay" *ngIf="showCropModal" style="z-index:1000">
+  <div class="modal-box" style="max-width:520px;width:95%">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0">Ajuster la photo</h3>
+      <button class="btn btn-ghost btn-sm" (click)="cancelCrop()">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <!-- Zone de crop -->
+    <div style="width:100%;height:320px;background:#111;border-radius:10px;overflow:hidden;position:relative">
+      <img #cropperImage id="cropper-image"
+           [src]="rawImageUrl"
+           style="max-width:100%;display:block" />
+    </div>
+
+    <!-- Contrôles -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0">
+      <button class="btn btn-outline btn-sm" (click)="zoomOut()">
+        <i data-lucide="zoom-out"></i>
+      </button>
+      <span class="text-sm text-muted">Zoom / Déplacer</span>
+      <button class="btn btn-outline btn-sm" (click)="zoomIn()">
+        <i data-lucide="zoom-in"></i>
+      </button>
+      <button class="btn btn-outline btn-sm" (click)="rotateLeft()">
+        <i data-lucide="rotate-ccw"></i>
+      </button>
+      <button class="btn btn-outline btn-sm" (click)="rotateRight()">
+        <i data-lucide="rotate-cw"></i>
+      </button>
+    </div>
+
+    <p class="text-sm text-muted" style="text-align:center;margin-bottom:16px">
+      Déplacez et zoomez pour cadrer votre visage dans le cercle
+    </p>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" (click)="cancelCrop()">Annuler</button>
+      <button class="btn btn-primary" (click)="applyCrop()">
+        <i data-lucide="check"></i> Confirmer la photo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL SUPPRESSION COMPTE ══════════════ -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-icon-danger">
+      <i data-lucide="alert-triangle"></i>
+    </div>
+    <h3>Supprimer votre compte ?</h3>
+    <p class="text-sm text-muted" style="margin:8px 0 16px">
+      Cette action est <strong style="color:#dc2626">permanente et irréversible</strong>.
+      Tous vos entretiens, CVs et données seront supprimés.
+    </p>
+    <div class="warning-box">
+      Pour confirmer, saisissez exactement votre nom complet :
+      <strong>{{ user.fullName }}</strong>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="form-label">Nom complet</label>
+      <input
+        class="form-input"
+        [(ngModel)]="deleteConfirmName"
+        name="deleteConfirmName"
+        placeholder="Saisissez votre nom..."
+        (ngModelChange)="onDeleteNameChange()"
+      />
+      <p class="text-sm" style="color:#dc2626;min-height:18px;margin-top:4px">
+        {{ deleteNameError }}
+      </p>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-outline" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" [disabled]="!deleteNameMatch" (click)="deleteAccount()">
+        <i data-lucide="trash-2"></i> Supprimer définitivement
+      </button>
+    </div>
+  </div>
+</div>

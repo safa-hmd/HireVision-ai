@@ -8,3 +8,5 @@
     .diff-beginner{background:#D1FAE5;color:#065F46}
     .diff-intermediate{background:#FEF3C7;color:#92400E}
     .diff-advanced{background:#FEE2E2;color:#991B1B}
+
+    @keyframes spin { to { transform: rotate(360deg); } }

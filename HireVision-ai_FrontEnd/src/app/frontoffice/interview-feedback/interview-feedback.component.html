@@ -1,0 +1,140 @@
+<div class="main-content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Rapport de Feedback</h1>
+      <p class="page-subtitle" *ngIf="results">{{ results.specialty?.title }} — Durée : {{ formatDuration(results.duration) }}</p>
+    </div>
+    <button class="btn btn-primary" (click)="restart()">
+      <i data-lucide="refresh-cw"></i> Nouvel entretien
+    </button>
+  </header>
+
+  <div class="page-body">
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" style="text-align:center;padding:60px">
+      <div class="spinner" style="margin:0 auto 16px"></div>
+      <p class="text-muted">Génération du rapport IA...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading && results">
+
+      <!-- Score global -->
+      <div class="card mb-6" [style.border-color]="scoreColor" style="text-align:center;padding:32px 24px">
+        <div style="font-size:72px;font-weight:800;line-height:1;margin-bottom:8px" [style.color]="scoreColor">
+          {{ globalScore }}<span style="font-size:28px;color:var(--text-muted);font-weight:400">/100</span>
+        </div>
+        <h2 style="margin:0 0 8px">{{ feedback?.titre }}</h2>
+        <p class="text-muted">{{ feedback?.message_global }}</p>
+        <span class="badge" style="font-size:13px;padding:6px 14px;margin-top:8px;display:inline-block"
+              [style.background]="scoreColor" style="color:#fff">
+          {{ feedback?.recommandation }}
+        </span>
+      </div>
+
+      <!-- Stats scores -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card" style="border-color:var(--primary)">
+          <div class="stat-label">Technique</div>
+          <div class="stat-value text-primary">{{ results.avg_scores?.technique || 0 }}%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-primary" [style.width]="(results.avg_scores?.technique || 0) + '%'"></div></div>
+        </div>
+        <div class="stat-card" style="border-color:var(--success)">
+          <div class="stat-label">Communication</div>
+          <div class="stat-value text-success">{{ results.avg_scores?.communication || 0 }}%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar progress-success" [style.width]="(results.avg_scores?.communication || 0) + '%'"></div></div>
+        </div>
+        <div class="stat-card" style="border-color:#8B5CF6">
+          <div class="stat-label">Confiance</div>
+          <div class="stat-value" style="color:#8B5CF6">{{ results.avg_scores?.confiance || 0 }}%</div>
+          <div class="progress-wrap mt-2"><div class="progress-bar" style="background:#8B5CF6" [style.width]="(results.avg_scores?.confiance || 0) + '%'"></div></div>
+        </div>
+        <div class="stat-card" style="border-color:var(--warning)">
+          <div class="stat-label">Questions</div>
+          <div class="stat-value text-warning">{{ results.answers?.length || 0 }}</div>
+          <div class="stat-change text-muted">Répondues</div>
+        </div>
+      </div>
+
+      <!-- Points forts / axes -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header"><h3>✅ Points Forts</h3></div>
+          <div class="card-body">
+            <div *ngFor="let p of feedback?.points_forts" style="display:flex;gap:8px;margin-bottom:10px">
+              <i data-lucide="check-circle" style="width:16px;height:16px;color:var(--success);flex-shrink:0;margin-top:2px"></i>
+              <span class="text-sm">{{ p }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📈 Axes d'Amélioration</h3></div>
+          <div class="card-body">
+            <div *ngFor="let a of feedback?.axes_amelioration" style="display:flex;gap:8px;margin-bottom:10px">
+              <i data-lucide="arrow-up-circle" style="width:16px;height:16px;color:var(--warning);flex-shrink:0;margin-top:2px"></i>
+              <span class="text-sm">{{ a }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analyse comportementale -->
+      <div class="card mb-6" *ngIf="results.behavior">
+        <div class="card-header"><h3>Analyse Comportementale</h3><p>Métriques captées pendant l'entretien</p></div>
+        <div class="card-body">
+          <div class="grid-3" style="gap:16px">
+            <ng-container *ngFor="let m of [
+              {label:'Contact visuel', key:'contactVisuel', color:'#10B981'},
+              {label:'Posture',        key:'posture',       color:'#3B82F6'},
+              {label:'Engagement',     key:'engagement',    color:'#10B981'},
+              {label:'Clarté vocale',  key:'clarteVocale',  color:'#3B82F6'},
+              {label:'Confiance',      key:'confiance',     color:'#8B5CF6'},
+              {label:'Stress',         key:'stress',        color:'#F59E0B'}
+            ]">
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                  <span class="text-sm">{{ m.label }}</span>
+                  <span class="text-sm font-medium" [style.color]="m.color">{{ results.behavior[m.key] }}%</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-bar" [style.background]="m.color" [style.width]="results.behavior[m.key] + '%'"></div></div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détail par question -->
+      <div class="card mb-6">
+        <div class="card-header"><h3>Détail par Question</h3></div>
+        <div class="card-body">
+          <div *ngFor="let a of results.answers; let i = index"
+               style="padding:14px;border-left:3px solid var(--primary);margin-bottom:12px;padding-left:16px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+              <span class="font-medium text-sm" style="flex:1;margin-right:8px">Q{{ i + 1 }}. {{ a.question?.question | slice:0:80 }}...</span>
+              <span *ngIf="a.evaluation" class="badge" style="color:#fff;flex-shrink:0"
+                    [style.background]="getNiveauColor(a.evaluation.niveau)">
+                {{ a.evaluation.score_global }}/100
+              </span>
+            </div>
+            <p *ngIf="a.transcript && a.transcript !== '(passé)'" class="text-sm text-muted" style="margin:4px 0">
+              💬 {{ a.transcript | slice:0:100 }}...
+            </p>
+            <p *ngIf="a.evaluation?.points_ameliorer" class="text-sm" style="margin:4px 0;color:var(--warning)">
+              💡 {{ a.evaluation.points_ameliorer }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conseil final -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(139,92,246,.05));border-color:rgba(99,102,241,.2)">
+        <div class="card-body" style="text-align:center;padding:24px">
+          <i data-lucide="star" style="width:32px;height:32px;color:#F59E0B;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"></i>
+          <h3 style="margin:0 0 8px">Conseil Final</h3>
+          <p style="margin:0">{{ feedback?.conseil_final }}</p>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

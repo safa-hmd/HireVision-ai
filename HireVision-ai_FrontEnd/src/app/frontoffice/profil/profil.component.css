@@ -1,0 +1,63 @@
+/* profil.component.css */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-box {
+  background: var(--surface, #fff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 90%;
+}
+.modal-icon-danger {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: #fee2e2;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  color: var(--danger, #dc2626);
+}
+.warning-box {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #92400e;
+}
+.btn-danger {
+  background: var(--danger, #dc2626);
+  color: #fff;
+  border: none;
+}
+.btn-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* profil.component.css */
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+div:hover > .avatar-overlay { opacity: 1; }
+
+/* Crop circle preview dans cropper */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 50% !important;
+}
+div:hover > .avatar-overlay { opacity: 1; }

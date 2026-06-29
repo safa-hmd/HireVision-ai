@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Setter
@@ -31,8 +32,10 @@ public class CV {
     @JoinTable(name = "cv_skill",
             joinColumns = @JoinColumn(name = "cv_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    List<Skill> skills;
+    List<Skill> skills = new ArrayList<>();  // ← ajouter new ArrayList<>()
 
     @OneToMany(mappedBy = "cv")
     List<MatchingResult> matchingResults;
+
+
 }
