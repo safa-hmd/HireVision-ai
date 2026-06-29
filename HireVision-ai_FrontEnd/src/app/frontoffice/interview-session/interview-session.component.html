@@ -8,638 +8,176 @@
         <span>Quitter</span>
       </button>
       <div class="session-title">
-        <h1>{{ specialty?.title }}</h1>
-        <span class="q-counter">Question {{ currentIndex + 1 }} / {{ questions.length }}</span>
+        <h1>Entretien {{ specialty?.title || 'Chargement...' }}</h1>
+        <span class="q-counter" *ngIf="!isLoading && questions.length">
+          Question {{ currentIndex + 1 }} sur {{ questions.length }}
+        </span>
       </div>
     </div>
     <div class="nav-right">
-      <div class="timer-badge" [class.timer-urgent]="timer > 2400">
-        <i data-lucide="clock" class="timer-icon"></i>
-        {{ timerDisplay }}
-      </div>
-      <button class="btn-danger" (click)="finishInterview()">
-        <i data-lucide="flag"></i> Terminer
-      </button>
+      <div class="timer-display">{{ timerDisplay }}</div>
+      <button class="btn-danger" (click)="finishInterview()">Terminer</button>
     </div>
   </header>
 
-  <!-- ── LOADING ── -->
+  <!-- ── LOADING SCREEN ── -->
   <div *ngIf="isLoading" class="loading-screen">
     <div class="loading-ring"></div>
-    <p class="loading-text">Génération des questions par l'IA…</p>
+    <p class="loading-text">Génération des questions par l'IA...</p>
     <p class="loading-sub">Gemini analyse votre spécialité</p>
   </div>
 
-  <!-- ── MAIN LAYOUT ── -->
+  <!-- ── MAIN CONTENT GRID ── -->
   <div *ngIf="!isLoading" class="session-body">
-
+    
     <!-- LEFT COLUMN -->
     <div class="col-main">
-
-      <!-- Camera Zone -->
+      <!-- Camera Card -->
       <div class="camera-card">
-        <video #webcam autoplay [muted]="true" playsinline class="webcam-feed"></video>
-
-        <!-- Offline overlay -->
+        <!-- Actual video element linked to webcam Stream -->
+        <video #webcam autoplay [muted]="true" playsinline class="webcam-feed" [style.display]="videoStream && isCameraOn ? 'block' : 'none'"></video>
+        
+        <!-- Offline placeholder when webcam is off -->
         <div *ngIf="!videoStream || !isCameraOn" class="cam-offline">
           <i data-lucide="video-off" class="cam-offline-icon"></i>
-          <span>Caméra désactivée</span>
+          <span>Flux webcam (démo)</span>
         </div>
-
-        <!-- Recording pill -->
-        <div *ngIf="isRecording" class="rec-badge">
-          <span class="rec-dot"></span> REC
-        </div>
-
-        <!-- Camera controls -->
+        
+        <!-- Controls Overlay -->
         <div class="cam-controls">
-          <button class="cam-btn" (click)="toggleRecording()"
-                  [class.cam-btn-active]="isRecording"
-                  [title]="isRecording ? 'Arrêter' : 'Enregistrer'">
+          <button class="cam-btn" (click)="toggleRecording()" [class.cam-btn-active]="isRecording" title="Enregistrement audio">
             <i [attr.data-lucide]="isRecording ? 'mic-off' : 'mic'"></i>
           </button>
-          <button class="cam-btn" (click)="toggleWebcam()"
-                  [class.cam-btn-danger]="!isCameraOn"
-                  [title]="isCameraOn ? 'Couper la caméra' : 'Activer la caméra'">
+          <button class="cam-btn" (click)="toggleWebcam()" [class.cam-btn-danger]="!isCameraOn" title="Caméra vidéo">
             <i [attr.data-lucide]="isCameraOn ? 'video' : 'video-off'"></i>
           </button>
         </div>
-
-        <!-- Audio waveform during recording -->
-        <div *ngIf="isRecording" class="waveform-bar">
-          <div class="wave-container">
-            <div *ngFor="let b of waveformBars; let i = index"
-                 class="wave-bar"
-                 [style.height]="b + 'px'"
-                 [style.animation-delay]="(i * 0.08) + 's'">
-            </div>
-          </div>
-          <span class="wave-label">En écoute…</span>
-        </div>
       </div>
-
+      
       <!-- Question Card -->
       <div *ngIf="currentQuestion" class="question-card">
         <div class="question-header">
           <div class="ai-avatar">IA</div>
           <div class="question-meta">
-            <span class="q-category">{{ currentQuestion.category }}</span>
-            <span class="diff-badge"
-                  [class.diff-easy]="currentQuestion.difficulty === 'easy'"
-                  [class.diff-medium]="currentQuestion.difficulty === 'medium'"
-                  [class.diff-hard]="currentQuestion.difficulty === 'hard'">
-              {{ currentQuestion.difficulty === 'easy' ? 'Facile' :
-                 currentQuestion.difficulty === 'medium' ? 'Moyen' : 'Difficile' }}
-            </span>
-          </div>
-          <div class="q-time-hint">
-            <i data-lucide="timer" style="width:12px;height:12px"></i>
-            {{ currentQuestion.time_suggested }}s suggérés
+            <h3>Question Actuelle</h3>
           </div>
         </div>
-
         <p class="question-text">{{ currentQuestion.question }}</p>
-
-        <div class="tip-row">
-          <i data-lucide="lightbulb" class="tip-icon"></i>
-          <span>{{ currentQuestion.tip }}</span>
-        </div>
-
-        <!-- Live transcript -->
-        <div *ngIf="isRecording || transcript" class="transcript-box" [class.transcript-active]="isRecording">
-          <div class="transcript-header">
-            <span class="transcript-label" *ngIf="isRecording">🔴 Transcription en direct</span>
-            <span class="transcript-label" *ngIf="!isRecording && transcript">✅ Réponse capturée</span>
-          </div>
-          <p class="transcript-text">{{ transcript + interimTranscript || 'Parlez maintenant, la transcription apparaît ici…' }}</p>
-        </div>
-
-        <!-- Analyzing spinner -->
-        <div *ngIf="isAnalyzing" class="analyzing-row">
-          <div class="analyze-ring"></div>
-          <div>
-            <p class="analyze-title">Analyse IA en cours…</p>
-            <p class="analyze-sub">Gemini évalue votre réponse</p>
+        
+        <!-- Real-time audio waveform when recording -->
+        <div class="audio-wave-container" *ngIf="isRecording">
+          <span class="rec-dot"></span>
+          <span class="rec-text">Enregistrement en cours...</span>
+          <div class="audio-wave">
+            <div class="wave-bar" *ngFor="let h of waveformBars" [style.height.px]="h"></div>
           </div>
         </div>
-
-        <!-- Action buttons -->
-        <div *ngIf="!isAnalyzing" class="action-row">
-          <button class="btn-record" (click)="toggleRecording()"
-                  [class.btn-stop]="isRecording">
-            <i [attr.data-lucide]="isRecording ? 'square' : 'circle'"></i>
-            {{ isRecording ? 'Arrêter et soumettre' : 'Démarrer l\'enregistrement' }}
+        
+        <div class="action-row" style="display: flex; align-items: center; gap: 12px;">
+          <button class="btn-record" (click)="toggleRecording()" [class.btn-stop]="isRecording">
+            <i [attr.data-lucide]="isRecording ? 'square' : 'mic'"></i>
+            {{ isRecording ? 'Arrêter et Soumettre' : "Démarrer l'enregistrement" }}
           </button>
-          <button class="btn-skip" (click)="skipQuestion()">
-            <i data-lucide="skip-forward"></i> Passer
+          
+          <button class="btn-outline-skip" (click)="skipQuestion()" *ngIf="!isRecording" title="Passer à la question suivante">
+            <i data-lucide="skip-forward"></i>
+            <span>Passer la question</span>
           </button>
         </div>
       </div>
-
-      <!-- Progress Bar -->
+      
+      <!-- Progress Card -->
       <div class="progress-card">
         <div class="progress-labels">
           <span>Progression</span>
-          <span>{{ answers.length }} / {{ questions.length }} répondues</span>
+          <span>{{ currentIndex + 1 }}/{{ questions.length }}</span>
         </div>
         <div class="progress-track">
-          <div class="progress-fill" [style.width]="progress + '%'"></div>
+          <div class="progress-fill" [style.width.%]="progress"></div>
         </div>
-        <div class="progress-steps">
-          <div *ngFor="let q of questions; let i = index"
-               class="step-dot"
-               [class.step-done]="i < answers.length"
-               [class.step-current]="i === currentIndex">
-          </div>
-        </div>
+        <p class="progress-sub">
+          {{ answers.length }} question{{ answers.length > 1 ? 's' : '' }} complétée{{ answers.length > 1 ? 's' : '' }} sur {{ questions.length }}
+        </p>
       </div>
-
     </div>
-
-    <!-- RIGHT SIDEBAR -->
+    
+    <!-- RIGHT COLUMN -->
     <aside class="col-side">
-
       <!-- Real-time metrics -->
-      <div class="side-section">
-        <div class="side-section-title">
-          <i data-lucide="activity" style="width:14px;height:14px;color:#6366f1"></i>
-          Analyses Temps Réel
-        </div>
-
-        <div *ngFor="let m of metrics" class="metric-row">
+      <div class="side-card">
+        <h3>Analyses en Temps Réel</h3>
+        
+        <div class="metric-item">
           <div class="metric-label-row">
-            <span class="metric-label">{{ m.label }}</span>
-            <span class="metric-value" [style.color]="m.color">{{ m.value | number:'1.0-0' }}%</span>
+            <span>Contact visuel</span>
+            <span>{{ contactVisuel | number:'1.0-0' }}%</span>
           </div>
           <div class="metric-track">
-            <div class="metric-fill" [style.width]="m.value + '%'" [style.background]="m.color"></div>
+            <div class="metric-fill bg-green" [style.width.%]="contactVisuel"></div>
           </div>
         </div>
-      </div>
-
-      <!-- Vision AI feedback -->
-      <div class="side-section vision-section">
-        <div class="side-section-title">
-          <i data-lucide="eye" style="width:14px;height:14px;color:#10b981"></i>
-          Vision IA
-        </div>
-        <div class="vision-status">
-          <div class="vision-dot" [class.vision-active]="isCameraOn"></div>
-          <span>{{ isCameraOn ? 'Analyse faciale active' : 'Caméra hors ligne' }}</span>
-        </div>
-        <div *ngIf="isCameraOn" class="vision-grid">
-          <div class="vision-chip" [class.chip-good]="contactVisuel >= 75">
-            <span class="chip-icon">👁</span>
-            <span>Contact visuel</span>
-            <strong>{{ contactVisuel | number:'1.0-0' }}%</strong>
-          </div>
-          <div class="vision-chip" [class.chip-good]="posture >= 75">
-            <span class="chip-icon">🧍</span>
+        
+        <div class="metric-item">
+          <div class="metric-label-row">
             <span>Posture</span>
-            <strong>{{ posture | number:'1.0-0' }}%</strong>
+            <span>{{ posture | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metric-track">
+            <div class="metric-fill bg-blue" [style.width.%]="posture"></div>
+          </div>
+        </div>
+        
+        <div class="metric-item">
+          <div class="metric-label-row">
+            <span>Engagement</span>
+            <span>{{ engagement | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metric-track">
+            <div class="metric-fill bg-green" [style.width.%]="engagement"></div>
+          </div>
+        </div>
+        
+        <div class="metric-item">
+          <div class="metric-label-row">
+            <span>Clarté vocale</span>
+            <span>{{ clarteVocale | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metric-track">
+            <div class="metric-fill bg-green" [style.width.%]="clarteVocale"></div>
+          </div>
+        </div>
+        
+        <div class="metric-item">
+          <div class="metric-label-row">
+            <span>Confiance</span>
+            <span>{{ confiance | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metric-track">
+            <div class="metric-fill bg-blue" [style.width.%]="confiance"></div>
+          </div>
+        </div>
+        
+        <div class="metric-item">
+          <div class="metric-label-row">
+            <span>Niveau de stress</span>
+            <span>{{ stress | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metric-track">
+            <div class="metric-fill bg-orange" [style.width.%]="stress"></div>
           </div>
         </div>
       </div>
-
+      
       <!-- AI Tips -->
-      <div class="side-section">
-        <div class="side-section-title">
-          <i data-lucide="zap" style="width:14px;height:14px;color:#f59e0b"></i>
-          Conseils IA
-        </div>
+      <div class="side-card">
+        <h3>Conseils IA</h3>
         <ul class="tips-list">
-          <li *ngFor="let tip of aiTips" class="tip-item">
-            <span class="tip-bullet">→</span> {{ tip }}
+          <li *ngFor="let tip of aiTips">
+            <span class="bullet">•</span>
+            <span>{{ tip }}</span>
           </li>
         </ul>
       </div>
-
-      <!-- Mini score history -->
-      <div class="side-section" *ngIf="answers.length > 0">
-        <div class="side-section-title">
-          <i data-lucide="bar-chart-2" style="width:14px;height:14px;color:#a78bfa"></i>
-          Dernières réponses
-        </div>
-        <div class="history-list">
-          <div *ngFor="let a of answers.slice(-4).reverse(); let i = index" class="history-item">
-            <div class="history-q">{{ a.question?.question | slice:0:40 }}…</div>
-            <div class="history-score" *ngIf="a.evaluation">
-              <span class="score-pill"
-                    [class.score-good]="a.evaluation.score_global >= 70"
-                    [class.score-mid]="a.evaluation.score_global >= 50 && a.evaluation.score_global < 70"
-                    [class.score-low]="a.evaluation.score_global < 50">
-                {{ a.evaluation.score_global }}
-              </span>
-              <span class="niveau-tag">{{ a.evaluation.niveau }}</span>
-            </div>
-            <div class="history-score" *ngIf="!a.evaluation">
-              <span class="score-pill score-skip">—</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </aside>
   </div>
 </div>
-
-<style>
-/* ── TOKENS ── */
-:root {
-  --bg:        #09090f;
-  --surface:   #111827;
-  --surface2:  #1a2035;
-  --border:    #1f2937;
-  --accent:    #6366f1;
-  --accent-lo: rgba(99,102,241,.12);
-  --success:   #10b981;
-  --danger:    #ef4444;
-  --warning:   #f59e0b;
-  --purple:    #a78bfa;
-  --text:      #f1f5f9;
-  --muted:     #64748b;
-  --subtle:    #94a3b8;
-  --radius:    14px;
-  --radius-sm: 8px;
-}
-
-/* ── RESET ── */
-.session-root * { box-sizing: border-box; margin: 0; padding: 0; }
-
-.session-root {
-  background: var(--bg);
-  min-height: 100vh;
-  color: var(--text);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── NAV ── */
-.session-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(12px);
-}
-.nav-left, .nav-right { display: flex; align-items: center; gap: 14px; }
-.session-title h1 { font-size: 15px; font-weight: 600; color: var(--text); }
-.q-counter { font-size: 12px; color: var(--muted); display: block; }
-
-/* ── BUTTONS ── */
-.btn-ghost {
-  display: flex; align-items: center; gap: 6px;
-  background: transparent; border: 1px solid var(--border);
-  color: var(--muted); padding: 7px 13px; border-radius: var(--radius-sm);
-  cursor: pointer; font-size: 13px; transition: all .15s;
-}
-.btn-ghost:hover { border-color: var(--accent); color: var(--text); }
-.btn-ghost i { width: 15px; height: 15px; }
-
-.btn-danger {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--danger); border: none; color: #fff;
-  padding: 8px 16px; border-radius: var(--radius-sm);
-  cursor: pointer; font-size: 13px; font-weight: 600;
-  transition: opacity .15s;
-}
-.btn-danger:hover { opacity: .85; }
-.btn-danger i { width: 15px; height: 15px; }
-
-/* ── TIMER ── */
-.timer-badge {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
-  color: var(--danger); letter-spacing: 1px;
-  background: rgba(239,68,68,.08);
-  border: 1px solid rgba(239,68,68,.2);
-  padding: 6px 14px; border-radius: 30px;
-}
-.timer-icon { width: 14px; height: 14px; }
-.timer-urgent { animation: timer-pulse 1s ease-in-out infinite; }
-@keyframes timer-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-
-/* ── LOADING ── */
-.loading-screen {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px;
-}
-.loading-ring {
-  width: 48px; height: 48px;
-  border: 3px solid var(--accent);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-.loading-text { color: var(--text); font-size: 15px; font-weight: 500; }
-.loading-sub  { color: var(--muted); font-size: 13px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── BODY GRID ── */
-.session-body {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  flex: 1;
-  min-height: 0;
-  gap: 0;
-}
-
-/* ── LEFT COL ── */
-.col-main {
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* ── CAMERA ── */
-.camera-card {
-  position: relative;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  height: 380px;
-  border: 1px solid var(--border);
-}
-.webcam-feed {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.cam-offline {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 10px;
-  background: var(--surface);
-}
-.cam-offline-icon { width: 48px; height: 48px; color: var(--border); }
-.cam-offline span  { color: var(--muted); font-size: 13px; }
-
-.rec-badge {
-  position: absolute; top: 14px; left: 14px;
-  background: var(--danger); color: #fff;
-  font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 6px;
-}
-.rec-dot {
-  width: 7px; height: 7px; background: #fff; border-radius: 50%;
-  animation: rec-blink 1s ease-in-out infinite;
-}
-@keyframes rec-blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-
-.cam-controls {
-  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 10px;
-}
-.cam-btn {
-  width: 46px; height: 46px; border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,.15);
-  background: rgba(0,0,0,.55); backdrop-filter: blur(8px);
-  color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
-}
-.cam-btn i { width: 18px; height: 18px; }
-.cam-btn:hover { background: rgba(99,102,241,.4); border-color: var(--accent); }
-.cam-btn-active { background: rgba(239,68,68,.6) !important; border-color: var(--danger) !important; }
-.cam-btn-danger { background: rgba(239,68,68,.4) !important; border-color: var(--danger) !important; }
-
-/* ── WAVEFORM ── */
-.waveform-bar {
-  position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
-  border: 1px solid rgba(99,102,241,.3);
-  border-radius: 24px;
-  padding: 8px 20px;
-  display: flex; align-items: center; gap: 12px;
-  white-space: nowrap;
-}
-.wave-container { display: flex; align-items: center; gap: 3px; height: 28px; }
-.wave-bar {
-  width: 3px; border-radius: 3px;
-  background: var(--accent);
-  animation: wave-anim 0.8s ease-in-out infinite alternate;
-  min-height: 4px;
-}
-@keyframes wave-anim {
-  from { height: 4px; opacity: .5; }
-  to   { height: var(--h, 20px); opacity: 1; }
-}
-.wave-label { color: var(--accent); font-size: 12px; font-weight: 500; }
-
-/* ── QUESTION CARD ── */
-.question-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px;
-  display: flex; flex-direction: column; gap: 14px;
-}
-.question-header {
-  display: flex; align-items: center; gap: 10px;
-}
-.ai-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #818cf8);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 12px; flex-shrink: 0;
-}
-.question-meta { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-.q-category { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
-.diff-badge {
-  font-size: 11px; font-weight: 600; padding: 2px 8px;
-  border-radius: 20px; width: fit-content;
-}
-.diff-easy   { background: rgba(16,185,129,.15); color: var(--success); }
-.diff-medium { background: rgba(245,158,11,.15);  color: var(--warning); }
-.diff-hard   { background: rgba(239,68,68,.15);   color: var(--danger); }
-
-.q-time-hint {
-  display: flex; align-items: center; gap: 4px;
-  color: var(--muted); font-size: 11px; white-space: nowrap;
-}
-
-.question-text {
-  font-size: 17px; line-height: 1.65;
-  color: var(--text); font-weight: 500;
-}
-
-.tip-row {
-  display: flex; align-items: flex-start; gap: 8px;
-  background: rgba(245,158,11,.07);
-  border: 1px solid rgba(245,158,11,.15);
-  border-radius: var(--radius-sm); padding: 10px 14px;
-}
-.tip-icon { width: 14px; height: 14px; color: var(--warning); flex-shrink: 0; margin-top: 2px; }
-.tip-row span { color: var(--subtle); font-size: 13px; line-height: 1.5; }
-
-/* ── TRANSCRIPT ── */
-.transcript-box {
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.03);
-  padding: 14px;
-  min-height: 60px;
-  transition: border-color .2s;
-}
-.transcript-active { border-color: var(--accent); background: var(--accent-lo); }
-.transcript-header { margin-bottom: 8px; }
-.transcript-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-.transcript-text { color: var(--subtle); font-size: 14px; line-height: 1.6; }
-
-/* ── ANALYZE ── */
-.analyzing-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px; background: var(--accent-lo);
-  border: 1px solid rgba(99,102,241,.25); border-radius: var(--radius-sm);
-}
-.analyze-ring {
-  width: 28px; height: 28px; flex-shrink: 0;
-  border: 2.5px solid var(--accent); border-top-color: transparent;
-  border-radius: 50%; animation: spin .8s linear infinite;
-}
-.analyze-title { color: var(--text); font-size: 14px; font-weight: 500; }
-.analyze-sub   { color: var(--muted); font-size: 12px; margin-top: 2px; }
-
-/* ── ACTION BUTTONS ── */
-.action-row { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.btn-record {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--success); color: #fff; border: none;
-  padding: 11px 20px; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: all .15s;
-}
-.btn-record:hover { filter: brightness(1.1); }
-.btn-record.btn-stop { background: var(--danger); }
-.btn-record i { width: 16px; height: 16px; }
-
-.btn-skip {
-  display: flex; align-items: center; gap: 6px;
-  background: transparent; border: 1px solid var(--border);
-  color: var(--muted); padding: 11px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 14px; cursor: pointer; transition: all .15s;
-}
-.btn-skip:hover { border-color: var(--accent); color: var(--text); }
-.btn-skip i { width: 15px; height: 15px; }
-
-/* ── PROGRESS ── */
-.progress-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-}
-.progress-labels {
-  display: flex; justify-content: space-between;
-  font-size: 12px; color: var(--muted); margin-bottom: 10px;
-}
-.progress-track {
-  background: var(--border); border-radius: 4px; height: 6px; overflow: hidden;
-}
-.progress-fill {
-  background: linear-gradient(90deg, var(--accent), var(--purple));
-  height: 6px; border-radius: 4px; transition: width .4s ease;
-}
-.progress-steps {
-  display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;
-}
-.step-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--border); transition: all .2s;
-}
-.step-done    { background: var(--success); }
-.step-current { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-
-/* ── RIGHT SIDEBAR ── */
-.col-side {
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  overflow-y: auto;
-  display: flex; flex-direction: column; gap: 0;
-}
-.side-section {
-  padding: 18px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.side-section:last-child { border-bottom: none; }
-.side-section-title {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 12px; font-weight: 700; color: var(--subtle);
-  text-transform: uppercase; letter-spacing: .5px;
-  margin-bottom: 14px;
-}
-
-/* ── METRICS ── */
-.metric-row { margin-bottom: 13px; }
-.metric-row:last-child { margin-bottom: 0; }
-.metric-label-row {
-  display: flex; justify-content: space-between;
-  margin-bottom: 5px;
-}
-.metric-label { color: var(--subtle); font-size: 12px; }
-.metric-value { font-size: 12px; font-weight: 700; }
-.metric-track {
-  background: var(--border); border-radius: 3px; height: 4px; overflow: hidden;
-}
-.metric-fill { height: 4px; border-radius: 3px; transition: width .6s ease; }
-
-/* ── VISION ── */
-.vision-status {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12px; color: var(--muted); margin-bottom: 12px;
-}
-.vision-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--border);
-}
-.vision-active {
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-  animation: vision-pulse 2s ease-in-out infinite;
-}
-@keyframes vision-pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-
-.vision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.vision-chip {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 10px 8px;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  text-align: center; font-size: 11px; color: var(--muted);
-  transition: border-color .3s;
-}
-.chip-good { border-color: rgba(16,185,129,.3); }
-.chip-icon { font-size: 16px; }
-.vision-chip strong { font-size: 14px; color: var(--text); }
-
-/* ── TIPS ── */
-.tips-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.tip-item { font-size: 12px; color: var(--muted); line-height: 1.5; display: flex; gap: 6px; }
-.tip-bullet { color: var(--accent); flex-shrink: 0; }
-
-/* ── HISTORY ── */
-.history-list { display: flex; flex-direction: column; gap: 8px; }
-.history-item {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 10px 12px;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.history-q { font-size: 11px; color: var(--muted); line-height: 1.4; }
-.history-score { display: flex; align-items: center; gap: 8px; }
-.score-pill {
-  font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 12px; min-width: 32px; text-align: center;
-}
-.score-good { background: rgba(16,185,129,.15); color: var(--success); }
-.score-mid  { background: rgba(245,158,11,.15);  color: var(--warning); }
-.score-low  { background: rgba(239,68,68,.15);   color: var(--danger); }
-.score-skip { background: var(--border); color: var(--muted); }
-.niveau-tag { font-size: 10px; color: var(--muted); }
-</style>

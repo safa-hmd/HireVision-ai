@@ -1,0 +1,548 @@
+/* ── HireVision Dark Theme Session Variables ── */
+:host {
+  display: block;
+  width: 100%;
+  flex: 1;
+  
+  --bg: #0b0f19;
+  --surface: #111827;
+  --surface-card: #131b2e;
+  --border: rgba(255, 255, 255, 0.05);
+  
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  
+  --primary: #2563eb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --purple: #8b5cf6;
+  
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+}
+
+/* ── Reset & Base ── */
+.session-root * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.session-root {
+  background-color: var(--bg);
+  min-height: 100vh;
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top Nav ── */
+.session-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 70px;
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-ghost {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.btn-ghost i {
+  width: 14px;
+  height: 14px;
+}
+
+.session-title h1 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.q-counter {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+.timer-display {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+.btn-danger {
+  background: var(--danger);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/* ── Loading Screen ── */
+.loading-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg);
+}
+
+.loading-ring {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.loading-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Main Layout Grid ── */
+.session-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  flex: 1;
+  min-height: 0;
+  gap: 24px;
+  padding: 24px;
+}
+
+.col-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  align-items: center;
+}
+
+.col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+/* ── Camera Card ── */
+.camera-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 720px;
+}
+
+.webcam-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cam-offline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #151d30;
+}
+
+.cam-offline-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.cam-offline span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cam-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 5;
+}
+
+.cam-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 24, 39, 0.6);
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.cam-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cam-btn-active {
+  background: rgba(239, 68, 68, 0.4) !important;
+  border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+.cam-btn-danger {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: var(--danger) !important;
+}
+
+/* ── Question Card ── */
+.question-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+}
+
+.question-meta h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.question-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.action-row {
+  margin-top: 8px;
+}
+
+.btn-record {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--success);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-record:hover {
+  background: #0ea5e9;
+}
+
+.btn-record.btn-stop {
+  background: var(--danger);
+}
+
+.btn-record.btn-stop:hover {
+  background: #dc2626;
+}
+
+.btn-record i {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Progress Card ── */
+.progress-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+  width: 100%;
+  max-width: 720px;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  height: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  background: var(--primary);
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.progress-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Side Cards ── */
+.side-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.side-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+/* ── Metrics ── */
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.metric-item:last-child {
+  margin-bottom: 0;
+}
+
+.metric-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.metric-label-row span:first-child {
+  color: var(--text-muted);
+}
+
+.metric-label-row span:last-child {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.metric-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  height: 5px;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 5px;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.bg-orange { background-color: var(--warning); }
+
+/* ── AI Tips List ── */
+.tips-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tips-list li {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.tips-list li .bullet {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* ── Responsive Adaptations ── */
+@media (max-width: 1024px) {
+  .session-body {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* ── Skip Button ── */
+.btn-outline-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline-skip:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline-skip i {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Audio Visualizer Wave ── */
+.audio-wave-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 10px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  width: 100%;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  animation: recPulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.rec-text {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--danger);
+  margin-right: auto;
+}
+
+.audio-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 24px;
+}
+
+.wave-bar {
+  width: 3px;
+  background: var(--danger);
+  border-radius: 1.5px;
+  min-height: 4px;
+  transition: height 0.05s ease;
+}
+
+@keyframes recPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+}

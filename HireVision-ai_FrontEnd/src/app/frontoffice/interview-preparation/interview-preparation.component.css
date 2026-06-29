@@ -1,12 +1,51 @@
-  
- 
-    .category-card{cursor:pointer;transition:transform .15s,box-shadow .15s}
-    .category-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
-    .cat-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-    .cat-icon svg{width:28px;height:28px;color:#fff}
-    .diff-badge{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:100px}
-    .diff-beginner{background:#D1FAE5;color:#065F46}
-    .diff-intermediate{background:#FEF3C7;color:#92400E}
-    .diff-advanced{background:#FEE2E2;color:#991B1B}
+/* ═══════════════════════════════════════════════════
+   HireVision — Interview Preparation  (dark premium)
+═══════════════════════════════════════════════════ */
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* The existing CSS classes are inherited from the global stylesheet.
+   These are additive overrides/additions specific to this page. */
+
+.category-card {
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  border-color: var(--primary);
+}
+
+.cat-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  opacity: .92;
+}
+.cat-icon i { width: 28px; height: 28px; color: #fff; }
+
+/* Difficulty badges — dark mode versions */
+.diff-badge {
+  font-size: .72rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 100px;
+  display: inline-block;
+}
+.diff-beginner    { background: rgba(16,185,129,.15); color: #34D399; }
+.diff-intermediate { background: rgba(245,158,11,.15); color: #FCD34D; }
+.diff-advanced    { background: rgba(239,68,68,.15);  color: #F87171; }
+
+/* Gradient banner */
+.gradient-banner {
+  background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(16,185,129,.1));
+  border: 1px solid rgba(99,102,241,.25);
+  border-radius: 16px; padding: 20px 24px;
+  display: flex; align-items: center;
+}
+.gradient-banner h3 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
+.gradient-banner p  { margin: 0; font-size: 13px; color: var(--text-muted); }
+.gradient-banner i  { color: var(--primary); }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }

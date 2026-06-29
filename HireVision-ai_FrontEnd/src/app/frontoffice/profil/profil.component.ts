@@ -20,7 +20,7 @@ declare function showToast(message: string, type?: string): void;
 })
 export class ProfilComponent implements OnInit, AfterViewInit {
 
-  user: UserDTO = { fullName: '', email: '', age: 0 };
+  user: UserDTO = { fullName: '', email: '', age: 0, phone: '', title: '', linkedin: '', github: '' };
   userCvs: CvDTO[] = [];
 
   // ── Photo de profil ──

@@ -31,75 +31,45 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
 
   allCategories: Category[] = [
     {
-      id: 'java',
-      title: 'Programmation Java',
+      id: 'java', title: 'Programmation Java',
       description: 'Java Core, POO, Collections, Multithreading',
-      difficulty: 'Intermédiaire',
-      difficultyClass: 'diff-intermediate',
-      duration: 45,
-      questions: 15,
-      color: '#2563EB',
-      icon: 'code-2',
+      difficulty: 'Intermédiaire', difficultyClass: 'diff-intermediate',
+      duration: 45, questions: 15, color: '#2563EB', icon: 'code-2',
       keywords: ['java']
     },
     {
-      id: 'spring',
-      title: 'Spring Boot',
+      id: 'spring', title: 'Spring Boot',
       description: 'REST API, Injection de dépendances, JPA',
-      difficulty: 'Avancé',
-      difficultyClass: 'diff-advanced',
-      duration: 60,
-      questions: 20,
-      color: '#10B981',
-      icon: 'sparkles',
+      difficulty: 'Avancé', difficultyClass: 'diff-advanced',
+      duration: 60, questions: 20, color: '#10B981', icon: 'sparkles',
       keywords: ['spring', 'spring boot', 'springboot']
     },
     {
-      id: 'angular',
-      title: 'Framework Angular',
+      id: 'angular', title: 'Framework Angular',
       description: 'Composants, Services, RxJS, State Management',
-      difficulty: 'Intermédiaire',
-      difficultyClass: 'diff-intermediate',
-      duration: 45,
-      questions: 15,
-      color: '#EF4444',
-      icon: 'layers',
+      difficulty: 'Intermédiaire', difficultyClass: 'diff-intermediate',
+      duration: 45, questions: 15, color: '#EF4444', icon: 'layers',
       keywords: ['angular', 'angularjs']
     },
     {
-      id: 'ml',
-      title: 'IA / Machine Learning',
+      id: 'ml', title: 'IA / Machine Learning',
       description: 'Algorithmes ML, Réseaux de neurones, Deep Learning',
-      difficulty: 'Avancé',
-      difficultyClass: 'diff-advanced',
-      duration: 60,
-      questions: 18,
-      color: '#7C3AED',
-      icon: 'brain',
-      keywords: ['ml', 'machine learning', 'ia', 'ai', 'deep learning', 'python', 'tensorflow', 'pytorch']
+      difficulty: 'Avancé', difficultyClass: 'diff-advanced',
+      duration: 60, questions: 18, color: '#7C3AED', icon: 'brain',
+      keywords: ['ml', 'machine learning', 'ia', 'ai', 'deep learning', 'python', 'tensorflow', 'pytorch', 'mlops', 'sklearn']
     },
     {
-      id: 'devops',
-      title: 'DevOps',
+      id: 'devops', title: 'DevOps',
       description: 'Docker, Kubernetes, CI/CD, Cloud',
-      difficulty: 'Intermédiaire',
-      difficultyClass: 'diff-intermediate',
-      duration: 45,
-      questions: 15,
-      color: '#06B6D4',
-      icon: 'cloud',
-      keywords: ['devops', 'docker', 'kubernetes', 'ci/cd', 'jenkins', 'ansible', 'terraform', 'cloud', 'aws', 'azure', 'gcp']
+      difficulty: 'Intermédiaire', difficultyClass: 'diff-intermediate',
+      duration: 45, questions: 15, color: '#06B6D4', icon: 'cloud',
+      keywords: ['devops', 'docker', 'kubernetes', 'ci/cd', 'jenkins', 'ansible', 'terraform', 'cloud', 'aws', 'azure', 'gcp', 'linux']
     },
     {
-      id: 'rh',
-      title: 'Entretien RH',
+      id: 'rh', title: 'Entretien RH',
       description: 'Questions comportementales, Soft skills, Culture fit',
-      difficulty: 'Débutant',
-      difficultyClass: 'diff-beginner',
-      duration: 30,
-      questions: 10,
-      color: '#F59E0B',
-      icon: 'users',
+      difficulty: 'Débutant', difficultyClass: 'diff-beginner',
+      duration: 30, questions: 10, color: '#F59E0B', icon: 'users',
       keywords: ['rh', 'hr', 'soft skills', 'communication', 'management', 'leadership', 'agile', 'scrum']
     }
   ];
@@ -112,20 +82,13 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
     private cvService: CvService
   ) {}
 
-  ngOnInit(): void {
-    this.loadUserCvAndFilter();
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => lucide.createIcons(), 200);
-  }
+  ngOnInit(): void { this.loadUserCvAndFilter(); }
+  ngAfterViewInit(): void { setTimeout(() => lucide.createIcons(), 200); }
 
   loadUserCvAndFilter(): void {
     const userId = this.authService.getCurrentUserId();
     if (!userId) {
-      this.isLoading = false;
-      this.hasCv = false;
-      this.filteredCategories = [];
+      this.isLoading = false; this.hasCv = false; this.filteredCategories = [];
       return;
     }
 
@@ -143,9 +106,7 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
         setTimeout(() => lucide.createIcons(), 100);
       },
       error: () => {
-        this.isLoading = false;
-        this.hasCv = false;
-        this.filteredCategories = [];
+        this.isLoading = false; this.hasCv = false; this.filteredCategories = [];
         setTimeout(() => lucide.createIcons(), 100);
       }
     });
@@ -153,11 +114,16 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
 
   filterCategories(): void {
     this.filteredCategories = this.allCategories.filter(cat => {
-      if (cat.id === 'rh') return true; // Always available
+      if (cat.id === 'rh') return true; // toujours visible
       return this.userSkills.some(skill =>
-        cat.keywords.some(keyword => skill.toLowerCase().includes(keyword))
+        cat.keywords.some(kw => skill.toLowerCase().includes(kw))
       );
     });
+
+    // Si aucune correspondance (profil trop générique) → afficher tout
+    if (this.filteredCategories.length <= 1) {
+      this.filteredCategories = [...this.allCategories];
+    }
   }
 
   startInterview(id: string, title: string, count: number, duration: number): void {
@@ -165,7 +131,5 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/frontoffice/interview-session']);
   }
 
-  goToCvUpload(): void {
-    this.router.navigate(['/frontoffice/cvAnalyse']);
-  }
+  goToCvUpload(): void { this.router.navigate(['/frontoffice/cvAnalyse']); }
 }

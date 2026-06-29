@@ -2,6 +2,8 @@ import os
 import tempfile
 import httpx
 import pdfplumber
+import cv2
+import numpy as np
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -30,6 +32,10 @@ app.add_middleware(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+# ── OpenCV Haar Cascades (computer vision) ────────────────────────────────────
+FACE_CASCADE = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+EYE_CASCADE  = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
 
 # ── Pydantic Models ───────────────────────────────────────────────────────────
@@ -93,7 +99,7 @@ Génère un résumé professionnel en 3 phrases max en français, sans bullet po
         )
         data = response.json()
         return data["candidates"][0]["content"]["parts"][0]["text"]
-    except Exception as e:
+    except:
         return f"Profil {profile} avec score {score}/100."
 
 
@@ -126,6 +132,93 @@ Réponds UNIQUEMENT en JSON :
                 "points_ameliorer": "Développez davantage", "reponse_ideale": "Réponse avec exemples concrets"}
 
 
+def analyze_webcam_frame(frame_bytes: bytes) -> dict:
+    """Computer vision : analyse une frame JPEG, retourne eye_contact, posture, engagement."""
+    try:
+        nparr = np.frombuffer(frame_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if frame is None:
+            return _default_vision_metrics()
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        h, w = frame.shape[:2]
+
+        faces = FACE_CASCADE.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
+
+        if len(faces) == 0:
+            return {
+                "eye_contact": 40, "posture": 50, "engagement": 45,
+                "face_detected": False,
+                "tips": [
+                    "Rapprochez-vous de la caméra",
+                    "Assurez-vous d'être bien éclairé",
+                    "Centrez votre visage dans le cadre"
+                ]
+            }
+
+        fx, fy, fw, fh = max(faces, key=lambda f: f[2] * f[3])
+        face_cx = fx + fw / 2
+        face_cy = fy + fh / 2
+
+        center_offset_x = abs(face_cx - w / 2) / (w / 2)
+        center_offset_y = abs(face_cy - h / 2) / (h / 2)
+
+        face_roi_gray = gray[fy:fy+fh, fx:fx+fw]
+        eyes = EYE_CASCADE.detectMultiScale(face_roi_gray, scaleFactor=1.1, minNeighbors=5)
+        eyes_detected = len(eyes) >= 2
+
+        eye_contact = int(
+            100
+            - (center_offset_x * 25)
+            - (center_offset_y * 15)
+            + (10 if eyes_detected else -15)
+        )
+        eye_contact = max(30, min(100, eye_contact))
+
+        face_area_ratio = (fw * fh) / (w * h)
+        if 0.06 <= face_area_ratio <= 0.30:
+            posture_size = 90
+        elif face_area_ratio < 0.04:
+            posture_size = 55
+        elif face_area_ratio > 0.45:
+            posture_size = 60
+        else:
+            posture_size = 75
+
+        vert_score = 90 if face_cy < h * 0.55 else 70
+        posture = max(30, min(100, int((posture_size + vert_score) / 2)))
+        engagement = max(40, min(100, int(eye_contact * 0.6 + posture * 0.4)))
+
+        tips = []
+        if eye_contact < 65:
+            tips.append("Regardez directement la caméra pour un meilleur contact visuel")
+        if posture < 65:
+            tips.append("Ajustez votre position — centrez votre visage dans le cadre")
+        if not eyes_detected:
+            tips.append("Améliorez l'éclairage pour que vos yeux soient bien visibles")
+        if not tips:
+            tips.append("Excellent contact visuel — continuez ainsi !")
+
+        return {
+            "eye_contact": eye_contact,
+            "posture": posture,
+            "engagement": engagement,
+            "face_detected": True,
+            "eyes_detected": eyes_detected,
+            "tips": tips
+        }
+    except:
+        return _default_vision_metrics()
+
+
+def _default_vision_metrics() -> dict:
+    return {
+        "eye_contact": 75, "posture": 70, "engagement": 78,
+        "face_detected": False,
+        "tips": ["Maintenez le contact visuel avec la caméra"]
+    }
+
+
 # ── CV Endpoints ──────────────────────────────────────────────────────────────
 
 @app.post("/analyze")
@@ -151,14 +244,14 @@ async def analyze_cv(file: UploadFile = File(...)):
     }
 
 
-# ── Job Matching Endpoints ────────────────────────────────────────────────────
+# ── Job Matching ──────────────────────────────────────────────────────────────
 
 @app.post("/match-job")
 def match_job(request: JobMatchRequest):
     return match_skills(request.cv_skills, request.job_skills)
 
 
-# ── Question / Evaluate Endpoints ─────────────────────────────────────────────
+# ── Question / Evaluate ───────────────────────────────────────────────────────
 
 @app.post("/generate-questions")
 def generate_questions(request: QuestionRequest):
@@ -180,6 +273,7 @@ def evaluate_answer(request: EvaluateRequest):
 
 
 # ── Interview Session Endpoints ───────────────────────────────────────────────
+# Appelés par Spring Boot (:8086) qui sert de proxy entre Angular et ce service
 
 @app.get("/interview/specialties")
 def interview_specialties():
@@ -199,6 +293,13 @@ def interview_analyze_voice(request: VoiceAnalyzeRequest):
         question=request.question,
         specialty=request.specialty
     )
+
+
+@app.post("/interview/analyze-frame")
+async def interview_analyze_frame(frame: UploadFile = File(...)):
+    """Computer vision : reçoit une frame JPEG depuis Spring Boot, retourne les métriques comportementales."""
+    frame_bytes = await frame.read()
+    return analyze_webcam_frame(frame_bytes)
 
 
 @app.post("/interview/feedback")
