@@ -473,3 +473,49 @@ tbody tr:last-child { border-bottom: none; }
 .w-full { width: 100%; }
 .items-start { align-items: flex-start; }
 .tabs-root { }
+
+/* ── Print (rapports téléchargés en PDF via window.print) ──
+   Le layout de l'app utilise des conteneurs à défilement interne
+   (overflow:hidden + sidebar en position:fixed). Sans ces règles,
+   l'impression ne capture que la portion visible à l'écran. */
+@media print {
+  @page { margin: 14mm; }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .sidebar { display: none !important; }
+
+  .app-shell {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .page-body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .card, .stat-card {
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

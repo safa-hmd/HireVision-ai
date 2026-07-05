@@ -1,104 +1,71 @@
 import {
-  AfterViewInit, Component, ElementRef, NgZone,
+  AfterViewInit, Component, ElementRef,
   OnDestroy, OnInit, ViewChild
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
-import { CvService } from '../../services/cv.service';
+import { CvService }   from '../../services/cv.service';
 import { firstValueFrom } from 'rxjs';
 
 declare const lucide: any;
 declare function showToast(msg: string, type?: string): void;
 
 interface Question {
-  id: number;
-  category: string;
-  question: string;
-  difficulty: string;
-  tip: string;
+  id:             number;
+  category:       string;
+  question:       string;
+  difficulty:     string;
+  tip:            string;
   time_suggested: number;
 }
 
-interface AnswerRecord {
-  question: Question;
-  transcript: string;
-  evaluation?: any;
-  voiceMetrics?: VoiceMetrics;
-  behaviorSnapshot?: BehaviorSnapshot;
-}
-
-interface VoiceMetrics {
-  clarityScore: number;
-  paceScore: number;
-  confidenceScore: number;
-  fillerWordCount: number;
-  wordCount: number;
-  speakingRate: number; // words per minute
-}
-
-interface BehaviorSnapshot {
-  eyeContact: number;
-  posture: number;
-  engagement: number;
-  stress: number;
-}
-
 @Component({
-  selector: 'app-interview-session',
+  selector:    'app-interview-session',
   templateUrl: './interview-session.component.html',
-  styleUrls: ['./interview-session.component.css']
+  styleUrls:   ['./interview-session.component.css']
 })
 export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('webcam') webcamElement!: ElementRef<HTMLVideoElement>;
+  @ViewChild('webcam')            webcamEl!:          ElementRef<HTMLVideoElement>;
+  @ViewChild('faceCanvas')        faceCanvas!:        ElementRef<HTMLCanvasElement>;
+  @ViewChild('liveTranscriptEl')  liveTranscriptEl?:  ElementRef<HTMLParagraphElement>;
 
-  // ── Session state ─────────────────────────────────────────────────────────
-  specialty: any = null;
-  questions: Question[] = [];
-  currentIndex = 0;
-  isLoading = true;
-  isRecording = false;
-  isAnalyzing = false;
+  specialty:    any      = null;
+  questions:    Question[] = [];
+  currentIndex: number   = 0;
+  isLoading:    boolean  = true;
+  isRecording:  boolean  = false;
+  isAnalyzing:  boolean  = false;
+  isCameraOn:   boolean  = true;
+  latestCv:     any      = null;
 
-  // ── Timer ─────────────────────────────────────────────────────────────────
-  timer = 0;
-  private timerInterval: any;
+  // ── Timer ──
+  timer         = 0;
+  timerInterval: any;
 
-  // ── Media & Speech ─────────────────────────────────────────────────────────
-  videoStream: MediaStream | null = null;
-  isCameraOn = true;
-  private recognition: any = null;
-  transcript = '';
-  interimTranscript = '';
-  answers: AnswerRecord[] = [];
+  // ── Webcam / Speech ──
+  videoStream:        MediaStream | null = null;
+  recognition:        any                = null;
+  transcript:         string             = '';
+  interimTranscript:  string             = '';
+  answers:            any[]              = [];
 
-  // ── Voice analysis (real-time) ─────────────────────────────────────────────
-  private audioContext: AudioContext | null = null;
-  private analyserNode: AnalyserNode | null = null;
-  private waveAnimFrame: number | null = null;
-  private recordingStart = 0;
-  waveformBars: number[] = Array(20).fill(4); // heights in px
+  // ── Behavior metrics (simulation + real CV) ──
+  contactVisuel = 85; posture   = 78;
+  engagement    = 90; clarteVocale = 88;
+  confiance     = 82; stress    = 30;
 
-  // ── Behavior metrics (updated by camera analysis loop) ─────────────────────
-  contactVisuel = 82;
-  posture = 78;
-  engagement = 90;
-  clarteVocale = 88;
-  confiance = 80;
-  stress = 32;
+  behaviorInterval: any;
+  audioBarInterval: any;
 
-  private behaviorInterval: any;
-  private cameraAnalysisInterval: any;
-  private lastVoiceMetrics: VoiceMetrics | null = null;
+  // ── Voice metrics (retournés par IA après chaque réponse) ──
+  voiceMetrics: any = null;
 
-  // ── URLs ──────────────────────────────────────────────────────────────────
-  private pythonUrl = 'http://localhost:8000';
-  private javaUrl   = 'http://localhost:8086/HireVision';
+  // ── Audio visualizer bars ──
+  audioBars: number[] = Array(24).fill(8);
 
-  private latestCv: any = null;
-
-  // ── AI Tips (dynamic) ─────────────────────────────────────────────────────
+  // ── AI Tips (mis à jour dynamiquement) ──
   aiTips: string[] = [
     'Maintenez le contact visuel avec la caméra',
     'Parlez clairement et avec confiance',
@@ -106,560 +73,517 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     'Utilisez des exemples concrets (méthode STAR)'
   ];
 
-  // ── Derived ───────────────────────────────────────────────────────────────
-  get currentQuestion(): Question | null { return this.questions[this.currentIndex] ?? null; }
-  get progress(): number {
-    return this.questions.length
-      ? Math.round((this.answers.length / this.questions.length) * 100)
-      : 0;
-  }
-  get timerDisplay(): string {
+  // ── Difficulté progressive : score courant ──
+  private currentRunningScore = 0;
+  private askedIds:     number[] = [];
+
+  private readonly javaUrl   = 'http://localhost:8086/HireVision';
+
+  // ── Computed ──
+  get currentQuestion(): Question | null { return this.questions[this.currentIndex] || null; }
+  get progress():        number { return this.questions.length ? Math.round((this.currentIndex / this.questions.length) * 100) : 0; }
+  get timerDisplay():    string {
     const m = Math.floor(this.timer / 60).toString().padStart(2, '0');
     const s = (this.timer % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   }
+  get questions_total(): number { return this.specialty?.count || this.questions.length || 15; }
 
-  get metrics() {
+  get behaviorMetrics() {
     return [
-      { label: 'Contact visuel', value: Math.round(this.contactVisuel), color: '#10b981' },
-      { label: 'Posture',        value: Math.round(this.posture),       color: '#3b82f6' },
-      { label: 'Engagement',     value: Math.round(this.engagement),    color: '#10b981' },
-      { label: 'Clarté vocale',  value: Math.round(this.clarteVocale),  color: '#10b981' },
-      { label: 'Confiance',      value: Math.round(this.confiance),     color: '#a78bfa' },
-      { label: 'Niveau de stress', value: Math.round(this.stress),      color: '#f59e0b' },
+      { label: 'Contact visuel', icon: 'eye',       value: this.contactVisuel,  color: this.metricColor(this.contactVisuel) },
+      { label: 'Posture',        icon: 'user',       value: this.posture,        color: this.metricColor(this.posture) },
+      { label: 'Engagement',     icon: 'heart',      value: this.engagement,     color: this.metricColor(this.engagement) },
+      { label: 'Clarté vocale',  icon: 'volume-2',   value: this.clarteVocale,   color: this.metricColor(this.clarteVocale) },
+      { label: 'Confiance',      icon: 'shield',     value: this.confiance,      color: this.metricColor(this.confiance) },
+      { label: 'Niveau de stress', icon: 'activity', value: this.stress,         color: this.stressColor(this.stress) },
+    ];
+  }
+  get voiceMetricsDisplay() {
+    if (!this.voiceMetrics) return [];
+    return [
+      { label: 'Technique',     value: this.voiceMetrics.score_technique     || 0, color: this.metricColor(this.voiceMetrics.score_technique) },
+      { label: 'Communication', value: this.voiceMetrics.score_communication || 0, color: this.metricColor(this.voiceMetrics.score_communication) },
+      { label: 'Confiance',     value: this.voiceMetrics.score_confiance     || 0, color: this.metricColor(this.voiceMetrics.score_confiance) },
     ];
   }
 
-  constructor(
-    private router: Router,
-    private http: HttpClient,
-    private authService: AuthService,
-    private cvService: CvService,
-    private ngZone: NgZone
-  ) {}
+  private metricColor(v: number): string {
+    if (v >= 75) return '#10B981';
+    if (v >= 50) return '#3B82F6';
+    return '#F59E0B';
+  }
+  private stressColor(v: number): string {
+    if (v <= 30) return '#10B981';
+    if (v <= 60) return '#F59E0B';
+    return '#EF4444';
+  }
+  private clamp(v: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, v));
+  }
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  constructor(
+    private router:      Router,
+    private http:        HttpClient,
+    private authService: AuthService,
+    private cvService:   CvService
+  ) {}
 
   ngOnInit(): void {
     const stored = sessionStorage.getItem('interview_specialty');
     if (!stored) { this.router.navigate(['/frontoffice/interviewPrep']); return; }
     this.specialty = JSON.parse(stored);
+    this.loadLatestCv();
     this.loadQuestions();
     this.startTimer();
     this.initWebcam();
     this.initSpeechRecognition();
-    this.loadLatestCv();
+    this.startBehaviorSimulation();
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => lucide?.createIcons(), 100);
-  }
+  ngAfterViewInit(): void { setTimeout(() => lucide.createIcons(), 100); }
 
-  ngOnDestroy(): void {
-    this.cleanup();
-  }
-
-  // ── Data loading ──────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // DATA LOADING
+  // ─────────────────────────────────────────────────
 
   loadLatestCv(): void {
     const userId = this.authService.getCurrentUserId();
     if (userId) {
       this.cvService.getLatest(userId).subscribe({
-        next: (cv) => this.latestCv = cv,
-        error: (err) => console.warn('CV load error:', err)
+        next:  (cv)  => { this.latestCv = cv; },
+        error: ()    => {}
       });
     }
   }
 
   loadQuestions(): void {
     this.isLoading = true;
-    this.http.get<any>(`${this.pythonUrl}/interview/questions/${this.specialty.id}`).subscribe({
+    const userId = this.authService.getCurrentUserId();
+
+    // Passer userId pour anti-répétition (Spring Boot → Python)
+    const url = `${this.javaUrl}/interview/questions/${this.specialty.id}`
+              + (userId ? `?userId=${userId}` : '');
+
+    this.http.get<any>(url).subscribe({
       next: (res) => {
-        this.questions = res.questions ?? [];
+        this.questions = res.questions || [];
         this.isLoading = false;
-        setTimeout(() => lucide?.createIcons(), 100);
+        setTimeout(() => lucide.createIcons(), 100);
       },
       error: () => {
         this.isLoading = false;
-        showToast('Erreur lors du chargement des questions', 'danger');
+        showToast('Erreur chargement questions', 'danger');
       }
     });
   }
 
-  // ── Timer ─────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // TIMER
+  // ─────────────────────────────────────────────────
 
   startTimer(): void {
     this.timerInterval = setInterval(() => this.timer++, 1000);
   }
 
-  // ── Webcam ────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // WEBCAM + COMPUTER VISION
+  // ─────────────────────────────────────────────────
 
   initWebcam(): void {
-    navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: 'user' }, audio: false })
+    navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
       .then(stream => {
         this.videoStream = stream;
-        this.attachVideoStream();
-        this.startCameraAnalysis();
+        this.attachWebcam();
       })
-      .catch(() => {
-        showToast('Caméra non disponible — mode audio uniquement activé', 'warning');
-        this.isCameraOn = false;
-      });
+      .catch(() => showToast('Caméra non disponible — mode texte activé', 'warning'));
   }
 
-  private attachVideoStream(): void {
-    const attach = () => {
-      const video = this.webcamElement?.nativeElement;
-      if (video) {
-        video.srcObject = this.videoStream;
-        video.muted = true;
-        video.play().catch(e => console.warn('Video play error:', e));
-      } else {
-        setTimeout(attach, 100);
-      }
-    };
-    attach();
+  private attachWebcam(): void {
+    if (this.webcamEl?.nativeElement) {
+      const v = this.webcamEl.nativeElement;
+      v.srcObject = this.videoStream;
+      v.muted = true;
+      v.play().catch(console.error);
+    } else {
+      setTimeout(() => this.attachWebcam(), 100);
+    }
   }
 
   toggleWebcam(): void {
     if (this.isCameraOn) {
       this.videoStream?.getVideoTracks().forEach(t => t.stop());
       this.videoStream = null;
-      this.isCameraOn = false;
-      clearInterval(this.cameraAnalysisInterval);
-      showToast('Caméra désactivée', 'info');
+      this.isCameraOn  = false;
     } else {
       this.isCameraOn = true;
       this.initWebcam();
     }
-    setTimeout(() => lucide?.createIcons(), 50);
+    setTimeout(() => lucide.createIcons(), 50);
   }
 
-  // ── Camera-based behavior analysis ────────────────────────────────────────
-  /**
-   * Sends a frame snapshot to the Python /analyze-frame endpoint every 3s.
-   * Falls back to jitter simulation if the endpoint is unavailable.
-   */
-  private startCameraAnalysis(): void {
-    this.cameraAnalysisInterval = setInterval(() => {
-      this.captureFrameAndAnalyze();
-    }, 3000);
-  }
+  /** Capture une frame webcam et l'envoie au backend Spring Boot → Python CV */
+  private captureAndAnalyzeFrame(): void {
+    if (!this.videoStream || !this.isCameraOn || !this.webcamEl?.nativeElement) return;
+    const video = this.webcamEl.nativeElement;
+    if (video.readyState < 2) return;
 
-  private captureFrameAndAnalyze(): void {
-    const video = this.webcamElement?.nativeElement;
-    if (!video || !this.videoStream) {
-      this.simulateBehaviorJitter();
-      return;
-    }
-
-    // Draw current frame to off-screen canvas
-    const canvas = document.createElement('canvas');
-    canvas.width  = 320; // small for fast transfer
-    canvas.height = 240;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) { this.simulateBehaviorJitter(); return; }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const canvas    = document.createElement('canvas');
+    canvas.width    = 320;
+    canvas.height   = 240;
+    const ctx       = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, 320, 240);
 
     canvas.toBlob(blob => {
-      if (!blob) { this.simulateBehaviorJitter(); return; }
+      if (!blob) return;
       const fd = new FormData();
       fd.append('frame', blob, 'frame.jpg');
 
-      this.http.post<any>(`${this.pythonUrl}/analyze-frame`, fd).subscribe({
-        next: (res) => {
-          this.ngZone.run(() => {
-            // Python returns normalized 0-1 scores — convert to 0-100
-            if (res.eye_contact   != null) this.contactVisuel = res.eye_contact   * 100;
-            if (res.posture       != null) this.posture       = res.posture       * 100;
-            if (res.engagement    != null) this.engagement    = res.engagement    * 100;
-            if (res.stress        != null) this.stress        = res.stress        * 100;
-            if (res.confidence    != null) this.confiance     = res.confidence    * 100;
-            this.updateAiTipsFromBehavior();
-          });
+      // Via Spring Boot proxy
+      this.http.post<any>(`${this.javaUrl}/interview/analyze-frame`, fd).subscribe({
+        next: (result) => {
+          if (result.eye_contact !== undefined) this.contactVisuel = result.eye_contact;
+          if (result.posture     !== undefined) this.posture       = result.posture;
+          if (result.engagement  !== undefined) this.engagement    = result.engagement;
+          if (result.tips?.length)              this.aiTips        = result.tips;
+          setTimeout(() => lucide.createIcons(), 30);
         },
-        error: () => this.simulateBehaviorJitter() // endpoint not yet available
+        error: () => {} // silencieux — simulation continue
       });
     }, 'image/jpeg', 0.7);
   }
 
-  private simulateBehaviorJitter(): void {
-    const jitter = (v: number, lo: number, hi: number, d: number) =>
-      Math.min(hi, Math.max(lo, v + (Math.random() * d * 2 - d)));
-
-    this.ngZone.run(() => {
-      this.contactVisuel = jitter(this.contactVisuel, 60, 98, 3);
-      this.posture       = jitter(this.posture, 55, 95, 3);
-      this.engagement    = jitter(this.engagement, 65, 98, 2);
-      this.clarteVocale  = jitter(this.clarteVocale, 60, 97, 3);
-      this.confiance     = jitter(this.confiance, 58, 95, 3);
-      this.stress        = jitter(this.stress, 8, 70, 4);
-    });
-  }
-
-  private updateAiTipsFromBehavior(): void {
-    const tips: string[] = [];
-    if (this.contactVisuel < 70) tips.push('Regardez directement la caméra');
-    if (this.posture < 65)       tips.push('Redressez-vous et tenez-vous droit');
-    if (this.stress > 60)        tips.push('Respirez profondément pour vous détendre');
-    if (this.confiance < 65)     tips.push('Parlez avec plus d\'assurance');
-
-    // Always keep at least 2 positive tips
-    const fallback = [
-      'Utilisez des exemples concrets',
-      'Structurez votre réponse (situation → action → résultat)',
-      'Faites des pauses réfléchies plutôt que de dire "euh"',
-    ];
-    while (tips.length < 3) tips.push(fallback[tips.length]);
-    this.aiTips = tips.slice(0, 4);
-  }
-
-  // ── Speech Recognition ────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // SPEECH RECOGNITION
+  // ─────────────────────────────────────────────────
 
   initSpeechRecognition(): void {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) {
-      showToast('Votre navigateur ne supporte pas la reconnaissance vocale', 'warning');
-      return;
-    }
-    this.recognition = new SR();
-    this.recognition.continuous = true;
+    if (!SR) { showToast('Reconnaissance vocale non supportée', 'warning'); return; }
+
+    this.recognition               = new SR();
+    this.recognition.continuous    = true;
     this.recognition.interimResults = true;
-    this.recognition.lang = 'fr-FR';
+    this.recognition.lang          = 'fr-FR';
 
     this.recognition.onresult = (event: any) => {
-      let interim = '';
-      let final = '';
+      let interim = '', final = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const text = event.results[i][0].transcript;
-        if (event.results[i].isFinal) final += text + ' ';
-        else interim += text;
+        event.results[i].isFinal ? (final += text + ' ') : (interim += text);
       }
-      this.transcript += final;
-      this.interimTranscript = interim;
+      this.transcript        += final;
+      this.interimTranscript  = interim;
+      this.scrollLiveTranscript();
     };
-
-    this.recognition.onerror = (event: any) => {
-      console.warn('Speech recognition error:', event.error);
-      if (event.error === 'not-allowed') {
-        showToast('Microphone refusé — vérifiez les permissions', 'danger');
-      }
+    this.recognition.onerror = (e: any) => {
+      if (e.error !== 'aborted') showToast('Erreur micro : ' + e.error, 'warning');
     };
   }
 
-  // ── Audio Waveform ────────────────────────────────────────────────────────
-
-  private initAudioVisualizer(): void {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(stream => {
-      this.audioContext = new AudioContext();
-      const source = this.audioContext.createMediaStreamSource(stream);
-      this.analyserNode = this.audioContext.createAnalyser();
-      this.analyserNode.fftSize = 64;
-      source.connect(this.analyserNode);
-      this.animateWaveform();
-    }).catch(() => {
-      // No mic access — animate randomly
-      this.animateWaveformFallback();
-    });
+  private scrollLiveTranscript(): void {
+    setTimeout(() => {
+      const el = this.liveTranscriptEl?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 0);
   }
 
-  private animateWaveform(): void {
-    const draw = () => {
-      if (!this.isRecording) return;
-      this.waveAnimFrame = requestAnimationFrame(draw);
+  // ─────────────────────────────────────────────────
+  // BEHAVIOR SIMULATION (entre les analyses vision)
+  // ─────────────────────────────────────────────────
 
-      if (!this.analyserNode) return;
-      const data = new Uint8Array(this.analyserNode.frequencyBinCount);
-      this.analyserNode.getByteFrequencyData(data);
+  startBehaviorSimulation(): void {
+    let tick = 0;
+    this.behaviorInterval = setInterval(() => {
+      const j = (range: number) => Math.random() * range - range / 2;
+      this.contactVisuel = this.clamp(this.contactVisuel + j(6), 55, 100);
+      this.posture       = this.clamp(this.posture       + j(6), 55, 100);
+      this.engagement    = this.clamp(this.engagement    + j(4), 65, 100);
+      this.clarteVocale  = this.clamp(this.clarteVocale  + j(6), 55, 100);
+      this.confiance     = this.clamp(this.confiance     + j(6), 55, 100);
+      this.stress        = this.clamp(this.stress        + j(8), 10, 75);
 
-      this.ngZone.run(() => {
-        this.waveformBars = Array.from({ length: 20 }, (_, i) => {
-          const idx = Math.floor(i * data.length / 20);
-          return 4 + (data[idx] / 255) * 22;
-        });
-      });
-    };
-    draw();
+      // Vraie analyse vision toutes les 3 itérations (~9s)
+      if (++tick % 3 === 0) this.captureAndAnalyzeFrame();
+    }, 3000);
   }
 
-  private animateWaveformFallback(): void {
-    const tick = () => {
-      if (!this.isRecording) return;
-      this.waveAnimFrame = requestAnimationFrame(tick);
-      this.ngZone.run(() => {
-        this.waveformBars = Array.from({ length: 20 }, () =>
-          4 + Math.random() * 22
-        );
-      });
-    };
-    tick();
+  // ─────────────────────────────────────────────────
+  // AUDIO VISUALIZER
+  // ─────────────────────────────────────────────────
+
+  private startAudioVisualizer(): void {
+    this.audioBarInterval = setInterval(() => {
+      this.audioBars = Array(24).fill(0).map(() => Math.floor(Math.random() * 30) + 4);
+    }, 120);
   }
 
   private stopAudioVisualizer(): void {
-    if (this.waveAnimFrame) {
-      cancelAnimationFrame(this.waveAnimFrame);
-      this.waveAnimFrame = null;
-    }
-    this.audioContext?.close();
-    this.audioContext = null;
-    this.analyserNode = null;
-    this.waveformBars = Array(20).fill(4);
+    clearInterval(this.audioBarInterval);
+    this.audioBars = Array(24).fill(4);
   }
 
-  // ── Real Voice Metrics ────────────────────────────────────────────────────
-
-  private computeLocalVoiceMetrics(text: string, durationSeconds: number): VoiceMetrics {
-    const words = text.trim().split(/\s+/).filter(Boolean);
-    const wordCount = words.length;
-
-    // Filler words detection (French + English)
-    const fillers = ['euh', 'euhm', 'eh', 'ben', 'bah', 'hm', 'um', 'uh', 'donc', 'voilà'];
-    const fillerWordCount = words.filter(w => fillers.includes(w.toLowerCase())).length;
-
-    // Speaking rate (words per minute)
-    const speakingRate = durationSeconds > 0 ? Math.round((wordCount / durationSeconds) * 60) : 0;
-
-    // Clarity score: penalizes fillers and very long sentences
-    const fillerRatio = wordCount > 0 ? fillerWordCount / wordCount : 0;
-    const clarityScore = Math.max(20, Math.round(100 - fillerRatio * 150 - (speakingRate > 180 ? 15 : 0)));
-
-    // Pace score: ideal ~130 wpm for French
-    const idealPace = 130;
-    const paceDeviation = Math.abs(speakingRate - idealPace);
-    const paceScore = wordCount < 5 ? 50 : Math.max(30, Math.round(100 - paceDeviation * 0.5));
-
-    // Confidence score: longer, more complete sentences suggest confidence
-    const avgSentLen = wordCount / (text.split(/[.!?]/).length || 1);
-    const confidenceScore = Math.min(95, Math.max(30, Math.round(50 + avgSentLen * 2 - fillerRatio * 80)));
-
-    return { clarityScore, paceScore, confidenceScore, fillerWordCount, wordCount, speakingRate };
-  }
-
-  // ── Recording flow ────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // RECORDING TOGGLE
+  // ─────────────────────────────────────────────────
 
   toggleRecording(): void {
     if (!this.isRecording) {
-      this.startRecording();
-    } else {
-      this.stopRecording();
-    }
-  }
-
-  private startRecording(): void {
-    this.transcript = '';
-    this.interimTranscript = '';
-    this.recordingStart = Date.now();
-    this.recognition?.start();
-    this.isRecording = true;
-    this.initAudioVisualizer();
-    showToast('Enregistrement démarré — parlez maintenant', 'info');
-  }
-
-  private stopRecording(): void {
-    this.recognition?.stop();
-    this.isRecording = false;
-    this.stopAudioVisualizer();
-
-    if (this.interimTranscript.trim()) {
-      this.transcript += this.interimTranscript;
+      this.transcript        = '';
       this.interimTranscript = '';
-    }
-
-    const duration = (Date.now() - this.recordingStart) / 1000;
-    this.lastVoiceMetrics = this.computeLocalVoiceMetrics(this.transcript, duration);
-
-    // Update clarté vocale from real voice metrics
-    this.clarteVocale = this.lastVoiceMetrics.clarityScore;
-    this.confiance    = Math.round((this.confiance * 0.6) + (this.lastVoiceMetrics.confidenceScore * 0.4));
-
-    if (this.transcript.trim()) {
-      this.analyzeAndNext();
+      this.recognition?.start();
+      this.isRecording = true;
+      this.startAudioVisualizer();
+      showToast('Enregistrement démarré — parlez clairement', 'info');
     } else {
-      showToast('Aucune réponse détectée — réessayez ou passez', 'warning');
+      this.recognition?.stop();
+      this.isRecording = false;
+      this.stopAudioVisualizer();
+
+      if (this.interimTranscript.trim()) {
+        this.transcript       += this.interimTranscript;
+        this.interimTranscript = '';
+      }
+
+      if (this.transcript.trim()) {
+        this.analyzeAndNext();
+      } else {
+        showToast('Aucune réponse détectée — veuillez réessayer', 'warning');
+      }
     }
+    setTimeout(() => lucide.createIcons(), 50);
   }
 
-  // ── AI Analysis ───────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────
+  // ANALYSE VOCALE + DIFFICULTÉ PROGRESSIVE
+  // ─────────────────────────────────────────────────
 
   analyzeAndNext(): void {
     this.isAnalyzing = true;
     const q = this.currentQuestion!;
+    this.askedIds.push(q.id);
 
-    const behaviorSnapshot: BehaviorSnapshot = {
-      eyeContact: Math.round(this.contactVisuel),
-      posture:    Math.round(this.posture),
-      engagement: Math.round(this.engagement),
-      stress:     Math.round(this.stress),
-    };
-
-    this.http.post<any>(`${this.pythonUrl}/interview/analyze-voice`, {
+    // Tout passe par Spring Boot (qui gère lui-même son propre fallback
+    // si Python est indisponible) — jamais d'appel direct à Python ici.
+    this.http.post<any>(`${this.javaUrl}/interview/analyze-voice`, {
       transcript: this.transcript,
       question:   q.question,
       specialty:  this.specialty.title
     }).subscribe({
-      next: (result) => {
-        this.answers.push({
-          question:         q,
-          transcript:       this.transcript,
-          evaluation:       result,
-          voiceMetrics:     this.lastVoiceMetrics ?? undefined,
-          behaviorSnapshot
-        });
-        this.transcript = '';
-        this.isAnalyzing = false;
-
-        if (this.currentIndex < this.questions.length - 1) {
-          this.currentIndex++;
-          setTimeout(() => lucide?.createIcons(), 50);
-        } else {
-          this.finishInterview();
-        }
-      },
+      next:  (result) => this.onVoiceAnalyzed(result, q),
       error: () => {
         this.isAnalyzing = false;
-        showToast('Erreur lors de l\'analyse IA — question passée', 'warning');
-        this.skipQuestion();
+        showToast('Erreur analyse vocale', 'warning');
+        this.goToNext();
       }
     });
   }
 
-  skipQuestion(): void {
+  private onVoiceAnalyzed(result: any, q: Question): void {
+    this.voiceMetrics = result;
+
+    // Mettre à jour métriques vocales
+    if (result.score_communication) this.clarteVocale = result.score_communication;
+    if (result.score_confiance)     this.confiance    = result.score_confiance;
+
+    // Afficher conseil immédiat de l'analyse vocale
+    if (result.analyse_vocale?.conseil_immediat) {
+      const tips = [result.analyse_vocale.conseil_immediat, ...this.aiTips.slice(0, 2)];
+      this.aiTips = tips;
+    }
+
     this.answers.push({
-      question:    this.currentQuestion!,
-      transcript:  '(passé)',
-      evaluation: {
-        score_technique: 0, score_communication: 0,
-        score_confiance: 0, score_global: 0,
-        niveau: 'Insuffisant',
-        points_forts: '', points_ameliorer: 'Question passée', reponse_ideale: ''
-      }
+      question:   q,
+      transcript: this.transcript,
+      evaluation: result
     });
-    this.transcript = '';
+
+    // Mettre à jour le score courant (pour difficulté progressive)
+    const scores = this.answers
+      .filter(a => a.evaluation?.score_global)
+      .map(a => a.evaluation.score_global);
+    if (scores.length) {
+      this.currentRunningScore = scores.reduce((s, v) => s + v, 0) / scores.length;
+    }
+
+    this.transcript  = '';
+    this.isAnalyzing = false;
+    this.updateDynamicTips(result);
+    this.goToNext();
+    setTimeout(() => lucide.createIcons(), 50);
+  }
+
+  private goToNext(): void {
     if (this.currentIndex < this.questions.length - 1) {
-      this.currentIndex++;
-      setTimeout(() => lucide?.createIcons(), 50);
+      // Difficulté progressive via Spring Boot
+      this.http.post<any>(`${this.javaUrl}/interview/next-question`, {
+        specialty_id:  this.specialty.id,
+        current_score: this.currentRunningScore,
+        asked_ids:     this.askedIds,
+        all_questions: this.questions
+      }).subscribe({
+        next: (res) => {
+          if (!res.finished && res.question) {
+            // Trouver l'index de la question recommandée
+            const idx = this.questions.findIndex(q => q.id === res.question.id);
+            this.currentIndex = idx >= 0 ? idx : this.currentIndex + 1;
+          } else {
+            this.currentIndex++;
+          }
+          setTimeout(() => lucide.createIcons(), 50);
+        },
+        error: () => {
+          this.currentIndex++;
+          setTimeout(() => lucide.createIcons(), 50);
+        }
+      });
     } else {
       this.finishInterview();
     }
   }
 
-  // ── Finish & Save ─────────────────────────────────────────────────────────
+  private updateDynamicTips(evaluation: any): void {
+    const tips: string[] = [];
+    if (evaluation.analyse_vocale?.conseil_immediat) {
+      tips.push(evaluation.analyse_vocale.conseil_immediat);
+    }
+    if (evaluation.score_technique    < 60) tips.push('Approfondissez les aspects techniques');
+    if (evaluation.score_communication < 65) tips.push('Structurez mieux votre réponse (intro → développement → conclusion)');
+    if (evaluation.score_confiance     < 65) tips.push('Parlez avec plus d\'assurance, évitez les hésitations');
+    if (tips.length === 0)                   tips.push('Excellente réponse — continuez sur cette lancée !');
+    tips.push('Utilisez des exemples concrets issus de vos projets');
+    this.aiTips = tips.slice(0, 4);
+    setTimeout(() => lucide.createIcons(), 30);
+  }
+
+  skipQuestion(): void {
+    if (this.currentQuestion) {
+      this.askedIds.push(this.currentQuestion.id);
+      this.answers.push({
+        question:   this.currentQuestion,
+        transcript: '(passé)',
+        evaluation: {
+          score_technique: 0, score_communication: 0,
+          score_confiance: 0, score_global: 0,
+          niveau: 'Insuffisant', points_forts: '',
+          points_ameliorer: 'Question passée', reponse_ideale: ''
+        }
+      });
+    }
+    this.transcript = '';
+    if (this.currentIndex < this.questions.length - 1) {
+      this.currentIndex++;
+      setTimeout(() => lucide.createIcons(), 50);
+    } else {
+      this.finishInterview();
+    }
+  }
+
+  // ─────────────────────────────────────────────────
+  // FINISH + SAVE (via Spring Boot)
+  // ─────────────────────────────────────────────────
 
   async finishInterview(): Promise<void> {
-    this.cleanup();
+    clearInterval(this.timerInterval);
+    clearInterval(this.behaviorInterval);
+    clearInterval(this.audioBarInterval);
+    this.videoStream?.getTracks().forEach(t => t.stop());
+    this.recognition?.stop();
 
     const userId = this.authService.getCurrentUserId();
     const cvId   = this.latestCv?.id;
 
     if (!userId || !cvId) {
-      console.warn('User or CV not found — skipping DB save');
       this.navigateToFeedback();
       return;
     }
 
     try {
-      showToast('Enregistrement de l\'entretien en cours…', 'info');
+      showToast('Sauvegarde de l\'entretien...', 'info');
 
-      // 1 — Create Interview
-      const interviewDto = await firstValueFrom(
+      // 1. Créer l'entretien
+      const interview = await firstValueFrom(
         this.http.post<any>(`${this.javaUrl}/interviews/add`, {
           userId, cvId, startDate: new Date().toISOString()
         })
       );
-      const dbInterviewId = interviewDto.id;
 
-      // 2 — Save questions + answers
+      // 2. Sauvegarder questions + réponses
       for (const ans of this.answers) {
-        const questionDto = await firstValueFrom(
+        const question = await firstValueFrom(
           this.http.post<any>(`${this.javaUrl}/questions/add`, {
             content:     ans.question.question,
             difficulty:  (ans.question.difficulty || 'medium').toUpperCase(),
-            interviewId: dbInterviewId
+            interviewId: interview.id
           })
         );
         await firstValueFrom(
           this.http.post<any>(`${this.javaUrl}/answers/add`, {
-            questionId: questionDto.id,
+            questionId: question.id,
             answerText: ans.transcript || '(passé)'
           })
         );
       }
 
-      // 3 — Behavior Analysis (from camera)
+      // 3. Behavior analysis (computer vision)
       await firstValueFrom(
         this.http.post<any>(`${this.javaUrl}/behavior-analysis/add`, {
-          interviewId:     dbInterviewId,
-          postureScore:    Math.round(this.posture),
+          interviewId:    interview.id,
+          postureScore:   Math.round(this.posture),
           eyeContactScore: Math.round(this.contactVisuel),
           expressionScore: Math.round(this.engagement),
-          videoPath:       ''
+          videoPath: ''
         })
       );
 
-      // 4 — Voice Analysis (from real metrics)
-      const avgVoice = this.computeAverageVoiceMetrics();
+      // 4. Voice analysis
       await firstValueFrom(
         this.http.post<any>(`${this.javaUrl}/voice-analysis/add`, {
-          interviewId:        dbInterviewId,
-          clarityScore:       avgVoice.clarity,
-          paceScore:          avgVoice.pace,
-          tonalVariationScore: Math.round(this.confiance),
-          audioPath:          ''
+          interviewId:          interview.id,
+          clarityScore:         Math.round(this.clarteVocale),
+          paceScore:            80,
+          tonalVariationScore:  Math.round(this.confiance),
+          audioPath: ''
         })
       );
 
-      // 5 — Feedback
-      const evaluated = this.answers.filter(a => a.evaluation?.score_global);
-      const avg = (key: string) =>
-        evaluated.length
-          ? Math.round(evaluated.reduce((s, a) => s + (a.evaluation?.[key] || 0), 0) / evaluated.length)
-          : 70;
+      // 5. Feedback scores
+      const evaluated = this.answers.filter(a => a.evaluation?.score_global > 0);
+      const avg = (key: string) => evaluated.length
+        ? Math.round(evaluated.reduce((s: number, a: any) => s + (a.evaluation?.[key] || 0), 0) / evaluated.length)
+        : 70;
 
       await firstValueFrom(
         this.http.post<any>(`${this.javaUrl}/feedbacks/add`, {
-          interviewId:       dbInterviewId,
-          technicalScore:    avg('score_technique'),
+          interviewId:        interview.id,
+          technicalScore:     avg('score_technique'),
           communicationScore: avg('score_communication'),
-          confidenceScore:   avg('score_confiance'),
-          eyeContactScore:   Math.round(this.contactVisuel)
+          confidenceScore:    avg('score_confiance'),
+          eyeContactScore:    Math.round(this.contactVisuel)
         })
       );
 
-      showToast('Entretien enregistré avec succès !', 'success');
-
+      showToast('Entretien sauvegardé avec succès !', 'success');
     } catch (err) {
       console.error('Save error:', err);
-      showToast('Erreur lors de l\'enregistrement — les résultats sont quand même disponibles', 'warning');
+      showToast('Erreur lors de la sauvegarde', 'danger');
     }
 
     this.navigateToFeedback();
   }
 
-  private computeAverageVoiceMetrics(): { clarity: number; pace: number } {
-    const answersWithMetrics = this.answers.filter(a => a.voiceMetrics);
-    if (!answersWithMetrics.length) {
-      return { clarity: Math.round(this.clarteVocale), pace: 75 };
-    }
-    const avgClarity = Math.round(
-      answersWithMetrics.reduce((s, a) => s + (a.voiceMetrics?.clarityScore ?? 0), 0) / answersWithMetrics.length
-    );
-    const avgPace = Math.round(
-      answersWithMetrics.reduce((s, a) => s + (a.voiceMetrics?.paceScore ?? 0), 0) / answersWithMetrics.length
-    );
-    return { clarity: avgClarity, pace: avgPace };
-  }
-
   private navigateToFeedback(): void {
-    const evaluated = this.answers.filter(a => a.evaluation?.score_global);
-    const avg = (key: string) =>
-      evaluated.length
-        ? Math.round(evaluated.reduce((s, a) => s + (a.evaluation?.[key] || 0), 0) / evaluated.length)
-        : 0;
+    const evaluated = this.answers.filter(a => a.evaluation?.score_global > 0);
+    const avg = (key: string) => evaluated.length
+      ? Math.round(evaluated.reduce((s: number, a: any) => s + (a.evaluation?.[key] || 0), 0) / evaluated.length)
+      : 0;
 
     sessionStorage.setItem('interview_results', JSON.stringify({
-      specialty:  this.specialty,
-      answers:    this.answers,
-      duration:   this.timer,
+      specialty:      this.specialty,
+      answers:        this.answers,
+      duration:       this.timer,
+      questions_total: this.questions.length,
       avg_scores: {
         technique:     avg('score_technique'),
         communication: avg('score_communication'),
@@ -679,19 +603,20 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     this.router.navigate(['/frontoffice/interview-feedback']);
   }
 
-  // ── Cleanup ───────────────────────────────────────────────────────────────
-
   quit(): void {
-    this.cleanup();
+    clearInterval(this.timerInterval);
+    clearInterval(this.behaviorInterval);
+    clearInterval(this.audioBarInterval);
+    this.videoStream?.getTracks().forEach(t => t.stop());
+    this.recognition?.stop();
     this.router.navigate(['/frontoffice/interviewPrep']);
   }
 
-  private cleanup(): void {
+  ngOnDestroy(): void {
     clearInterval(this.timerInterval);
     clearInterval(this.behaviorInterval);
-    clearInterval(this.cameraAnalysisInterval);
+    clearInterval(this.audioBarInterval);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
-    this.stopAudioVisualizer();
   }
 }

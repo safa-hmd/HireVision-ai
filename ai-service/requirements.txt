@@ -2,8 +2,12 @@ fastapi
 uvicorn
 pdfplumber
 python-multipart
-spacy
 scikit-learn
 joblib
 pandas
-anthropic
+httpx
+opencv-python
+numpy
+python-dotenv
+sentence-transformers
+torch

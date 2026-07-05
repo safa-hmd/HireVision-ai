@@ -29,31 +29,38 @@
 
   <!-- ── MAIN CONTENT GRID ── -->
   <div *ngIf="!isLoading" class="session-body">
-    
+
     <!-- LEFT COLUMN -->
     <div class="col-main">
       <!-- Camera Card -->
       <div class="camera-card">
         <!-- Actual video element linked to webcam Stream -->
         <video #webcam autoplay [muted]="true" playsinline class="webcam-feed" [style.display]="videoStream && isCameraOn ? 'block' : 'none'"></video>
-        
+
         <!-- Offline placeholder when webcam is off -->
         <div *ngIf="!videoStream || !isCameraOn" class="cam-offline">
           <i data-lucide="video-off" class="cam-offline-icon"></i>
           <span>Flux webcam (démo)</span>
         </div>
-        
+
         <!-- Controls Overlay -->
         <div class="cam-controls">
-          <button class="cam-btn" (click)="toggleRecording()" [class.cam-btn-active]="isRecording" title="Enregistrement audio">
-            <i [attr.data-lucide]="isRecording ? 'mic-off' : 'mic'"></i>
-          </button>
-          <button class="cam-btn" (click)="toggleWebcam()" [class.cam-btn-danger]="!isCameraOn" title="Caméra vidéo">
-            <i [attr.data-lucide]="isCameraOn ? 'video' : 'video-off'"></i>
-          </button>
+          <div class="cam-btn-wrap">
+            <button class="cam-btn" (click)="toggleRecording()" [class.cam-btn-active]="isRecording" title="Enregistrement audio">
+              <span class="cam-btn-pulse" *ngIf="isRecording"></span>
+              <i [attr.data-lucide]="isRecording ? 'mic-off' : 'mic'"></i>
+            </button>
+            <span class="cam-btn-label">{{ isRecording ? 'En cours' : 'Micro' }}</span>
+          </div>
+          <div class="cam-btn-wrap">
+            <button class="cam-btn" (click)="toggleWebcam()" [class.cam-btn-danger]="!isCameraOn" title="Caméra vidéo">
+              <i [attr.data-lucide]="isCameraOn ? 'video' : 'video-off'"></i>
+            </button>
+            <span class="cam-btn-label">Caméra</span>
+          </div>
         </div>
       </div>
-      
+
       <!-- Question Card -->
       <div *ngIf="currentQuestion" class="question-card">
         <div class="question-header">
@@ -63,29 +70,43 @@
           </div>
         </div>
         <p class="question-text">{{ currentQuestion.question }}</p>
-        
+
         <!-- Real-time audio waveform when recording -->
         <div class="audio-wave-container" *ngIf="isRecording">
           <span class="rec-dot"></span>
           <span class="rec-text">Enregistrement en cours...</span>
           <div class="audio-wave">
-            <div class="wave-bar" *ngFor="let h of waveformBars" [style.height.px]="h"></div>
+            <div class="wave-bar" *ngFor="let b of audioBars; let i = index"
+                 [style.height]="b + 'px'"
+                 [style.animation-delay]="(i * 0.07) + 's'"></div>
           </div>
         </div>
-        
+
+        <!-- Live speech-to-text : affiche ce que vous dites en direct -->
+        <div class="live-transcript-box" *ngIf="isRecording">
+          <div class="lt-header">
+            <i data-lucide="captions"></i>
+            <span>Ce que vous dites</span>
+          </div>
+          <p class="lt-text" #liveTranscriptEl>
+            <span>{{ transcript }}</span><span class="lt-interim">{{ interimTranscript }}</span>
+            <span *ngIf="!transcript && !interimTranscript" class="lt-placeholder">Parlez, votre réponse s'affiche ici en direct...</span>
+          </p>
+        </div>
+
         <div class="action-row" style="display: flex; align-items: center; gap: 12px;">
           <button class="btn-record" (click)="toggleRecording()" [class.btn-stop]="isRecording">
             <i [attr.data-lucide]="isRecording ? 'square' : 'mic'"></i>
             {{ isRecording ? 'Arrêter et Soumettre' : "Démarrer l'enregistrement" }}
           </button>
-          
+
           <button class="btn-outline-skip" (click)="skipQuestion()" *ngIf="!isRecording" title="Passer à la question suivante">
             <i data-lucide="skip-forward"></i>
             <span>Passer la question</span>
           </button>
         </div>
       </div>
-      
+
       <!-- Progress Card -->
       <div class="progress-card">
         <div class="progress-labels">
@@ -100,74 +121,27 @@
         </p>
       </div>
     </div>
-    
+
     <!-- RIGHT COLUMN -->
     <aside class="col-side">
       <!-- Real-time metrics -->
       <div class="side-card">
         <h3>Analyses en Temps Réel</h3>
-        
-        <div class="metric-item">
+
+        <div class="metric-item" *ngFor="let m of behaviorMetrics">
           <div class="metric-label-row">
-            <span>Contact visuel</span>
-            <span>{{ contactVisuel | number:'1.0-0' }}%</span>
+            <span class="metric-label-with-icon">
+              <i [attr.data-lucide]="m.icon" class="metric-icon" [style.color]="m.color"></i>
+              {{ m.label }}
+            </span>
+            <span [style.color]="m.color">{{ m.value | number:'1.0-0' }}%</span>
           </div>
           <div class="metric-track">
-            <div class="metric-fill bg-green" [style.width.%]="contactVisuel"></div>
-          </div>
-        </div>
-        
-        <div class="metric-item">
-          <div class="metric-label-row">
-            <span>Posture</span>
-            <span>{{ posture | number:'1.0-0' }}%</span>
-          </div>
-          <div class="metric-track">
-            <div class="metric-fill bg-blue" [style.width.%]="posture"></div>
-          </div>
-        </div>
-        
-        <div class="metric-item">
-          <div class="metric-label-row">
-            <span>Engagement</span>
-            <span>{{ engagement | number:'1.0-0' }}%</span>
-          </div>
-          <div class="metric-track">
-            <div class="metric-fill bg-green" [style.width.%]="engagement"></div>
-          </div>
-        </div>
-        
-        <div class="metric-item">
-          <div class="metric-label-row">
-            <span>Clarté vocale</span>
-            <span>{{ clarteVocale | number:'1.0-0' }}%</span>
-          </div>
-          <div class="metric-track">
-            <div class="metric-fill bg-green" [style.width.%]="clarteVocale"></div>
-          </div>
-        </div>
-        
-        <div class="metric-item">
-          <div class="metric-label-row">
-            <span>Confiance</span>
-            <span>{{ confiance | number:'1.0-0' }}%</span>
-          </div>
-          <div class="metric-track">
-            <div class="metric-fill bg-blue" [style.width.%]="confiance"></div>
-          </div>
-        </div>
-        
-        <div class="metric-item">
-          <div class="metric-label-row">
-            <span>Niveau de stress</span>
-            <span>{{ stress | number:'1.0-0' }}%</span>
-          </div>
-          <div class="metric-track">
-            <div class="metric-fill bg-orange" [style.width.%]="stress"></div>
+            <div class="metric-fill" [style.width.%]="m.value" [style.background]="m.color"></div>
           </div>
         </div>
       </div>
-      
+
       <!-- AI Tips -->
       <div class="side-card">
         <h3>Conseils IA</h3>

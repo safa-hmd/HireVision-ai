@@ -13,123 +13,122 @@
 
   <div class="page-body">
 
-    <!-- Stats -->
-    <div class="grid-4 mb-6">
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#DBEAFE">
-          <i data-lucide="file-text" style="color:#2563EB;width:20px;height:20px;"></i>
-        </div>
-        <div class="stat-label">Complétion du Profil</div>
-        <div class="stat-value text-primary" data-countup="75" data-suffix="%">0%</div>
-        <div class="progress-wrap mt-2">
-          <div class="progress-bar progress-primary" style="width:75%"></div>
-        </div>
-        <div class="stat-change text-muted">Complétez votre CV</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#D1FAE5">
-          <i data-lucide="graduation-cap" style="color:#10B981;width:20px;height:20px;"></i>
-        </div>
-        <div class="stat-label">Entretiens Complétés</div>
-        <div class="stat-value text-primary" data-countup="12">0</div>
-        <div class="stat-change text-success">+3 cette semaine</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#FEF3C7">
-          <i data-lucide="award" style="color:#F59E0B;width:20px;height:20px;"></i>
-        </div>
-        <div class="stat-label">Score Moyen</div>
-        <div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div>
-        <div class="stat-change text-success">+5% vs semaine dernière</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-icon" style="background:#EDE9FE">
-          <i data-lucide="briefcase" style="color:#7C3AED;width:20px;height:20px;"></i>
-        </div>
-        <div class="stat-label">Offres Correspondantes</div>
-        <div class="stat-value text-primary" data-countup="8">0</div>
-        <div class="stat-change text-muted">Basé sur vos compétences</div>
-      </div>
+    <!-- ═══ LOADING ═══ -->
+    <div *ngIf="isLoading" class="dash-loading">
+      <div class="dash-spinner"></div>
+      <p class="text-muted text-sm">Chargement de votre tableau de bord...</p>
     </div>
 
-    <!-- Charts -->
-    <div class="grid-2 mb-6">
+    <ng-container *ngIf="!isLoading">
+
+      <!-- ── STATS ── -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#DBEAFE">
+            <i data-lucide="file-text" style="color:#2563EB;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Complétion du Profil</div>
+          <div class="stat-value text-primary" [attr.data-countup]="profileCompletion" data-suffix="%">0%</div>
+          <div class="progress-wrap mt-2">
+            <div class="progress-bar progress-primary" [style.width.%]="profileCompletion"></div>
+          </div>
+          <div class="stat-change text-muted">
+            {{ hasCv ? 'Profil bien renseigné' : 'Ajoutez votre CV pour progresser' }}
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#D1FAE5">
+            <i data-lucide="graduation-cap" style="color:#10B981;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Entretiens Complétés</div>
+          <div class="stat-value text-primary" [attr.data-countup]="interviewsCount">0</div>
+          <div class="stat-change text-muted">Total depuis votre inscription</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#FEF3C7">
+            <i data-lucide="award" style="color:#F59E0B;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Score Moyen</div>
+          <div class="stat-value" style="color:var(--success)" [attr.data-countup]="averageScore" data-suffix="%">0%</div>
+          <div class="stat-change text-muted">Moyenne sur tous vos entretiens</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:#EDE9FE">
+            <i data-lucide="briefcase" style="color:#7C3AED;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">Offres Correspondantes</div>
+          <div class="stat-value text-primary" [attr.data-countup]="matchingOffersCount">0</div>
+          <div class="stat-change text-muted">Basé sur vos compétences</div>
+        </div>
+      </div>
+
+      <!-- ── CHARTS ── -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header">
+            <h3>Performance aux Entretiens</h3>
+            <p>Scores de vos derniers entretiens</p>
+          </div>
+          <div class="card-body">
+            <div style="height:240px" *ngIf="performanceChartData.length">
+              <canvas id="chart-perf"></canvas>
+            </div>
+            <p *ngIf="!performanceChartData.length" class="text-muted text-sm">
+              Aucun entretien réalisé pour le moment.
+            </p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Niveau de Compétences</h3>
+            <p>Évaluation actuelle (moyenne globale)</p>
+          </div>
+          <div class="card-body">
+            <div style="height:240px"><canvas id="chart-skills"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI BANNER ── -->
+      <div class="gradient-banner mb-6">
+        <div class="flex items-center gap-4 mb-4">
+          <i data-lucide="brain" style="width:28px;height:28px"></i>
+          <h3>Recommandations IA</h3>
+        </div>
+        <p style="margin-bottom:16px">Basé sur votre profil et vos performances récentes :</p>
+        <div class="flex gap-3" style="flex-wrap:wrap">
+          <a routerLink="/frontoffice/interviewPrep" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Pratiquer un entretien</a>
+          <a routerLink="/frontoffice/cvAnalyse"     class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Améliorer le CV</a>
+          <a routerLink="/frontoffice/careerRoadmap" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Plan Carrière</a>
+        </div>
+      </div>
+
+      <!-- ── RECENT ACTIVITY ── -->
       <div class="card">
         <div class="card-header">
-          <h3>Performance aux Entretiens</h3>
-          <p>Scores sur la dernière semaine</p>
+          <h3>Activité Récente</h3>
+          <p>Dernières sessions d'entretien</p>
         </div>
-        <div class="card-body">
-          <div style="height:240px"><canvas id="chart-perf"></canvas></div>
+        <div class="card-body space-y-4">
+          <div class="list-item" *ngFor="let iv of recentInterviews">
+            <div>
+              <div class="font-medium">{{ iv.label }}</div>
+              <div class="text-sm text-muted">{{ iv.dateLabel }}</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-primary">{{ iv.score }}%</span>
+              <a routerLink="/frontoffice/interviewPrep" class="btn btn-outline btn-sm">Nouvel entretien</a>
+            </div>
+          </div>
+          <p *ngIf="!recentInterviews.length" class="text-muted text-sm">
+            Aucun entretien pour le moment — lancez votre premier essai !
+          </p>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <h3>Niveau de Compétences</h3>
-          <p>Évaluation actuelle</p>
-        </div>
-        <div class="card-body">
-          <div style="height:240px"><canvas id="chart-skills"></canvas></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- AI Banner -->
-    <div class="gradient-banner mb-6">
-      <div class="flex items-center gap-4 mb-4">
-        <i data-lucide="brain" style="width:28px;height:28px"></i>
-        <h3>Recommandations IA</h3>
-      </div>
-      <p style="margin-bottom:16px">Basé sur votre profil et vos performances récentes :</p>
-      <div class="flex gap-3" style="flex-wrap:wrap">
-        <a routerLink="/frontoffice/interviewPrep" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Pratiquer Java</a>
-        <a routerLink="/frontoffice/cvAnalyse"     class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Améliorer le CV</a>
-        <a routerLink="/frontoffice/careerRoadmap" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Plan Carrière</a>
-      </div>
-    </div>
-
-    <!-- Recent activity -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Activité Récente</h3>
-        <p>Dernières sessions d'entretien</p>
-      </div>
-      <div class="card-body space-y-4">
-        <div class="list-item">
-          <div>
-            <div class="font-medium">Entretien Technique Java</div>
-            <div class="text-sm text-muted">Aujourd'hui, 10h30</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-primary">85%</span>
-            <a routerLink="/frontoffice/feedback" class="btn btn-outline btn-sm">Voir Rapport</a>
-          </div>
-        </div>
-        <div class="list-item">
-          <div>
-            <div class="font-medium">Session Spring Boot</div>
-            <div class="text-sm text-muted">Hier, 14h15</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-primary">78%</span>
-            <a routerLink="/frontoffice/feedback" class="btn btn-outline btn-sm">Voir Rapport</a>
-          </div>
-        </div>
-        <div class="list-item">
-          <div>
-            <div class="font-medium">Pratique DevOps</div>
-            <div class="text-sm text-muted">6 Juin, 16h00</div>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-primary">72%</span>
-            <a routerLink="/frontoffice/feedback" class="btn btn-outline btn-sm">Voir Rapport</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    </ng-container>
   </div>
 </div>

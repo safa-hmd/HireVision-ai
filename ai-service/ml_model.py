@@ -1,9 +1,37 @@
-import joblib
+"""
+Classification de profil — version SÉMANTIQUE (zero-shot par embeddings).
+
+Pourquoi ce changement :
+- L'ancienne version encodait les compétences en vecteur binaire (23 colonnes
+  fixes) puis demandait à un RandomForest entraîné sur... 44 lignes de tenter
+  de généraliser sur 5 classes. Avec si peu de données, le modèle mémorise le
+  dataset plus qu'il n'apprend une vraie règle -> ses prédictions ne sont pas
+  fiables sur de nouveaux CV.
+- Le vecteur binaire faisait aussi du matching par sous-chaîne bugué
+  ("c" in "react" -> vrai) : une compétence "C" activait à tort la colonne
+  "react", "csharp", etc.
+
+Nouvelle approche : on ne dépend plus d'un dictionnaire de colonnes figées.
+On décrit chaque PROFIL par une phrase de référence, puis on compare le sens
+des compétences du candidat à ces phrases via des embeddings. Ça fonctionne
+dès le premier jour, sans dataset d'entraînement, et reconnaît des technologies
+jamais vues explicitement (ex: "Quarkus" est proche sémantiquement de "Java
+backend" même si "Quarkus" n'apparaît dans aucune liste écrite à la main).
+
+Le RandomForest entraîné (train_model.py / model.joblib) reste disponible et
+est utilisé en signal SECONDAIRE, uniquement pour affiner la confiance quand
+il est d'accord avec la prédiction sémantique — jamais comme unique source de
+vérité tant que le dataset n'a pas une taille raisonnable (voir train_model.py).
+"""
 import os
+import joblib
+import numpy as np
 import pandas as pd
+from embeddings import embed, cosine_sim
 
 MODEL_PATH = "model.joblib"
 
+# ── Colonnes conservées pour compatibilité avec model.joblib existant ───────
 SKILL_COLUMNS = [
     "java", "spring", "angular", "react", "vue", "python", "php",
     "docker", "kubernetes", "azure", "aws", "mysql", "mongodb",
@@ -22,73 +50,124 @@ SKILL_ALIASES = {
     "github actions": "cicd", "jenkins": "cicd"
 }
 
+# ── Descriptions de référence par profil : le coeur de la classification ───
+PROFILE_DESCRIPTIONS = {
+    "Backend": "développeur backend : Java, Spring Boot, Python, PHP, Node.js, "
+               "C#, .NET, API REST, bases de données, architecture serveur",
+    "Frontend": "développeur frontend : Angular, React, Vue, TypeScript, "
+                "JavaScript, HTML, CSS, interfaces utilisateur, Flutter, Dart",
+    "FullStack": "développeur fullstack : backend Java Spring et frontend "
+                 "Angular React, bases de données, API REST, applications complètes",
+    "DevOps": "ingénieur DevOps : Docker, Kubernetes, CI/CD, cloud AWS Azure, "
+              "infrastructure, automatisation des déploiements",
+    "MLOps": "ingénieur MLOps machine learning : Python, MLflow, entraînement "
+             "de modèles, Docker, Kubernetes, déploiement de modèles ML en production",
+}
 
-def load_model():
+CATEGORY_HINTS = {
+    "Backend": ["java", "spring", "python", "php", "node", "csharp", "dotnet", "cpp", "mysql", "mongodb"],
+    "Frontend": ["angular", "react", "vue", "typescript", "javascript", "flutter", "dart"],
+    "DevOps": ["docker", "kubernetes", "azure", "aws", "cicd"],
+    "MLOps": ["python", "mlflow", "docker", "kubernetes", "aws", "azure"],
+}
+
+
+def load_rf_model():
+    """Charge le RandomForest si présent (signal secondaire optionnel)."""
     if os.path.exists(MODEL_PATH):
-        return joblib.load(MODEL_PATH)
+        try:
+            return joblib.load(MODEL_PATH)
+        except Exception:
+            return None
     return None
 
 
 def skill_to_vector(skills: list[str]) -> list[int]:
-    skills_lower = [s.lower() for s in skills]
+    """
+    Conservé pour le RandomForest existant, mais CORRIGÉ :
+    l'ancien code faisait `col in s or s in col`, ce qui matchait
+    "c" avec "react" (car la lettre "c" est une sous-chaîne de "react").
+    Désormais on exige une égalité EXACTE après normalisation par alias,
+    sauf pour les colonnes de 4+ caractères où un "contient" à sens unique
+    (skill contient col) reste acceptable et sûr.
+    """
+    skills_normalized = []
+    for s in skills:
+        s_low = s.lower().strip()
+        skills_normalized.append(SKILL_ALIASES.get(s_low, s_low))
+
     vector = []
     for col in SKILL_COLUMNS:
-        found = False
-        for s in skills_lower:
-            # Check direct match
-            if col in s or s in col:
-                found = True
-                break
-            # Check alias
-            alias = SKILL_ALIASES.get(s)
-            if alias == col:
-                found = True
-                break
+        found = any(
+            s == col or (len(col) >= 4 and col in s)
+            for s in skills_normalized
+        )
         vector.append(1 if found else 0)
     return vector
 
 
+def _semantic_profile_scores(skills: list[str]) -> dict:
+    """Similarité cosinus entre le profil de compétences du candidat et
+    chaque description de référence -> converti en pseudo-probabilités."""
+    if not skills:
+        return {p: 0.0 for p in PROFILE_DESCRIPTIONS}
+
+    skills_text = ", ".join(skills)
+    sims = {
+        profile: max(0.0, cosine_sim(skills_text, description))
+        for profile, description in PROFILE_DESCRIPTIONS.items()
+    }
+    total = sum(sims.values()) or 1e-9
+    return {p: v / total for p, v in sims.items()}  # normalisation -> pseudo-proba
+
+
 def predict_profile(skills: list[str]) -> dict:
-    model = load_model()
-    if model is None:
+    if not skills:
         return {"profile": "Non déterminé", "confidence": 0, "global_score": 0, "skill_scores": {}}
 
-    vector = skill_to_vector(skills)
-    df = pd.DataFrame([vector], columns=SKILL_COLUMNS)
+    # ── 1) Prédiction sémantique (source principale, fonctionne sans entraînement) ──
+    semantic_scores = _semantic_profile_scores(skills)
+    semantic_profile = max(semantic_scores, key=semantic_scores.get)
+    semantic_confidence = semantic_scores[semantic_profile]
 
-    prediction = model.predict(df)[0]
-    proba = model.predict_proba(df)[0]
-    confidence = round(max(proba) * 100)
+    # ── 2) Signal secondaire du RandomForest, si le modèle est chargeable ──
+    rf_model = load_rf_model()
+    final_profile = semantic_profile
+    final_confidence = semantic_confidence
 
-    # Score par skill selon le profil détecté
+    if rf_model is not None:
+        try:
+            vector = skill_to_vector(skills)
+            df = pd.DataFrame([vector], columns=SKILL_COLUMNS)
+            rf_pred = rf_model.predict(df)[0]
+            rf_proba = max(rf_model.predict_proba(df)[0])
+
+            if rf_pred == semantic_profile:
+                # Les deux méthodes sont d'accord -> on renforce la confiance.
+                final_confidence = min(0.99, (semantic_confidence + rf_proba) / 2 + 0.15)
+            # Si elles sont en désaccord, on privilégie la méthode sémantique
+            # (le RF est entraîné sur un dataset encore trop petit pour trancher).
+        except Exception:
+            pass  # le RF reste purement optionnel
+
+    confidence_pct = round(final_confidence * 100)
+
+    # ── 3) Score par compétence : similarité sémantique compétence <-> profil ──
+    core_skills = CATEGORY_HINTS.get(final_profile, [])
     scores = {}
-    profile_weights = {
-        "Backend":   ["java", "spring", "python", "php", "node", "csharp", "dotnet", "cpp"],
-        "Frontend":  ["angular", "react", "vue", "typescript", "javascript", "flutter", "dart"],
-        "FullStack": ["java", "spring", "angular", "react", "python", "mysql", "typescript"],
-        "DevOps":    ["docker", "kubernetes", "azure", "aws", "cicd", "linux"],
-        "MLOps":     ["python", "mlflow", "docker", "kubernetes", "aws", "azure"]
-    }
-
-    core_skills = profile_weights.get(prediction, [])
-
     for skill in skills:
         skill_lower = skill.lower()
-        normalized = SKILL_ALIASES.get(skill_lower, skill_lower)
-        if any(core in skill_lower or core in normalized for core in core_skills):
-            scores[skill] = min(95, 75 + confidence // 5)
-        elif any(col in skill_lower for col in ["docker", "kubernetes", "aws", "azure", "cicd"]):
-            scores[skill] = 80
-        elif any(col in skill_lower for col in ["git", "github", "agile", "scrum", "rest", "api"]):
-            scores[skill] = 75
-        else:
-            scores[skill] = 65
+        sim_to_profile = cosine_sim(skill, PROFILE_DESCRIPTIONS[final_profile])
+        base = 60 + round(sim_to_profile * 35)  # échelle ~60-95 selon pertinence sémantique
+        if any(core in skill_lower for core in core_skills):
+            base = max(base, 80)
+        scores[skill] = max(50, min(97, base))
 
     global_score = round(sum(scores.values()) / len(scores)) if scores else 0
 
     return {
-        "profile": prediction,
-        "confidence": confidence,
+        "profile": final_profile,
+        "confidence": confidence_pct,
         "global_score": global_score,
         "skill_scores": scores
     }
