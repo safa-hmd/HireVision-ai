@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { CvService }   from '../../services/cv.service';
 import { firstValueFrom } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 declare const lucide: any;
 declare function showToast(msg: string, type?: string): void;
@@ -162,10 +164,27 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     const userId = this.authService.getCurrentUserId();
 
     // Passer userId pour anti-répétition (Spring Boot → Python)
-    const url = `${this.javaUrl}/interview/questions/${this.specialty.id}`
-              + (userId ? `?userId=${userId}` : '');
+    let url = `${this.javaUrl}/interview/questions/${encodeURIComponent(this.specialty.id)}`
+            + (userId ? `?userId=${userId}` : '?');
 
-    this.http.get<any>(url).subscribe({
+    // Spécialité "custom" (compétence détectée dans le CV, pas parmi les 6
+    // pré-câblées côté Python) : on transmet titre/description/niveau/durée
+    // pour que l'IA génère des questions pertinentes au lieu de retomber
+    // silencieusement sur des questions Java.
+    if (this.specialty.isCustom) {
+      url += `&title=${encodeURIComponent(this.specialty.title)}`
+           + `&description=${encodeURIComponent(this.specialty.description || '')}`
+           + `&level=${encodeURIComponent(this.specialty.level || 'Intermédiaire')}`
+           + `&count=${this.specialty.count || 15}`
+           + `&duration=${this.specialty.duration || 45}`;
+    }
+
+    this.http.get<any>(url).pipe(
+      // Filet de sécurité : même si Spring/Python restent bloqués (pas de
+      // réponse), on ne laisse jamais le spinner tourner indéfiniment.
+      timeout(65_000),
+      catchError(err => throwError(() => err))
+    ).subscribe({
       next: (res) => {
         this.questions = res.questions || [];
         this.isLoading = false;
@@ -173,7 +192,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       },
       error: () => {
         this.isLoading = false;
-        showToast('Erreur chargement questions', 'danger');
+        showToast('Erreur chargement questions — vérifiez que le service IA (Python) tourne bien', 'danger');
       }
     });
   }

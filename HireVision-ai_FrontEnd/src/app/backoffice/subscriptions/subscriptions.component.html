@@ -1,0 +1,143 @@
+<div class="app-shell">
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Abonnements & Revenus</h1><p class="page-subtitle">Gestion des plans et paiements</p></div>
+      <div class="page-header-actions">
+        <button class="btn btn-outline btn-sm" (click)="exportData()"><i data-lucide="download"></i> Exporter</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Chargement -->
+      <div class="card" *ngIf="loading">
+        <div class="card-body text-center text-muted" style="padding:40px">Chargement des données...</div>
+      </div>
+
+      <!-- Erreur -->
+      <div class="card" *ngIf="error && !loading">
+        <div class="card-body text-center" style="padding:40px">
+          <p class="text-danger">Impossible de charger les données d'abonnements.</p>
+          <button class="btn btn-outline btn-sm" (click)="loadStats()">Réessayer</button>
+        </div>
+      </div>
+
+      <ng-container *ngIf="stats && !loading">
+
+        <!-- Revenue KPIs -->
+        <div class="grid-4 mb-6">
+          <div class="stat-card" style="border-color:#10B981">
+            <div class="stat-label">MRR (Revenus Mensuels)</div>
+            <div class="stat-value text-success" [attr.data-countup]="stats.mrr" data-suffix="€">0€</div>
+            <div class="stat-change" [class.text-success]="stats.mrrChangePercent >= 0" [class.text-danger]="stats.mrrChangePercent < 0">
+              {{ stats.mrrChangePercent >= 0 ? '↑' : '↓' }} {{ stats.mrrChangePercent }}% vs mois dernier
+            </div>
+          </div>
+          <div class="stat-card" style="border-color:#4F46E5">
+            <div class="stat-label">ARR (Annuel Estimé)</div>
+            <div class="stat-value" style="color:#4F46E5" [attr.data-countup]="stats.arr" data-suffix="€">0€</div>
+            <div class="stat-change text-muted">MRR × 12</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Abonnés Payants</div>
+            <div class="stat-value text-primary" [attr.data-countup]="stats.payingSubscribersCount">0</div>
+            <div class="stat-change text-muted">Sur {{ stats.totalUsers }} utilisateurs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Revenu Moyen / Abonné</div>
+            <div class="stat-value text-warning" [attr.data-countup]="stats.arpu" data-suffix="€">0€</div>
+            <div class="stat-change text-muted">MRR / abonnés payants</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-2 mb-6">
+          <div class="card">
+            <div class="card-header"><h3>Évolution des Revenus</h3><p>6 derniers mois</p></div>
+            <div class="card-body"><div style="height:230px"><canvas id="chart-rev"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Répartition des Plans</h3><p>Distribution actuelle</p></div>
+            <div class="card-body"><div style="height:230px"><canvas id="chart-pie"></canvas></div></div>
+          </div>
+        </div>
+
+        <!-- Plans cards -->
+        <div class="grid-3 mb-6">
+          <div class="card" style="border-color:var(--border)">
+            <div class="card-body text-center">
+              <div class="badge badge-muted" style="margin-bottom:12px;font-size:.82rem">Gratuit</div>
+              <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px">0€</div>
+              <div class="text-sm text-muted mb-4">/mois</div>
+              <div class="text-sm space-y-3">
+                <div>5 entretiens / mois</div><div>Feedback basique</div><div>1 CV</div>
+              </div>
+              <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+                <div class="stat-value" style="font-size:1.4rem;color:var(--text-muted)">{{ planCount('Gratuit') }}</div>
+                <div class="text-xs text-muted">utilisateurs</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="border-color:#4F46E5;border-width:2px">
+            <div class="card-body text-center">
+              <div class="badge badge-admin" style="margin-bottom:12px;font-size:.82rem">Pro ★ Populaire</div>
+              <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px;color:#4F46E5">29€</div>
+              <div class="text-sm text-muted mb-4">/mois</div>
+              <div class="text-sm space-y-3">
+                <div>Entretiens illimités</div><div>Analyse IA avancée</div><div>CV illimités</div><div>Plan carrière</div>
+              </div>
+              <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+                <div class="stat-value" style="font-size:1.4rem;color:#4F46E5">{{ planCount('Pro') }}</div>
+                <div class="text-xs text-muted">utilisateurs</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="border-color:#F59E0B;border-width:2px">
+            <div class="card-body text-center">
+              <div class="badge badge-warning" style="margin-bottom:12px;font-size:.82rem">Premium</div>
+              <div style="font-size:2rem;font-weight:800;font-family:var(--font-head);margin-bottom:4px;color:#F59E0B">59€</div>
+              <div class="text-sm text-muted mb-4">/mois</div>
+              <div class="text-sm space-y-3">
+                <div>Tout le plan Pro</div><div>Coach IA dédié</div><div>Simulation réelle</div><div>Support prioritaire</div>
+              </div>
+              <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+                <div class="stat-value" style="font-size:1.4rem;color:#F59E0B">{{ planCount('Premium') }}</div>
+                <div class="text-xs text-muted">utilisateurs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent transactions -->
+        <div class="card">
+          <div class="card-header"><h3>Transactions Récentes</h3><p>Derniers paiements reçus</p></div>
+          <div class="card-body" style="padding:0">
+            <table>
+              <thead><tr><th>Utilisateur</th><th>Plan</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let t of stats.recentTransactions">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar avatar-sm">{{ t.userFullName ? t.userFullName.substring(0,2).toUpperCase() : '?' }}</div>
+                      {{ t.userFullName }}
+                    </div>
+                  </td>
+                  <td>{{ t.plan }}</td>
+                  <td><strong>{{ t.amount }}€</strong></td>
+                  <td class="text-xs text-muted">{{ t.paymentDate | date:'d MMM y' }}</td>
+                  <td><span class="badge" [ngClass]="statusBadgeClass(t.status)">{{ statusLabel(t.status) }}</span></td>
+                </tr>
+                <tr *ngIf="!stats.recentTransactions.length">
+                  <td colspan="5" class="text-center text-muted">Aucune transaction pour le moment</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>

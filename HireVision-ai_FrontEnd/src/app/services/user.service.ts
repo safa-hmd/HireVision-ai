@@ -50,4 +50,8 @@ uploadPicture(id: number, file: File): Observable<UserDTO> {
 getPictureUrl(filename: string): string {
   return `http://localhost:8086/HireVision/users/pictures/${filename}`;
 }
+//supprimer ok
+create(dto: UserDTO): Observable<UserDTO> {
+  return this.http.post<UserDTO>(this.baseUrl, dto);
+}
 }

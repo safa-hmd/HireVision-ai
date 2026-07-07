@@ -1,0 +1,166 @@
+<div class="app-shell">
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Tableau de Bord</h1>
+        <p class="page-subtitle">Vue d'ensemble de la plateforme HireVision AI</p>
+      </div>
+      <div class="page-header-actions">
+        <span class="text-sm text-muted">Données en direct</span>
+        <button class="btn btn-primary btn-sm" (click)="refreshData()">
+          <i data-lucide="refresh-cw"></i> Actualiser
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Chargement -->
+      <div class="card" *ngIf="!$any(stats)">
+        <div class="card-body text-center text-muted" style="padding:40px">
+          Chargement des statistiques...
+        </div>
+      </div>
+
+      <!-- Erreur -->
+      <div class="card" *ngIf="error && !stats">
+        <div class="card-body text-center" style="padding:40px">
+          <p class="text-danger">Impossible de charger les statistiques du tableau de bord.</p>
+          <button class="btn btn-outline btn-sm" (click)="$event">Réessayer</button>
+        </div>
+      </div>
+
+      <ng-container *ngIf="stats">
+
+        <!-- KPIs -->
+        <div class="grid-4 mb-6">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#EDE9FE"><i data-lucide="users" style="color:#7C3AED;width:18px;height:18px"></i></div>
+            <div class="stat-label">Utilisateurs Totaux</div>
+            <div class="stat-value" style="color:#4F46E5" [attr.data-countup]="stats.totalUsers">0</div>
+            <div class="stat-change" [class.text-success]="stats.totalUsersChangePercent >= 0" [class.text-danger]="stats.totalUsersChangePercent < 0">
+              {{ stats.totalUsersChangePercent >= 0 ? '↑' : '↓' }} {{ formatChange(stats.totalUsersChangePercent) }} (30j)
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#D1FAE5"><i data-lucide="video" style="color:#10B981;width:18px;height:18px"></i></div>
+            <div class="stat-label">Entretiens ce mois</div>
+            <div class="stat-value text-success" [attr.data-countup]="stats.totalInterviewsThisMonth">0</div>
+            <div class="stat-change" [class.text-success]="stats.interviewsChangePercent >= 0" [class.text-danger]="stats.interviewsChangePercent < 0">
+              {{ stats.interviewsChangePercent >= 0 ? '↑' : '↓' }} {{ formatChange(stats.interviewsChangePercent) }} vs mois dernier
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#DBEAFE"><i data-lucide="trending-up" style="color:#2563EB;width:18px;height:18px"></i></div>
+            <div class="stat-label">Score Moyen Global</div>
+            <div class="stat-value text-primary" [attr.data-countup]="stats.avgGlobalScore" data-suffix="%">0%</div>
+            <div class="stat-change" [class.text-success]="stats.avgGlobalScoreChangePercent >= 0" [class.text-danger]="stats.avgGlobalScoreChangePercent < 0">
+              {{ stats.avgGlobalScoreChangePercent >= 0 ? '↑' : '↓' }} {{ formatChange(stats.avgGlobalScoreChangePercent) }} ce mois
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FEF3C7"><i data-lucide="credit-card" style="color:#F59E0B;width:18px;height:18px"></i></div>
+            <div class="stat-label">Revenus ce mois</div>
+            <div class="stat-value text-warning" *ngIf="subStats" [attr.data-countup]="subStats.mrr" data-suffix="€">0€</div>
+            <div class="stat-change" *ngIf="subStats" [class.text-success]="subStats.mrrChangePercent >= 0" [class.text-danger]="subStats.mrrChangePercent < 0">
+              {{ subStats.mrrChangePercent >= 0 ? '↑' : '↓' }} {{ formatChange(subStats.mrrChangePercent) }} vs mois dernier
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts row 1 -->
+        <div class="grid-2 mb-6">
+          <div class="card">
+            <div class="card-header"><h3>Nouveaux Utilisateurs</h3><p>Inscriptions sur les 7 derniers jours</p></div>
+            <div class="card-body"><div style="height:240px"><canvas id="chart-users"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Entretiens par Difficulté</h3><p>Répartition des questions posées</p></div>
+            <div class="card-body">
+              <div style="height:240px" *ngIf="stats.interviewsByDifficulty.length"><canvas id="chart-categories"></canvas></div>
+              <div class="text-center text-muted" style="padding:60px 0" *ngIf="!stats.interviewsByDifficulty.length">Aucune donnée pour le moment</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts row 2 -->
+        <div class="grid-2 mb-6">
+          <div class="card">
+            <div class="card-header"><h3>Revenus Mensuels</h3><p>6 derniers mois</p></div>
+            <div class="card-body"><div style="height:220px"><canvas id="chart-revenue"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Distribution des Abonnements</h3><p>Répartition par plan</p></div>
+            <div class="card-body"><div style="height:220px"><canvas id="chart-plans"></canvas></div></div>
+          </div>
+        </div>
+
+        <!-- Bottom row -->
+        <div class="grid-2">
+
+          <!-- Recent users -->
+          <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
+              <div><h3>Derniers Inscrits</h3><p>Nouveaux utilisateurs</p></div>
+              <a routerLink="/backoffice/users" class="btn btn-outline btn-sm">Voir tout</a>
+            </div>
+            <div class="card-body" style="padding-top:0">
+              <table>
+                <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Email</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let u of stats.recentUsers">
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="avatar avatar-sm">{{ u.fullName ? u.fullName.substring(0,2).toUpperCase() : '?' }}</div>
+                        {{ u.fullName }}
+                      </div>
+                    </td>
+                    <td><span class="badge" [class.badge-admin]="u.role === 'ADMIN'" [class.badge-success]="u.role !== 'ADMIN'">{{ u.role }}</span></td>
+                    <td class="text-muted text-xs">{{ u.email }}</td>
+                  </tr>
+                  <tr *ngIf="!stats.recentUsers.length">
+                    <td colspan="3" class="text-center text-muted">Aucun utilisateur pour le moment</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent interviews -->
+          <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
+              <div><h3>Entretiens Récents</h3><p>Dernières sessions</p></div>
+              <a routerLink="/backoffice/interviews" class="btn btn-outline btn-sm">Voir tout</a>
+            </div>
+            <div class="card-body" style="padding-top:0">
+              <table>
+                <thead><tr><th>Candidat</th><th>Difficulté</th><th>Score</th><th>Durée</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let i of stats.recentInterviews">
+                    <td>{{ i.candidateName }}</td>
+                    <td><span class="badge badge-primary">{{ i.difficulty }}</span></td>
+                    <td>
+                      <strong *ngIf="i.globalScore !== null" [class.text-success]="i.globalScore >= 75" [class.text-warning]="i.globalScore < 75 && i.globalScore >= 50" [class.text-danger]="i.globalScore < 50">
+                        {{ i.globalScore }}%
+                      </strong>
+                      <span *ngIf="i.globalScore === null" class="text-muted">—</span>
+                    </td>
+                    <td class="text-muted">{{ i.durationMinutes }} min</td>
+                  </tr>
+                  <tr *ngIf="!stats.recentInterviews.length">
+                    <td colspan="4" class="text-center text-muted">Aucun entretien pour le moment</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>

@@ -1,8 +1,4 @@
-import httpx
-import os
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+from llm_client import call_llm
 
 
 def generate_interview_questions(
@@ -47,13 +43,7 @@ FORMAT DE RÉPONSE — réponds UNIQUEMENT en JSON valide, sans markdown, sans b
 Les questions doivent être en français, personnalisées selon les compétences et le poste."""
 
     try:
-        response = httpx.post(
-            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=60
-        )
-        data = response.json()
-        raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+        raw_text = call_llm(prompt, timeout=25)
 
         # Nettoyer le JSON
         raw_text = raw_text.strip()

@@ -126,6 +126,10 @@ getToken(): string | null {
     window.location.href = 'http://localhost:8086/HireVision/oauth2/authorization/google';
   }
 
+  loginWithGithub(): void {
+    window.location.href = 'http://localhost:8086/HireVision/oauth2/authorization/github';
+  }
+
   forgotPassword(email: string): Observable<string> {
     return this.http.post(
       `http://localhost:8086/HireVision/auth/forgot-password`,

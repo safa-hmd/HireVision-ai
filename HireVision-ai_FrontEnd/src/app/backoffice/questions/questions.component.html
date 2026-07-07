@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Questions — HireVision AI Admin</title>
+  
+  <style>
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--surface);border-radius:var(--radius);padding:28px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Banque de Questions</h1><p class="page-subtitle">Gérez les questions d'entretien de la plateforme</p></div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="plus"></i> Nouvelle Question</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card"><div class="stat-label">Total Questions</div><div class="stat-value text-primary" data-countup="342">0</div><div class="stat-change text-muted">Toutes catégories</div></div>
+        <div class="stat-card"><div class="stat-label">Java</div><div class="stat-value" style="color:#4F46E5" data-countup="78">0</div><div class="stat-change text-muted">questions</div></div>
+        <div class="stat-card"><div class="stat-label">Spring Boot</div><div class="stat-value text-success" data-countup="64">0</div><div class="stat-change text-muted">questions</div></div>
+        <div class="stat-card"><div class="stat-label">Taux d'Utilisation</div><div class="stat-value text-warning" data-countup="89" data-suffix="%">0%</div><div class="stat-change text-success">↑ Excellent</div></div>
+      </div>
+
+      <!-- Filters + table -->
+      <div class="card">
+        <div class="card-body" style="border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div class="search-wrap" style="flex:1;min-width:200px">
+            <i data-lucide="search"></i>
+            <input class="form-input" id="q-search" placeholder="Rechercher une question…" />
+          </div>
+          <select class="form-select" style="width:160px"><option value="">Toutes les catégories</option><option>Java</option><option>Spring Boot</option><option>Angular</option><option>DevOps</option><option>RH</option></select>
+          <select class="form-select" style="width:140px"><option value="">Tous les niveaux</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table id="q-table">
+            <thead><tr><th style="width:40%">Question</th><th>Catégorie</th><th>Niveau</th><th>Utilisations</th><th>Score Moy.</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td class="text-sm">Expliquez le concept d'injection de dépendances en Java.</td><td><span class="badge badge-primary">Java</span></td><td><span class="badge badge-warning">Intermédiaire</span></td><td>312</td><td class="text-success font-medium">78%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm" onclick="confirmAction('Supprimer ?',()=>showToast('Supprimée','danger'))"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td class="text-sm">Quelle est la différence entre @Component, @Service et @Repository dans Spring ?</td><td><span class="badge badge-primary">Spring Boot</span></td><td><span class="badge badge-danger">Avancé</span></td><td>289</td><td class="text-warning font-medium">71%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td class="text-sm">Qu'est-ce qu'un Observable en Angular et comment l'utiliser ?</td><td><span class="badge badge-warning">Angular</span></td><td><span class="badge badge-warning">Intermédiaire</span></td><td>245</td><td class="text-success font-medium">80%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td class="text-sm">Expliquez la différence entre Docker et Kubernetes.</td><td><span class="badge badge-success">DevOps</span></td><td><span class="badge badge-warning">Intermédiaire</span></td><td>198</td><td class="text-primary font-medium">74%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td class="text-sm">Décrivez une situation où vous avez géré un conflit d'équipe.</td><td><span class="badge badge-muted">RH</span></td><td><span class="badge badge-success">Débutant</span></td><td>421</td><td class="text-success font-medium">85%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+              <tr><td class="text-sm">Comment fonctionne le Garbage Collector en Java ?</td><td><span class="badge badge-primary">Java</span></td><td><span class="badge badge-danger">Avancé</span></td><td>176</td><td class="text-warning font-medium">67%</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModal()"><i data-lucide="edit-2"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span class="text-sm text-muted">Affichage 1–6 sur 342</span>
+          <div class="flex gap-2">
+            <button class="btn btn-outline btn-sm">Précédent</button>
+            <button class="btn btn-primary btn-sm">1</button>
+            <button class="btn btn-outline btn-sm">2</button>
+            <button class="btn btn-outline btn-sm">Suivant</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 style="margin-bottom:20px">Nouvelle Question</h3>
+    <div class="form-group"><label class="form-label">Question</label><textarea class="form-textarea" rows="4" placeholder="Saisissez la question…"></textarea></div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select"><option>Java</option><option>Spring Boot</option><option>Angular</option><option>DevOps</option><option>RH</option></select></div>
+      <div class="form-group"><label class="form-label">Niveau</label><select class="form-select"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Réponse type (optionnel)</label><textarea class="form-textarea" rows="3" placeholder="Éléments de réponse attendus…"></textarea></div>
+    <div class="flex gap-3 mt-4">
+      <button class="btn btn-primary flex-1" onclick="closeModal();showToast('Question créée !')">Enregistrer</button>
+      <button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

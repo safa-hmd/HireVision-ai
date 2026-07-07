@@ -19,4 +19,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query("SELECT q FROM Question q WHERE q.interview.id = :interviewId " +
             "AND q.answer IS NULL")
     List<Question> findUnansweredByInterviewId(@Param("interviewId") Long interviewId);
+
+    @Query("SELECT q.difficulty, COUNT(q) FROM Question q GROUP BY q.difficulty")
+    List<Object[]> countGroupedByDifficulty();
 }

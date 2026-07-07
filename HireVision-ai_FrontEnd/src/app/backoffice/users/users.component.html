@@ -1,0 +1,151 @@
+<div class="app-shell">
+  <div class="main-content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Gestion des Utilisateurs</h1>
+        <p class="page-subtitle">{{ users.length }} utilisateurs inscrits</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" (click)="openModal()">
+          <i data-lucide="user-plus"></i> Ajouter un utilisateur
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Filters -->
+      <div class="card mb-6">
+        <div class="card-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:220px">
+            <i data-lucide="search"></i>
+            <input class="form-input" placeholder="Rechercher par nom, email…"
+                   [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+          </div>
+    <select class="form-select" style="width:160px"
+        [(ngModel)]="roleFilter" (ngModelChange)="onRoleFilterChange($event)">
+  <option value="">Tous les rôles</option>
+  <option value="ADMIN">Admin</option>
+  <option value="CANDIDATE">Candidat</option>
+</select>
+          <button class="btn btn-outline btn-sm" (click)="showToast('Export CSV généré !')">
+            <i data-lucide="download"></i> Export CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading / Error -->
+      <div *ngIf="loading" class="card mb-6"><div class="card-body">Chargement…</div></div>
+      <div *ngIf="errorMsg && !loading" class="card mb-6"><div class="card-body text-danger">{{ errorMsg }}</div></div>
+
+      <!-- Table -->
+      <div class="card" *ngIf="!loading && !errorMsg">
+        <div class="card-body" style="padding:0">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Téléphone</th><th>Titre</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of pagedUsers">
+                <td>
+                  <div class="flex items-center gap-2">
+                    <div class="avatar avatar-sm" [style.background]="avatarColor(user.idUser)">
+                      {{ getInitials(user.fullName) }}
+                    </div>
+                    <div class="font-medium">{{ user.fullName }}</div>
+                  </div>
+                </td>
+                <td class="text-muted text-sm">{{ user.email }}</td>
+<td>
+  <span class="badge" [ngClass]="user.role === 'ADMIN' ? 'badge-admin' : 'badge-success'">
+    {{ user.role === 'CANDIDATE' ? 'Candidat' : (user.role || '—') }}
+  </span>
+</td>                <td class="text-sm">{{ user.phone || '—' }}</td>
+                <td class="text-sm">{{ user.title || '—' }}</td>
+                <td>
+                  <div class="flex gap-1">
+                    <a [routerLink]="['/admin/users', user.idUser]" class="btn btn-ghost btn-sm">
+                      <i data-lucide="eye"></i>
+                    </a>
+                    <a [routerLink]="['/admin/users', user.idUser, 'edit']" class="btn btn-ghost btn-sm">
+                      <i data-lucide="edit-2"></i>
+                    </a>
+                    <button class="btn btn-ghost btn-sm" (click)="askDelete(user)">
+                      <i data-lucide="trash-2"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredUsers.length === 0">
+                <td colspan="6" class="text-center text-muted" style="padding:20px">Aucun utilisateur trouvé</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span class="text-sm text-muted">Page {{ page }} / {{ totalPages }} — {{ filteredUsers.length }} résultats</span>
+          <div class="flex gap-2">
+            <button class="btn btn-outline btn-sm" (click)="prevPage()" [disabled]="page === 1">Précédent</button>
+            <button class="btn btn-outline btn-sm" (click)="nextPage()" [disabled]="page === totalPages">Suivant</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal ajout -->
+<div class="modal-overlay" [class.open]="showModal">
+  <div class="modal">
+    <h3>Ajouter un Utilisateur</h3>
+    <div class="form-group">
+      <label class="form-label">Nom complet</label>
+      <input class="form-input" [(ngModel)]="newUser.fullName" placeholder="Jean Dupont" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" [(ngModel)]="newUser.email" placeholder="jean@exemple.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Âge</label>
+      <input class="form-input" type="number" [(ngModel)]="newUser.age" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Rôle</label>
+      <select class="form-select" [(ngModel)]="newUser.role">
+        <option value="CANDIDATE">Candidate</option>
+        <option value="ADMIN">Admin</option>
+      </select>
+    </div>
+    <div class="flex gap-3 mt-4">
+      <button class="btn btn-primary flex-1" (click)="createUser()">Créer</button>
+      <button class="btn btn-outline" (click)="closeModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmation suppression -->
+<div class="modal-overlay" [class.open]="userToDelete">
+  <div class="modal">
+    <h3>Confirmer la suppression</h3>
+    <p class="text-sm text-muted">
+      Supprimer <strong>{{ userToDelete?.fullName }}</strong> ? Cette action est irréversible.
+    </p>
+    <div class="flex gap-3 mt-4">
+      <button class="btn btn-danger flex-1" (click)="confirmDelete()">Supprimer</button>
+      <button class="btn btn-outline" (click)="cancelDelete()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div *ngIf="toastMsg" class="toast" [ngClass]="toastType"
+     style="position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;z-index:300"
+     [style.background]="toastType === 'success' ? '#10B981' : '#EF4444'">
+  {{ toastMsg }}
+</div>

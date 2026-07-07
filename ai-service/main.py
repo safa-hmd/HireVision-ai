@@ -41,8 +41,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_URL     = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+from llm_client import call_llm, GROQ_API_KEY
+GEMINI_API_KEY = GROQ_API_KEY  # alias gardé pour ne pas casser le reste du fichier
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Cache en mémoire — évite les appels Gemini répétés
@@ -134,13 +134,7 @@ def generate_feedback_with_gemini(skills: list[str], profile: str, score: int) -
 - Compétences : {', '.join(skills)}
 Génère un résumé professionnel en 3 phrases max en français, sans bullet points."""
     try:
-        response = httpx.post(
-            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=30
-        )
-        data = response.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+        return call_llm(prompt, timeout=30)
     except Exception:
         return f"Profil {profile} avec score {score}/100."
 
@@ -161,13 +155,7 @@ Compétences : {', '.join(skills)}
 Réponds UNIQUEMENT en JSON :
 {{"score":<0-100>,"niveau":"<Excellent|Bien|Moyen|Insuffisant>","points_forts":"...","points_ameliorer":"...","reponse_ideale":"..."}}"""
     try:
-        response = httpx.post(
-            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=30
-        )
-        data = response.json()
-        raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        raw = call_llm(prompt, timeout=30).strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"): raw = raw[4:]
@@ -367,18 +355,38 @@ def interview_specialties():
 def interview_questions(
     specialty_id:        str,
     user_id:             int  = Query(default=None, description="userId pour exclure questions déjà posées"),
-    excluded_questions:  str  = Query(default=None, description="JSON array de questions à exclure")
+    excluded_questions:  str  = Query(default=None, description="JSON array de questions à exclure"),
+    title:               str  = Query(default=None, description="Titre affiché (spécialité custom issue du CV)"),
+    description:         str  = Query(default=None, description="Description (spécialité custom)"),
+    level:               str  = Query(default=None, description="Niveau affiché (spécialité custom)"),
+    count:               int  = Query(default=None, description="Nombre de questions voulu (spécialité custom)"),
+    duration:            int  = Query(default=None, description="Durée en minutes (spécialité custom)"),
 ):
     """
     Génère les questions avec anti-répétition :
-    - Pool de 30+ questions par spécialité
+    - Pool de 30+ questions par spécialité connue
     - Sélection aléatoire différente à chaque session
     - Exclusion optionnelle des questions déjà posées à cet utilisateur
+    - Spécialités "custom" (compétence détectée dans un CV, pas parmi les 6
+      pré-câblées) : title/description/level/count/duration permettent à
+      Gemini de générer des questions pertinentes au lieu de retomber sur Java.
     """
-    specialty_id = _normalize_specialty_id(specialty_id)
-    if specialty_id not in SPECIALTIES:
-        print(f"[WARN] /interview/questions a reçu un specialty_id inconnu : '{specialty_id}'")
-    count = SPECIALTIES.get(specialty_id, {}).get("count", 15)
+    normalized_id = _normalize_specialty_id(specialty_id)
+    is_known = normalized_id in SPECIALTIES
+
+    custom_spec = None
+    if not is_known:
+        if title:
+            custom_spec = {
+                "title": title, "description": description,
+                "level": level, "count": count, "duration": duration
+            }
+        else:
+            print(f"[WARN] /interview/questions a reçu un specialty_id inconnu sans titre custom : '{specialty_id}'")
+
+    cache_key = normalized_id if is_known else f"custom:{normalized_id}"
+    effective_count = (SPECIALTIES.get(normalized_id, {}).get("count")
+                       or count or 15)
 
     # Parser les questions exclues si fournies
     excluded_list = []
@@ -389,20 +397,20 @@ def interview_questions(
             pass
 
     # Vérifier le cache
-    pool = _get_cached_pool(specialty_id)
+    pool = _get_cached_pool(cache_key)
 
     if pool is None:
-        # Générer via Gemini (ou pool local) et mettre en cache
-        fresh = generate_questions_by_specialty(specialty_id, excluded_list)
-        _set_cache(specialty_id, fresh)
-        pool = _get_cached_pool(specialty_id) or fresh
+        # Générer via Gemini (ou pool local/générique) et mettre en cache
+        fresh = generate_questions_by_specialty(specialty_id, excluded_list, custom_spec)
+        _set_cache(cache_key, fresh)
+        pool = _get_cached_pool(cache_key) or fresh
 
     # Filtrer les questions exclues (anti-répétition), avec filet de sécurité :
     # si l'exclusion laisse moins de questions que nécessaire, on garde le pool
     # complet plutôt que de renvoyer une session incomplète.
     if excluded_list:
         filtered = [q for q in pool if q.get("question") not in excluded_list]
-        if len(filtered) >= count:
+        if len(filtered) >= effective_count:
             pool = filtered
 
     # Sélection aléatoire depuis le pool
@@ -415,14 +423,14 @@ def interview_questions(
     medium = [q for q in selected if q.get("difficulty") == "medium"]
     hard   = [q for q in selected if q.get("difficulty") == "hard"]
 
-    n_easy   = max(2, count // 4)
-    n_hard   = max(2, count // 4)
-    n_medium = count - n_easy - n_hard
+    n_easy   = max(2, effective_count // 4)
+    n_hard   = max(2, effective_count // 4)
+    n_medium = effective_count - n_easy - n_hard
 
-    result = (easy[:n_easy] + medium[:n_medium] + hard[:n_hard])[:count]
-    if len(result) < count:
+    result = (easy[:n_easy] + medium[:n_medium] + hard[:n_hard])[:effective_count]
+    if len(result) < effective_count:
         extra = [q for q in selected if q not in result]
-        result += extra[:count - len(result)]
+        result += extra[:effective_count - len(result)]
 
     rng.shuffle(result)
     for i, q in enumerate(result):
@@ -430,7 +438,7 @@ def interview_questions(
         q["id"] = i + 1
         result[i] = q
 
-    return {"specialty_id": specialty_id, "questions": result}
+    return {"specialty_id": normalized_id, "questions": result}
 
 
 @app.post("/interview/analyze-voice")
@@ -549,6 +557,6 @@ def health():
     cache_info = {k: "cached" for k in _question_cache.keys()}
     return {
         "status": "ok",
-        "gemini": "configured" if GEMINI_API_KEY else "not configured (fallback mode)",
+        "groq": "configured" if GEMINI_API_KEY else "not configured (fallback mode)",
         "cache":  cache_info
     }

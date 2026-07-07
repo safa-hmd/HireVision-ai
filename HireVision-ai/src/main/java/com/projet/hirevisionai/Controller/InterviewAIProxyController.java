@@ -36,18 +36,32 @@ public class InterviewAIProxyController {
 
     private static final String PYTHON_BASE = "http://localhost:8000";
 
-    // ── 1. GET questions par spécialité (anti-répétition) ───────────────────
+    // ── 1. GET questions par spécialité (anti-répétition + spécialités custom) ──
     @GetMapping("/questions/{specialtyId}")
     public ResponseEntity<Map> getQuestions(
             @PathVariable String specialtyId,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) Integer duration) {
         try {
-            // Construire la liste des questions déjà posées à cet utilisateur
-            String excludedParam = "";
+            // IMPORTANT : on passe ici des valeurs BRUTES (non encodées) à
+            // UriComponentsBuilder, qui se charge lui-même de l'encodage.
+            // Ne JAMAIS appeler URLEncoder.encode(...) puis re-passer la
+            // chaîne à RestTemplate : RestTemplate encode déjà l'URI qu'on
+            // lui donne, donc pré-encoder à la main double l'encodage
+            // (ex: "Intermédiaire" → "Interm%C3%A9diaire" → "Interm%25C3%25A9diaire").
+            org.springframework.web.util.UriComponentsBuilder builder =
+                    org.springframework.web.util.UriComponentsBuilder
+                            .fromHttpUrl(PYTHON_BASE + "/interview/questions/{specialtyId}");
+
             if (userId != null) {
+                builder.queryParam("user_id", userId);
+
                 List<String> alreadyAsked = getAlreadyAskedQuestions(userId);
                 if (!alreadyAsked.isEmpty()) {
-                    // Encoder en JSON pour le query param
                     StringBuilder sb = new StringBuilder("[");
                     for (int i = 0; i < alreadyAsked.size(); i++) {
                         sb.append("\"")
@@ -56,20 +70,23 @@ public class InterviewAIProxyController {
                         if (i < alreadyAsked.size() - 1) sb.append(",");
                     }
                     sb.append("]");
-                    try {
-                        excludedParam = "&excluded_questions="
-                                + java.net.URLEncoder.encode(sb.toString(), "UTF-8");
-                    } catch (Exception e) {
-                        excludedParam = "";
-                    }
+                    builder.queryParam("excluded_questions", sb.toString());
                 }
             }
 
-            String url = PYTHON_BASE + "/interview/questions/" + specialtyId
-                    + (userId != null ? "?user_id=" + userId : "?")
-                    + excludedParam;
+            // Spécialité "custom" (compétence détectée dans un CV, pas parmi
+            // les 6 pré-câblées côté Python) : on transmet title/description/
+            // level/count/duration pour que Gemini génère des questions
+            // pertinentes au lieu de retomber silencieusement sur Java.
+            if (title != null)       builder.queryParam("title", title);
+            if (description != null) builder.queryParam("description", description);
+            if (level != null)       builder.queryParam("level", level);
+            if (count != null)       builder.queryParam("count", count);
+            if (duration != null)    builder.queryParam("duration", duration);
 
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            java.net.URI uri = builder.buildAndExpand(specialtyId).encode().toUri();
+
+            ResponseEntity<Map> response = restTemplate.getForEntity(uri, Map.class);
             return ResponseEntity.ok(response.getBody());
 
         } catch (Exception e) {

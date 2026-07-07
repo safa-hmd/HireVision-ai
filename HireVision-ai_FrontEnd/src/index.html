@@ -8,67 +8,13 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/login.css">
-  
+  <link rel="stylesheet" href="assets/css/styleBack.css" />
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
   <script src="assets/js/login.js"></script>
   <script src="assets/js/app.js"></script>
-
-
-<script>
-  lucide.createIcons();
-  const questions = [
-    'Parlez-moi de vous et de votre expérience en Java.',
-    'Quelles sont vos principales forces dans ce domaine ?',
-    'Décrivez un projet difficile sur lequel vous avez travaillé récemment.',
-    'Comment vous tenez-vous informé des nouvelles technologies ?',
-    'Où vous voyez-vous dans 5 ans ?'
-  ];
-  let currentQ = 1, recording = false, micOn = true, camOn = true;
-  const total = 15;
-  const cat = new URLSearchParams(location.search).get('cat') || 'Java';
-  document.getElementById('session-title').textContent = 'Entretien ' + cat;
-
-  function startSession() {
-    recording = true;
-    document.getElementById('btn-start').style.display = 'none';
-    document.getElementById('btn-next').style.display = 'inline-flex';
-    document.getElementById('btn-end').disabled = false;
-    document.getElementById('rec-badge').style.display = 'flex';
-    startTimer('timer');
-    showToast('Session démarrée !', 'success');
-  }
-
-  function nextQuestion() {
-    if (currentQ < total) {
-      currentQ++;
-      document.getElementById('current-question').textContent = questions[(currentQ - 1) % questions.length];
-      document.getElementById('question-progress').textContent = 'Question ' + currentQ + ' sur ' + total;
-      document.getElementById('progress-txt').textContent = currentQ + '/' + total;
-      document.getElementById('progress-bar').style.width = ((currentQ / total) * 100) + '%';
-      document.getElementById('progress-msg').textContent = currentQ + ' question(s) complétée(s) sur ' + total;
-    }
-  }
-
-  function endInterview() {
-    stopTimer();
-    showToast('Entretien terminé ! Génération du rapport…', 'success');
-    setTimeout(() => { window.location.href = 'feedback.html'; }, 1500);
-  }
-
-  function toggleMic() {
-    micOn = !micOn;
-    document.getElementById('mic-icon').setAttribute('data-lucide', micOn ? 'mic' : 'mic-off');
-    document.getElementById('btn-mic').style.background = micOn ? 'rgba(255,255,255,.15)' : '#EF4444';
-    lucide.createIcons();
-  }
-  function toggleCam() {
-    camOn = !camOn;
-    document.getElementById('cam-icon').setAttribute('data-lucide', camOn ? 'video' : 'video-off');
-    document.getElementById('btn-cam').style.background = camOn ? 'rgba(255,255,255,.15)' : '#EF4444';
-    lucide.createIcons();
-  }
-</script>
+  <script src="assets/js/appBack.js"></script>
 </head>
 <body>
   <app-root></app-root>

@@ -45,4 +45,8 @@ export class LoginComponent {
   loginWithGoogle(): void {
     this.authService.loginWithGoogle();
   }
+
+  loginWithGithub(): void {
+    this.authService.loginWithGithub();
+  }
 }

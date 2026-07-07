@@ -5,8 +5,8 @@ import random
 import time
 from threading import Lock
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+from llm_client import call_llm, GROQ_API_KEY
+GEMINI_API_KEY = GROQ_API_KEY  # alias gardé pour ne pas casser le reste du fichier
 
 # ─────────────────────────────────────────────
 # Cache anti-répétition : évite d'appeler Gemini
@@ -247,22 +247,41 @@ def _normalize_specialty_id(specialty_id: str) -> str:
     return aliases.get(key, specialty_id)
 
 
-def generate_questions_by_specialty(specialty_id: str, excluded_questions: list = None) -> list:
+def generate_questions_by_specialty(specialty_id: str, excluded_questions: list = None, custom_spec: dict = None) -> list:
     """
     Génère les questions en garantissant la variété :
     1. Essaie Gemini avec un seed de variation
-    2. Fallback sur le pool local avec sélection aléatoire équilibrée
+    2. Fallback sur le pool local (spécialités connues) ou un pool générique
+       templaté (spécialités "custom" issues du CV) avec sélection équilibrée
     3. Exclut les questions déjà posées à cet utilisateur (si fourni)
+
+    custom_spec : dict optionnel {title, description, level, count} utilisé
+    quand specialty_id ne correspond à aucune des 6 spécialités codées en dur
+    (ex : une compétence détectée dans le CV comme "React" ou "Kubernetes").
+    Dans ce cas, on NE retombe PLUS silencieusement sur Java : Gemini génère
+    des questions pour cette compétence précise, avec un fallback générique
+    templaté si Gemini est indisponible.
     """
     original_id = specialty_id
     specialty_id = _normalize_specialty_id(specialty_id)
     spec = SPECIALTIES.get(specialty_id)
+
     if not spec:
-        # IMPORTANT : on ne retombe plus silencieusement sur "java" sans le signaler.
-        # On log clairement l'ID reçu pour identifier le vrai bug côté Angular/Spring Boot.
-        print(f"[WARN] specialty_id inconnu reçu par le service Python : '{original_id}' "
-              f"— attendu un de {list(SPECIALTIES.keys())}. Vérifie ce qu'Angular envoie.")
-        return QUESTION_POOL.get("java", [])[:15]
+        if custom_spec and custom_spec.get("title"):
+            # ── Spécialité personnalisée (compétence du CV non pré-cablée) ──
+            spec = {
+                "title":       custom_spec.get("title"),
+                "description": custom_spec.get("description") or f"Questions techniques et pratiques sur {custom_spec.get('title')}",
+                "level":       custom_spec.get("level") or "Intermédiaire",
+                "duration":    custom_spec.get("duration") or 45,
+                "count":       custom_spec.get("count") or 15,
+            }
+        else:
+            # IMPORTANT : on ne retombe plus silencieusement sur "java" sans le signaler.
+            print(f"[WARN] specialty_id inconnu reçu par le service Python : '{original_id}' "
+                  f"— attendu un de {list(SPECIALTIES.keys())} ou un custom_spec avec un titre. "
+                  f"Vérifie ce qu'Angular/Spring Boot envoie.")
+            return QUESTION_POOL.get("java", [])[:15]
 
     count = spec["count"]
     excluded_questions = excluded_questions or []
@@ -284,13 +303,7 @@ RÈGLES :
 [{{"id":1,"category":"Présentation","question":"...","difficulty":"easy","tip":"conseil court","time_suggested":60}}]"""
 
         try:
-            response = httpx.post(
-                f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-                json={"contents": [{"parts": [{"text": prompt}]}]},
-                timeout=60
-            )
-            data = response.json()
-            raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            raw = call_llm(prompt, timeout=20).strip()
             if raw.startswith("```"):
                 raw = raw.split("```")[1]
                 if raw.startswith("json"): raw = raw[4:]
@@ -300,8 +313,79 @@ RÈGLES :
         except Exception:
             pass
 
-    # ── Fallback : pool local étendu ─────────────────────────────────────────
-    return _select_from_pool(specialty_id, count, excluded_questions)
+    # ── Fallback : pool local étendu (spécialités connues) ───────────────────
+    if specialty_id in QUESTION_POOL:
+        return _select_from_pool(specialty_id, count, excluded_questions)
+
+    # ── Fallback générique templaté (spécialité custom, Gemini indisponible) ─
+    return _generic_fallback_questions(spec["title"], count, excluded_questions)
+
+
+def _generic_fallback_questions(title: str, count: int, excluded: list = None) -> list:
+    """
+    Pool de questions génériques templatées avec le nom de la compétence.
+    Utilisé uniquement quand Gemini est indisponible ET que la spécialité
+    n'a pas de pool dédié (compétence détectée dynamiquement dans un CV).
+    """
+    excluded = excluded or []
+    templates = [
+        {"category": "Présentation",   "difficulty": "easy",   "time_suggested": 60,
+         "tip": "Sois concis et concret",
+         "question": f"Parlez-moi de votre expérience avec {title}."},
+        {"category": "Présentation",   "difficulty": "easy",   "time_suggested": 60,
+         "tip": "Montre ta motivation",
+         "question": f"Pourquoi avez-vous choisi de travailler avec {title} ?"},
+        {"category": "Théorie",        "difficulty": "medium", "time_suggested": 90,
+         "tip": "Structure ta réponse",
+         "question": f"Quels sont selon vous les concepts fondamentaux à maîtriser en {title} ?"},
+        {"category": "Théorie",        "difficulty": "hard",   "time_suggested": 90,
+         "tip": "Compare avec des alternatives",
+         "question": f"Quels sont les principaux avantages et limites de {title} par rapport à ses alternatives ?"},
+        {"category": "Technique",      "difficulty": "medium", "time_suggested": 120,
+         "tip": "Sois précis",
+         "question": f"Décrivez une bonne pratique importante à respecter quand on travaille avec {title}."},
+        {"category": "Technique",      "difficulty": "hard",   "time_suggested": 120,
+         "tip": "Donne un exemple concret",
+         "question": f"Quel est le problème technique le plus complexe que vous avez résolu en utilisant {title} ?"},
+        {"category": "Technique",      "difficulty": "hard",   "time_suggested": 120,
+         "tip": "Parle des optimisations",
+         "question": f"Comment optimiseriez-vous les performances d'un projet basé sur {title} ?"},
+        {"category": "Projets",        "difficulty": "medium", "time_suggested": 120,
+         "tip": "Méthode STAR",
+         "question": f"Décrivez le projet le plus complexe où vous avez utilisé {title}."},
+        {"category": "Projets",        "difficulty": "medium", "time_suggested": 90,
+         "tip": "Sois honnête sur les difficultés",
+         "question": f"Quel défi avez-vous rencontré en travaillant avec {title}, et comment l'avez-vous surmonté ?"},
+        {"category": "Projets",        "difficulty": "easy",   "time_suggested": 90,
+         "tip": "Cite des outils précis",
+         "question": f"Quels outils utilisez-vous habituellement en complément de {title} ?"},
+        {"category": "Comportemental", "difficulty": "easy",   "time_suggested": 60,
+         "tip": "Sois authentique",
+         "question": f"Comment restez-vous à jour sur les évolutions liées à {title} ?"},
+        {"category": "Comportemental", "difficulty": "easy",   "time_suggested": 60,
+         "tip": "Esprit d'équipe",
+         "question": f"Comment expliqueriez-vous {title} à un collègue qui ne le connaît pas ?"},
+        {"category": "Théorie",        "difficulty": "medium", "time_suggested": 90,
+         "tip": "Cite un cas d'usage",
+         "question": f"Dans quel type de projet {title} est-il le plus pertinent, et pourquoi ?"},
+        {"category": "Technique",      "difficulty": "medium", "time_suggested": 90,
+         "tip": "Sois méthodique",
+         "question": f"Comment testez-vous ou validez-vous votre travail quand vous utilisez {title} ?"},
+        {"category": "Comportemental", "difficulty": "easy",   "time_suggested": 60,
+         "tip": "Curiosité",
+         "question": f"Qu'avez-vous appris récemment sur {title} qui vous a surpris ?"},
+    ]
+
+    pool = [q for q in templates if q["question"] not in excluded]
+    if len(pool) < count:
+        pool = templates  # si trop exclu, on relâche l'exclusion pour ne pas bloquer
+
+    rng = random.Random(time.time())
+    shuffled = pool.copy()
+    rng.shuffle(shuffled)
+    selected = shuffled[:count]
+
+    return _shuffle_and_reindex(selected)
 
 
 def _select_from_pool(specialty_id: str, count: int, excluded: list) -> list:
@@ -535,23 +619,14 @@ Réponds UNIQUEMENT en JSON valide :
   }}
 }}"""
 
+    # NOTE : contrairement à Gemini, Groq (chat completions text) n'accepte pas
+    # l'audio en pièce jointe inline dans ce type d'appel. On analyse donc
+    # uniquement le texte transcrit + les métriques locales (word_count,
+    # hésitations). Pour ré-activer une vraie analyse du ton/rythme audio,
+    # il faudrait transcrire/annoter l'audio séparément (ex: Whisper via
+    # Groq /audio/transcriptions) puis injecter le résultat dans le prompt.
     try:
-        parts = [{"text": prompt}]
-        if audio_bytes:
-            parts.append({
-                "inline_data": {
-                    "mime_type": audio_mime or "audio/webm",
-                    "data": base64.b64encode(audio_bytes).decode("utf-8"),
-                }
-            })
-
-        response = httpx.post(
-            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-            json={"contents": [{"parts": parts}]},
-            timeout=45
-        )
-        data = response.json()
-        raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        raw = call_llm(prompt, timeout=25).strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"): raw = raw[4:]
@@ -613,13 +688,7 @@ Réponds UNIQUEMENT en JSON valide :
 }}"""
 
     try:
-        response = httpx.post(
-            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=30
-        )
-        data = response.json()
-        raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        raw = call_llm(prompt, timeout=25).strip()
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"): raw = raw[4:]

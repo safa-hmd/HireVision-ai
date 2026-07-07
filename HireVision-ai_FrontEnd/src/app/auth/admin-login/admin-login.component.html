@@ -1,0 +1,61 @@
+<div class="admin-auth-layout">
+  <div class="admin-card">
+
+    <div class="admin-brand">
+      <img src="assets/img/brand/hirevision-icon.png" alt="HireVision AI" class="admin-brand-icon" />
+      <h1><span class="brand-white">Hire</span><span class="brand-accent">Vision</span></h1>
+
+      <div class="admin-badge">
+        <span class="admin-badge-icon">🛡</span>
+        Administration
+      </div>
+
+      <h2 class="admin-title">Administrator Access</h2>
+      <p class="admin-subtitle">Restricted interface for administrators only</p>
+    </div>
+
+    <div class="admin-divider"></div>
+
+    <form (ngSubmit)="handleLogin()" novalidate>
+
+      <div class="admin-form-group">
+        <label class="admin-label">Administrator email</label>
+        <input
+          class="admin-input"
+          [class.invalid]="emailInvalid"
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          placeholder="admin@hirevision.com"
+          autocomplete="email"
+          (blur)="emailTouched = true" />
+        <div class="admin-error" *ngIf="emailInvalid">Invalid email address.</div>
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-label">Password</label>
+        <input
+          class="admin-input"
+          [class.invalid]="passwordInvalid"
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          (blur)="passwordTouched = true" />
+        <div class="admin-error" *ngIf="passwordInvalid">Password is required.</div>
+      </div>
+
+      <div class="admin-error admin-error-global" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <button type="submit" class="admin-btn-submit" [disabled]="loading">
+        {{ loading ? 'Signing in…' : 'Access Admin Panel' }}
+      </button>
+    </form>
+
+    <div class="admin-footer">
+      <a (click)="goToUserLogin()">Back to user login</a>
+    </div>
+
+  </div>
+</div>

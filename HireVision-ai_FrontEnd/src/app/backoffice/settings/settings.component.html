@@ -1,0 +1,373 @@
+<div class="app-shell">
+  <div class="main-content">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Paramètres</h1>
+        <p class="page-subtitle">Configuration de la plateforme</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-primary" (click)="save()">
+          <i data-lucide="save"></i> Sauvegarder
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="tabs-root">
+        <div class="tabs-list">
+          <button *ngFor="let tab of tabs"
+                  class="tab-trigger"
+                  [class.active]="activeTab === tab.key"
+                  (click)="setTab(tab.key)">
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Général -->
+        <div class="tab-panel" *ngIf="activeTab === 'general'">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Informations de la Plateforme</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Nom de la plateforme</label>
+                  <input class="form-input" [(ngModel)]="general.platformName" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">URL du site</label>
+                  <input class="form-input" [(ngModel)]="general.siteUrl" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email de support</label>
+                  <input class="form-input" type="email" [(ngModel)]="general.supportEmail" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Fuseau horaire</label>
+                  <select class="form-select" [(ngModel)]="general.timezone">
+                    <option>Europe/Paris (UTC+2)</option>
+                    <option>UTC</option>
+                    <option>Africa/Tunis (UTC+1)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Langue par défaut</label>
+                  <select class="form-select" [(ngModel)]="general.language">
+                    <option>Français</option>
+                    <option>English</option>
+                    <option>العربية</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Devise</label>
+                  <select class="form-select" [(ngModel)]="general.currency">
+                    <option>EUR (€)</option>
+                    <option>USD ($)</option>
+                    <option>TND (د.ت)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Limites de la Plateforme</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Entretiens / mois (Gratuit)</label>
+                  <input class="form-input" type="number" [(ngModel)]="general.freeInterviewsPerMonth" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Durée max. entretien (min)</label>
+                  <input class="form-input" type="number" [(ngModel)]="general.maxInterviewDuration" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Taille max. CV (Mo)</label>
+                  <input class="form-input" type="number" [(ngModel)]="general.maxCvSizeMb" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CV max. par utilisateur</label>
+                  <input class="form-input" type="number" [(ngModel)]="general.maxCvPerUser" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IA -->
+        <div class="tab-panel" *ngIf="activeTab === 'ai'">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3>Configuration du Modèle IA</h3>
+              <p>Paramètres du moteur d'analyse</p>
+            </div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Modèle principal</label>
+                  <select class="form-select" [(ngModel)]="ai.model">
+                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                    <option value="claude-opus-4">claude-opus-4</option>
+                    <option value="claude-haiku-4">claude-haiku-4</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Température (créativité)</label>
+                  <input class="form-input" type="number" step="0.1" min="0" max="1" [(ngModel)]="ai.temperature" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Max tokens par réponse</label>
+                  <input class="form-input" type="number" [(ngModel)]="ai.maxTokens" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Langue des réponses IA</label>
+                  <select class="form-select" [(ngModel)]="ai.responseLanguage">
+                    <option>Automatique</option>
+                    <option>Français</option>
+                    <option>English</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Analyse Comportementale</h3>
+              <p>Paramètres de la vision par ordinateur</p>
+            </div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div>
+                  <div class="font-medium">Détection du contact visuel</div>
+                  <div class="text-sm text-muted">Analyser la direction du regard du candidat</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="aiToggles.eyeContact" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="list-item">
+                <div>
+                  <div class="font-medium">Analyse de la posture</div>
+                  <div class="text-sm text-muted">Évaluer la posture et le langage corporel</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="aiToggles.posture" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="list-item">
+                <div>
+                  <div class="font-medium">Analyse des émotions</div>
+                  <div class="text-sm text-muted">Détecter les émotions via les expressions faciales</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="aiToggles.emotions" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="list-item">
+                <div>
+                  <div class="font-medium">Analyse vocale</div>
+                  <div class="text-sm text-muted">Analyser le rythme, la clarté et le ton de la voix</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="aiToggles.voice" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="list-item">
+                <div>
+                  <div class="font-medium">Détection de stress</div>
+                  <div class="text-sm text-muted">Mesurer le niveau de stress en temps réel</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" [(ngModel)]="aiToggles.stress" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="tab-panel" *ngIf="activeTab === 'notifs'">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3>Notifications Admin</h3>
+              <p>Alertes envoyées aux administrateurs</p>
+            </div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div><div class="font-medium">Nouvel utilisateur inscrit</div><div class="text-sm text-muted">Email immédiat</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.newUser" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Paiement reçu</div><div class="text-sm text-muted">Email immédiat</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.paymentReceived" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Rapport quotidien</div><div class="text-sm text-muted">Résumé envoyé chaque matin à 8h</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.dailyReport" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Paiement échoué</div><div class="text-sm text-muted">Alerte immédiate</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.paymentFailed" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Signalement utilisateur</div><div class="text-sm text-muted">Modération de contenu</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.userReport" /><span class="slider"></span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Configuration Email</h3></div>
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Serveur SMTP</label>
+                  <input class="form-input" [(ngModel)]="emailConfig.smtpServer" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Port</label>
+                  <input class="form-input" [(ngModel)]="emailConfig.port" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Expéditeur</label>
+                  <input class="form-input" [(ngModel)]="emailConfig.sender" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Clé API</label>
+                  <input class="form-input" type="password" [(ngModel)]="emailConfig.apiKey" />
+                </div>
+              </div>
+              <button class="btn btn-outline btn-sm" (click)="sendTestEmail()">
+                <i data-lucide="send"></i> Envoyer un test
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sécurité -->
+        <div class="tab-panel" *ngIf="activeTab === 'security'">
+          <div class="card mb-4">
+            <div class="card-header"><h3>Authentification</h3></div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div><div class="font-medium">Double authentification (2FA)</div><div class="text-sm text-muted">Exiger le 2FA pour tous les admins</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="securityToggles.twoFactor" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Connexion sociale (Google/LinkedIn)</div><div class="text-sm text-muted">Autoriser les connexions OAuth</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="securityToggles.socialLogin" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Durée de session</div></div>
+                <select class="form-select" style="width:140px" [(ngModel)]="sessionDuration">
+                  <option>30 minutes</option>
+                  <option>1 heure</option>
+                  <option>8 heures</option>
+                  <option>24 heures</option>
+                </select>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Tentatives de connexion max</div></div>
+                <input class="form-input" type="number" [(ngModel)]="maxLoginAttempts" style="width:80px" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Données & Confidentialité</h3></div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div><div class="font-medium">Chiffrement des vidéos</div><div class="text-sm text-muted">AES-256 pour toutes les sessions</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="securityToggles.videoEncryption" /><span class="slider"></span></label>
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Rétention des données (jours)</div></div>
+                <input class="form-input" type="number" [(ngModel)]="dataRetentionDays" style="width:100px" />
+              </div>
+              <div class="list-item">
+                <div><div class="font-medium">Conformité RGPD</div><div class="text-sm text-muted">Activation du mode conformité RGPD</div></div>
+                <label class="toggle"><input type="checkbox" [(ngModel)]="securityToggles.gdpr" /><span class="slider"></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Intégrations -->
+        <div class="tab-panel" *ngIf="activeTab === 'integrations'">
+          <div class="card">
+            <div class="card-header">
+              <h3>Intégrations & API</h3>
+              <p>Services tiers connectés</p>
+            </div>
+            <div class="card-body space-y-4">
+              <div class="list-item">
+                <div class="flex items-center gap-3">
+                  <div style="width:40px;height:40px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">G</div>
+                  <div><div class="font-medium">Google OAuth</div><div class="text-sm text-muted">Connexion sociale Google</div></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="badge badge-success">Connecté</span>
+                  <button class="btn btn-outline btn-sm" (click)="disconnectIntegration('Google OAuth')">Déconnecter</button>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3">
+                  <div style="width:40px;height:40px;background:#0077B5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">in</div>
+                  <div><div class="font-medium">LinkedIn OAuth</div><div class="text-sm text-muted">Connexion & import de profil</div></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="badge badge-success">Connecté</span>
+                  <button class="btn btn-outline btn-sm" (click)="disconnectIntegration('LinkedIn OAuth')">Déconnecter</button>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3">
+                  <div style="width:40px;height:40px;background:#635BFF;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">S</div>
+                  <div><div class="font-medium">Stripe</div><div class="text-sm text-muted">Paiements en ligne</div></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="badge badge-success">Connecté</span>
+                  <button class="btn btn-outline btn-sm">Configurer</button>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3">
+                  <div style="width:40px;height:40px;background:#1A1A1A;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.8rem">API</div>
+                  <div><div class="font-medium">Anthropic Claude API</div><div class="text-sm text-muted">Moteur IA des entretiens</div></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="badge badge-success">Actif</span>
+                  <button class="btn btn-outline btn-sm" (click)="showToast('Clé copiée !')">Voir la clé</button>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="flex items-center gap-3">
+                  <div style="width:40px;height:40px;background:#F4645F;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">SG</div>
+                  <div><div class="font-medium">SendGrid</div><div class="text-sm text-muted">Envoi d'emails transactionnels</div></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="badge badge-success">Connecté</span>
+                  <button class="btn btn-outline btn-sm">Configurer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div *ngIf="toastMsg" class="toast"
+     style="position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;z-index:300"
+     [style.background]="toastType === 'success' ? '#10B981' : (toastType === 'warning' ? '#F59E0B' : '#EF4444')">
+  {{ toastMsg }}
+</div>

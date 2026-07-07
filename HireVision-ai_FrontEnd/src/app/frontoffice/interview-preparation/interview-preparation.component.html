@@ -1,131 +1,81 @@
 <div class="main-content">
-    <header class="page-header">
-      <div><h1 class="page-title">Préparation aux Entretiens</h1><p class="page-subtitle">Choisissez une catégorie pour commencer à pratiquer</p></div>
-    </header>
-    <div class="page-body">
-
-      <div class="gradient-banner mb-6">
-        <div class="flex items-center gap-4">
-          <i data-lucide="brain" style="width:28px;height:28px"></i>
-          <div>
-            <h3>Entretiens Simulés par IA</h3>
-            <p>Vivez des entretiens réalistes avec retour en temps réel et analyse comportementale</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid-3 mb-6">
-
-        <div class="card category-card" onclick="startInterview('Java')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#2563EB"><i data-lucide="code-2"></i></div>
-            <h3 style="margin-bottom:6px">Programmation Java</h3>
-            <p class="text-sm" style="margin-bottom:14px">Java Core, POO, Collections, Multithreading</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-intermediate">Intermédiaire</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">45 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">15</div></div>
-            </div>
-<button (click)="startInterview('java', 'Programmation Java', 15, 45)" class="btn btn-primary w-full">Démarrer</button>          </div>
-        </div>
-
-        <div class="card category-card" onclick="startInterview('Spring Boot')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#10B981"><i data-lucide="sparkles"></i></div>
-            <h3 style="margin-bottom:6px">Spring Boot</h3>
-            <p class="text-sm" style="margin-bottom:14px">REST API, Injection de dépendances, JPA</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-advanced">Avancé</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">60 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">20</div></div>
-            </div>
-            <button (click)="startInterview('Spring Boot', 'Spring Boot', 20, 60)" class="btn btn-primary w-full">Démarrer</button>
-          </div>
-        </div>
-
-        <div class="card category-card" onclick="startInterview('Angular')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#EF4444"><i data-lucide="layers"></i></div>
-            <h3 style="margin-bottom:6px">Framework Angular</h3>
-            <p class="text-sm" style="margin-bottom:14px">Composants, Services, RxJS, State Management</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-intermediate">Intermédiaire</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">45 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">15</div></div>
-            </div>
-            <button (click)="startInterview('Angular', 'Framework Angular', 15, 45)" class="btn btn-primary w-full">Démarrer</button>
-          </div>
-        </div>
-
-        <div class="card category-card" onclick="startInterview('IA/ML')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#7C3AED"><i data-lucide="brain"></i></div>
-            <h3 style="margin-bottom:6px">IA / Machine Learning</h3>
-            <p class="text-sm" style="margin-bottom:14px">Algorithmes ML, Réseaux de neurones, Deep Learning</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-advanced">Avancé</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">60 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">18</div></div>
-            </div>
-            <button (click)="startInterview('IA/ML', 'IA / Machine Learning', 18, 60)" class="btn btn-primary w-full">Démarrer</button>
-          </div>
-        </div>
-
-        <div class="card category-card" onclick="startInterview('DevOps')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#06B6D4"><i data-lucide="cloud"></i></div>
-            <h3 style="margin-bottom:6px">DevOps</h3>
-            <p class="text-sm" style="margin-bottom:14px">Docker, Kubernetes, CI/CD, Cloud</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-intermediate">Intermédiaire</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">45 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">15</div></div>
-            </div>
-            <button (click)="startInterview('DevOps', 'DevOps', 15, 45)" class="btn btn-primary w-full">Démarrer</button>
-          </div>
-        </div>
-
-        <div class="card category-card" onclick="startInterview('RH')">
-          <div class="card-body">
-            <div class="cat-icon" style="background:#F59E0B"><i data-lucide="users"></i></div>
-            <h3 style="margin-bottom:6px">Entretien RH</h3>
-            <p class="text-sm" style="margin-bottom:14px">Questions comportementales, Soft skills, Culture fit</p>
-            <div class="flex gap-2 mb-4">
-              <span class="diff-badge diff-beginner">Débutant</span>
-            </div>
-            <div class="grid-2 text-sm mb-4" style="gap:8px">
-              <div><div class="text-muted">Durée</div><div class="font-medium">30 min</div></div>
-              <div><div class="text-muted">Questions</div><div class="font-medium">10</div></div>
-            </div>
-            <button (click)="startInterview('RH', 'Entretien RH', 10, 30)" class="btn btn-primary w-full">Démarrer</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h3>Conseils pour réussir</h3><p>Bonnes pratiques pour l'entretien</p></div>
-        <div class="card-body">
-          <div class="grid-2" style="gap:12px">
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="sun" style="color:var(--warning);flex-shrink:0;width:18px;height:18px"></i> Assurez-vous d'avoir un bon éclairage</div>
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="mic" style="color:var(--primary);flex-shrink:0;width:18px;height:18px"></i> Testez votre microphone et son</div>
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="eye" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Maintenez le contact visuel avec la caméra</div>
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="volume-2" style="color:var(--accent);flex-shrink:0;width:18px;height:18px"></i> Parlez clairement à rythme modéré</div>
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="wifi-off" style="color:var(--text-muted);flex-shrink:0;width:18px;height:18px"></i> Utilisez un endroit calme</div>
-            <div class="flex items-center gap-3 text-sm"><i data-lucide="smile" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Restez calme et confiant</div>
-          </div>
-        </div>
-      </div>
-
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Préparation aux Entretiens</h1>
+      <p class="page-subtitle">
+        {{ hasCv ? 'Basé sur les compétences détectées dans votre CV' : 'Choisissez une catégorie pour commencer à pratiquer' }}
+      </p>
     </div>
+  </header>
+  <div class="page-body">
+
+    <div class="gradient-banner mb-6">
+      <div class="flex items-center gap-4">
+        <i data-lucide="brain" style="width:28px;height:28px"></i>
+        <div>
+          <h3>Entretiens Simulés par IA</h3>
+          <p>Vivez des entretiens réalistes avec retour en temps réel et analyse comportementale</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CV non renseigné : suggestion d'upload (sans bloquer l'accès) ── -->
+    <div class="card mb-6" *ngIf="!isLoading && !hasCv">
+      <div class="card-body flex items-center justify-between" style="flex-wrap:wrap;gap:12px">
+        <div class="flex items-center gap-3">
+          <i data-lucide="file-text" style="color:var(--primary);width:20px;height:20px"></i>
+          <div>
+            <div class="font-medium">Ajoutez votre CV pour des entretiens personnalisés</div>
+            <div class="text-sm text-muted">Nous générerons des questions basées sur vos vraies compétences plutôt que sur cette liste générique.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="goToCvUpload()">Analyser mon CV</button>
+      </div>
+    </div>
+
+    <!-- ── Loading ── -->
+    <div *ngIf="isLoading" class="prep-loading">
+      <div class="prep-spinner"></div>
+      <p class="text-muted text-sm">Analyse de votre profil...</p>
+    </div>
+
+    <!-- ── Catégories (générées dynamiquement) ── -->
+    <div class="grid-3 mb-6" *ngIf="!isLoading">
+      <div class="card category-card" *ngFor="let cat of filteredCategories" (click)="startInterview(cat)">
+        <div class="card-body">
+          <div class="cat-icon" [style.background]="cat.color">
+            <i [attr.data-lucide]="cat.icon"></i>
+          </div>
+          <h3 style="margin-bottom:6px">
+            {{ cat.title }}
+            <span class="cat-custom-tag" *ngIf="cat.isCustom" title="Détecté dans votre CV">CV</span>
+          </h3>
+          <p class="text-sm" style="margin-bottom:14px">{{ cat.description }}</p>
+          <div class="flex gap-2 mb-4">
+            <span class="diff-badge" [ngClass]="cat.difficultyClass">{{ cat.difficulty }}</span>
+          </div>
+          <div class="grid-2 text-sm mb-4" style="gap:8px">
+            <div><div class="text-muted">Durée</div><div class="font-medium">{{ cat.duration }} min</div></div>
+            <div><div class="text-muted">Questions</div><div class="font-medium">{{ cat.questions }}</div></div>
+          </div>
+          <button (click)="startInterview(cat); $event.stopPropagation()" class="btn btn-primary w-full">Démarrer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Conseils pour réussir</h3><p>Bonnes pratiques pour l'entretien</p></div>
+      <div class="card-body">
+        <div class="grid-2" style="gap:12px">
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="sun" style="color:var(--warning);flex-shrink:0;width:18px;height:18px"></i> Assurez-vous d'avoir un bon éclairage</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="mic" style="color:var(--primary);flex-shrink:0;width:18px;height:18px"></i> Testez votre microphone et son</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="eye" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Maintenez le contact visuel avec la caméra</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="volume-2" style="color:var(--accent);flex-shrink:0;width:18px;height:18px"></i> Parlez clairement à rythme modéré</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="wifi-off" style="color:var(--text-muted);flex-shrink:0;width:18px;height:18px"></i> Utilisez un endroit calme</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="smile" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Restez calme et confiant</div>
+        </div>
+      </div>
+    </div>
+
   </div>
+</div>

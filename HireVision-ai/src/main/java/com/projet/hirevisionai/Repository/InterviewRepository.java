@@ -26,4 +26,11 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             @Param("userId") Long userId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
+
+    long countByStartDateBetween(LocalDateTime start, LocalDateTime end);
+    List<Interview> findTop5ByOrderByStartDateDesc();
+
+    @Query("SELECT AVG((f.technicalScore + f.communicationScore + f.confidenceScore + f.eyeContactScore) / 4) " +
+            "FROM Interview i JOIN i.feedback f WHERE i.startDate BETWEEN :start AND :end")
+    Double findAvgScoreByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

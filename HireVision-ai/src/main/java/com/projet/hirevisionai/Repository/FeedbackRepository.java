@@ -26,4 +26,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     @Query("SELECT AVG(f.confidenceScore) FROM Feedback f " +
             "WHERE f.interview.user.idUser = :userId")
     Double findAvgConfidenceScoreByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT AVG((f.technicalScore + f.communicationScore + f.confidenceScore + f.eyeContactScore) / 4) FROM Feedback f")
+    Double findGlobalAverageScore();
 }

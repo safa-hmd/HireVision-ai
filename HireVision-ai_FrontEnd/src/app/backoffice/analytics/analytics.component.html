@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Analytics — HireVision AI Admin</title>
+ 
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="main-content">
+    <header class="page-header">
+      <div><h1 class="page-title">Analytics</h1><p class="page-subtitle">Performances et tendances de la plateforme</p></div>
+      <div class="page-header-actions">
+        <select class="form-select" style="width:160px"><option>Ce mois</option><option>3 mois</option><option>6 mois</option><option>Cette année</option></select>
+        <button class="btn btn-outline btn-sm" onclick="showToast('Rapport exporté !')"><i data-lucide="download"></i> Exporter</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- KPIs -->
+      <div class="grid-4 mb-6">
+        <div class="stat-card"><div class="stat-label">Taux de Rétention</div><div class="stat-value text-success" data-countup="87" data-suffix="%">0%</div><div class="stat-change text-success">↑ +4% ce mois</div></div>
+        <div class="stat-card"><div class="stat-label">Taux de Conversion</div><div class="stat-value text-primary" data-countup="23.5" data-suffix="%">0%</div><div class="stat-change text-success">↑ +2.1%</div></div>
+        <div class="stat-card"><div class="stat-label">Temps de Session Moy.</div><div class="stat-value" style="color:#7C3AED">47 min</div><div class="stat-change text-success">↑ +5 min</div></div>
+        <div class="stat-card"><div class="stat-label">NPS Score</div><div class="stat-value text-success" data-countup="72">0</div><div class="stat-change text-success">Excellent</div></div>
+      </div>
+
+      <!-- Charts row 1 -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header"><h3>Croissance des Utilisateurs</h3><p>6 derniers mois</p></div>
+          <div class="card-body"><div style="height:240px"><canvas id="chart-growth"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Entretiens vs Scores Moyens</h3><p>Corrélation volume / qualité</p></div>
+          <div class="card-body"><div style="height:240px"><canvas id="chart-corr"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Charts row 2 -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header"><h3>Scores par Catégorie</h3><p>Performance moyenne par domaine</p></div>
+          <div class="card-body"><div style="height:230px"><canvas id="chart-bycat"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Rétention vs Churn</h3><p>Évolution mensuelle</p></div>
+          <div class="card-body"><div style="height:230px"><canvas id="chart-retention"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Top performers + categories -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3>Top Performers</h3><p>Utilisateurs avec les meilleurs scores</p></div>
+          <div class="card-body" style="padding:0">
+            <table>
+              <thead><tr><th>#</th><th>Utilisateur</th><th>Score Moy.</th><th>Entretiens</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#F59E0B">TM</div> Thomas Martin</div></td><td><strong class="text-success">91%</strong></td><td>31</td></tr>
+                <tr><td><strong>2</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#10B981">MD</div> Marie Dubois</div></td><td><strong class="text-success">85%</strong></td><td>24</td></tr>
+                <tr><td><strong>3</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm">JD</div> Jean Dupont</div></td><td><strong class="text-success">78%</strong></td><td>12</td></tr>
+                <tr><td><strong>4</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#7C3AED">AB</div> Ahmed Bensali</div></td><td><strong class="text-primary">75%</strong></td><td>18</td></tr>
+                <tr><td><strong>5</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#06B6D4">SC</div> Sara Chadi</div></td><td><strong class="text-primary">71%</strong></td><td>9</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Distribution Géographique</h3><p>Utilisateurs par pays</p></div>
+          <div class="card-body space-y-4">
+            <div class="metric-row"><div class="metric-row-header"><span>🇫🇷 France</span><span>42%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:42%"></div></div></div>
+            <div class="metric-row"><div class="metric-row-header"><span>🇩🇿 Algérie</span><span>18%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:18%"></div></div></div>
+            <div class="metric-row"><div class="metric-row-header"><span>🇲🇦 Maroc</span><span>14%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:14%"></div></div></div>
+            <div class="metric-row"><div class="metric-row-header"><span>🇹🇳 Tunisie</span><span>11%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:11%"></div></div></div>
+            <div class="metric-row"><div class="metric-row-header"><span>🇧🇪 Belgique</span><span>8%</span></div><div class="progress-wrap"><div class="progress-bar progress-warning" style="width:8%"></div></div></div>
+            <div class="metric-row"><div class="metric-row-header"><span>🌍 Autres</span><span>7%</span></div><div class="progress-wrap"><div class="progress-bar progress-warning" style="width:7%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
