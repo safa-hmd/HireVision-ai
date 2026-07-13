@@ -14,6 +14,7 @@ public class CvAnalysisDTO {
     private List<String> skills;
     private List<EducationEntry> education;
     private List<ExperienceEntry> experience;
+    private List<ProjectEntry> projects;
     private List<String> certifications;
     private List<LanguageEntry> languages;
     private String summary;
@@ -37,6 +38,13 @@ public class CvAnalysisDTO {
     public static class ExperienceEntry {
         private String title;
         private String company;
+        private String period;
+        private String description;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class ProjectEntry {
+        private String title;
         private String period;
         private String description;
     }

@@ -8,8 +8,16 @@
 
   <div class="page-body">
 
+    <!-- Checking state: éviter le flash du drop-zone pendant la vérification initiale -->
+    <div *ngIf="isChecking" class="card">
+      <div class="card-body text-center" style="padding:48px 24px">
+        <div class="spinner" style="margin:0 auto 20px"></div>
+        <p class="text-muted">Chargement...</p>
+      </div>
+    </div>
+
     <!-- Upload section -->
-    <div id="upload-section" [style.display]="showResults ? 'none' : 'block'">
+    <div *ngIf="!isChecking" id="upload-section" [style.display]="showResults ? 'none' : 'block'">
       <div class="card">
         <div class="card-body text-center" style="padding:48px 24px">
 
@@ -31,16 +39,12 @@
               <i data-lucide="upload"></i> Choisir un fichier
             </button>
           </div>
-
-          <button *ngIf="!isLoading" type="button" (click)="simulateUpload()" class="btn btn-outline mt-4">
-            Simuler l'analyse (démo)
-          </button>
         </div>
       </div>
     </div>
 
     <!-- Results section -->
-    <div id="results-section" [style.display]="showResults ? 'block' : 'none'">
+    <div *ngIf="!isChecking" id="results-section" [style.display]="showResults ? 'block' : 'none'">
 
       <!-- Success banner -->
       <div class="alert alert-success mb-6" style="display:flex;align-items:center;gap:12px">
@@ -134,6 +138,26 @@
           </div>
         </div>
 
+        <!-- Projets -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Projets</h3>
+            <p>Projets académiques et personnels</p>
+          </div>
+          <div class="card-body space-y-4">
+            <ng-container *ngIf="analysis?.projects?.length; else noProj">
+              <div *ngFor="let proj of analysis?.projects">
+                <div class="font-medium">{{ proj.title }}</div>
+                <div class="text-xs text-muted">{{ proj.period }}</div>
+                <div class="text-sm mt-2">{{ proj.description }}</div>
+              </div>
+            </ng-container>
+            <ng-template #noProj>
+              <p class="text-muted text-sm">Aucun projet détecté</p>
+            </ng-template>
+          </div>
+        </div>
+
         <!-- Certifications -->
         <div class="card">
           <div class="card-header">
@@ -176,7 +200,7 @@
       <!-- Actions -->
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <button type="button" (click)="resetUpload()" class="btn btn-outline">
-          <i data-lucide="refresh-cw"></i> Analyser un autre CV
+          <i data-lucide="upload"></i> Uploader un nouveau CV
         </button>
       </div>
 

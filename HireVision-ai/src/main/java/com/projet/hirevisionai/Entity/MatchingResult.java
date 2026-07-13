@@ -23,6 +23,10 @@ public class MatchingResult {
     @JoinColumn(name = "cv_id")
     private CV cv;
 
+    @ManyToOne
+    @JoinColumn(name = "job_offer_id")
+    private JobOffer jobOffer;
+
     @OneToMany(mappedBy = "matchingResult", cascade = CascadeType.ALL)
     private List<MissedSkill> missedSkills;
 }

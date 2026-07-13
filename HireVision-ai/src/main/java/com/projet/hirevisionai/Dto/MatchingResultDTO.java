@@ -15,6 +15,8 @@ public class MatchingResultDTO {
     private Long                 id;
     private float                score;
     private Long                 cvId;
+    private Long                 jobOfferId;
+    private String               jobOfferTitle;
     private List<MissedSkillDTO> missedSkills;
     private String        label;
     private String        message;
@@ -28,6 +30,8 @@ public class MatchingResultDTO {
                 .id(mr.getId())
                 .score(mr.getScore())
                 .cvId(mr.getCv() != null ? mr.getCv().getId() : null)
+                .jobOfferId(mr.getJobOffer() != null ? mr.getJobOffer().getId() : null)
+                .jobOfferTitle(mr.getJobOffer() != null ? mr.getJobOffer().getTitle() : null)
                 .missedSkills(mr.getMissedSkills() != null
                         ? mr.getMissedSkills().stream()
                         .map(MissedSkillDTO::fromEntity)

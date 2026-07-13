@@ -1,74 +1,59 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Entretiens — HireVision AI Admin</title>
-</head>
-<body>
-<div class="app-shell">
- 
+<div class="main-content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Gestion des Entretiens</h1>
+      <p class="page-subtitle">{{ interviews.length }} entretien(s) au total</p>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-outline btn-sm" (click)="loadInterviews()"><i data-lucide="refresh-cw"></i> Actualiser</button>
+    </div>
+  </header>
 
-  <div class="main-content">
-    <header class="page-header">
-      <div><h1 class="page-title">Gestion des Entretiens</h1><p class="page-subtitle">3 842 entretiens ce mois</p></div>
-      <div class="page-header-actions">
-        <button class="btn btn-outline btn-sm" onclick="showToast('Export généré !')"><i data-lucide="download"></i> Exporter</button>
-      </div>
-    </header>
-
-    <div class="page-body">
-
-      <!-- KPIs -->
-      <div class="grid-4 mb-6">
-        <div class="stat-card"><div class="stat-icon" style="background:#DBEAFE"><i data-lucide="video" style="color:#2563EB;width:18px;height:18px"></i></div><div class="stat-label">Total ce mois</div><div class="stat-value text-primary" data-countup="3842">0</div><div class="stat-change text-success">↑ +8%</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#D1FAE5"><i data-lucide="check-circle" style="color:#10B981;width:18px;height:18px"></i></div><div class="stat-label">Complétés</div><div class="stat-value text-success" data-countup="3621">0</div><div class="stat-change text-muted">94% du total</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#FEF3C7"><i data-lucide="trending-up" style="color:#F59E0B;width:18px;height:18px"></i></div><div class="stat-label">Score Moyen</div><div class="stat-value text-warning" data-countup="74.3" data-suffix="%">0%</div><div class="stat-change text-success">↑ +3.2%</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#EDE9FE"><i data-lucide="clock" style="color:#7C3AED;width:18px;height:18px"></i></div><div class="stat-label">Durée Moyenne</div><div class="stat-value" style="color:#7C3AED">43 min</div><div class="stat-change text-muted">Par session</div></div>
-      </div>
-
-      <!-- Chart -->
-      <div class="card mb-6">
-        <div class="card-header"><h3>Entretiens par Jour</h3><p>Les 14 derniers jours</p></div>
-        <div class="card-body"><div style="height:200px"><canvas id="chart-daily"></canvas></div></div>
-      </div>
-
-      <!-- Filters + table -->
-      <div class="card">
-        <div class="card-body" style="padding-bottom:0;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-          <div class="search-wrap" style="flex:1;min-width:200px">
-            <i data-lucide="search"></i>
-            <input class="form-input" id="int-search" placeholder="Rechercher candidat, type…" />
-          </div>
-          <select class="form-select" style="width:160px"><option value="">Toutes les catégories</option><option>Java</option><option>Spring Boot</option><option>Angular</option><option>DevOps</option><option>RH</option></select>
-          <select class="form-select" style="width:140px"><option value="">Tous les scores</option><option>≥ 80%</option><option>60–80%</option><option>< 60%</option></select>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <div *ngIf="isLoading" style="text-align:center;padding:32px">
+          <div class="spinner" style="margin:0 auto 12px"></div>
+          <p class="text-muted">Chargement des entretiens...</p>
         </div>
-        <div class="card-body" style="padding:0">
-          <table id="int-table">
-            <thead><tr><th>Candidat</th><th>Type</th><th>Score</th><th>Contact Visuel</th><th>Confiance</th><th>Durée</th><th>Date</th><th>Actions</th></tr></thead>
-            <tbody>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm">JD</div> Jean Dupont</div></td><td><span class="badge badge-primary">Java</span></td><td><strong class="text-success">85%</strong></td><td>88%</td><td>82%</td><td class="text-muted">45 min</td><td class="text-xs text-muted">8 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm" onclick="confirmAction('Supprimer ?',()=>showToast('Supprimé','danger'))"><i data-lucide="trash-2"></i></button></div></td></tr>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#10B981">MD</div> Marie Dubois</div></td><td><span class="badge badge-primary">Spring Boot</span></td><td><strong class="text-primary">78%</strong></td><td>81%</td><td>75%</td><td class="text-muted">60 min</td><td class="text-xs text-muted">8 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#F59E0B">AB</div> Ahmed Bensali</div></td><td><span class="badge badge-success">RH</span></td><td><strong class="text-success">92%</strong></td><td>95%</td><td>90%</td><td class="text-muted">30 min</td><td class="text-xs text-muted">7 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#EF4444">LR</div> Lucie Renard</div></td><td><span class="badge badge-warning">DevOps</span></td><td><strong class="text-warning">67%</strong></td><td>72%</td><td>65%</td><td class="text-muted">45 min</td><td class="text-xs text-muted">7 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#7C3AED">TM</div> Thomas Martin</div></td><td><span class="badge badge-primary">Angular</span></td><td><strong class="text-success">91%</strong></td><td>93%</td><td>88%</td><td class="text-muted">45 min</td><td class="text-xs text-muted">6 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
-              <tr><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#06B6D4">SC</div> Sara Chadi</div></td><td><span class="badge badge-primary">Java</span></td><td><strong class="text-warning">71%</strong></td><td>75%</td><td>68%</td><td class="text-muted">50 min</td><td class="text-xs text-muted">6 Juin 2026</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm"><i data-lucide="eye"></i></button><button class="btn btn-ghost btn-sm"><i data-lucide="trash-2"></i></button></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <span class="text-sm text-muted">Affichage 1–6 sur 3 842</span>
-          <div class="flex gap-2">
-            <button class="btn btn-outline btn-sm">Précédent</button>
-            <button class="btn btn-primary btn-sm">1</button>
-            <button class="btn btn-outline btn-sm">2</button>
-            <button class="btn btn-outline btn-sm">Suivant</button>
-          </div>
-        </div>
-      </div>
 
+        <table *ngIf="!isLoading">
+          <thead>
+            <tr>
+              <th>Candidat</th>
+              <th>Date</th>
+              <th>Durée</th>
+              <th>Difficulté dominante</th>
+              <th>Score global</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let i of interviews">
+              <td class="text-sm font-medium">{{ i.candidateName }}</td>
+              <td class="text-sm">{{ i.startDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="text-sm">{{ i.durationMinutes }} min</td>
+              <td>
+                <span class="badge"
+                      [class.badge-success]="i.difficulty === 'Facile'"
+                      [class.badge-warning]="i.difficulty === 'Moyen'"
+                      [class.badge-danger]="i.difficulty === 'Difficile'">
+                  {{ i.difficulty }}
+                </span>
+              </td>
+              <td [style.color]="scoreColor(i.globalScore)" style="font-weight:600">
+                {{ i.globalScore !== null ? i.globalScore + '%' : 'En attente' }}
+              </td>
+              <td>
+                <button class="btn btn-ghost btn-sm" (click)="deleteInterview(i)"><i data-lucide="trash-2"></i></button>
+              </td>
+            </tr>
+            <tr *ngIf="!interviews.length">
+              <td colspan="6" class="text-center text-muted" style="padding:24px">Aucun entretien pour le moment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
-
-</body>
-</html>

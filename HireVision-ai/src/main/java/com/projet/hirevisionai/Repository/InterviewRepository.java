@@ -29,6 +29,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     long countByStartDateBetween(LocalDateTime start, LocalDateTime end);
     List<Interview> findTop5ByOrderByStartDateDesc();
+    List<Interview> findAllByOrderByStartDateDesc();
 
     @Query("SELECT AVG((f.technicalScore + f.communicationScore + f.confidenceScore + f.eyeContactScore) / 4) " +
             "FROM Interview i JOIN i.feedback f WHERE i.startDate BETWEEN :start AND :end")

@@ -31,7 +31,20 @@ SKILLS_LIST = [
     "microservices", "agile", "scrum",
     # Autres langages
     "c++", "kotlin", "swift", "matlab",
-    "verilog", "fpga", "raspberry pi", "perforce"
+    "verilog", "fpga", "raspberry pi", "perforce",
+    # Génie mécanique
+    "solidworks", "catia", "autocad", "ansys", "rdm",
+    "résistance des matériaux", "thermique", "engrenages",
+    "cao", "dao", "conception mécanique", "usinage",
+    # Génie électrique / électrotechnique
+    "grafcet", "automates programmables", "siemens", "schneider",
+    "variateur de vitesse", "électrotechnique", "moteurs asynchrones",
+    "tia portal", "step7", "plc",
+    # Génie civil
+    "béton armé", "revit", "topographie", "structures",
+    # Business / gestion
+    "excel", "power bi", "sap", "comptabilité", "marketing",
+    "gestion de projet"
 ]
 
 # Liste "sémantique" utilisée pour rattraper des technologies proches mais absentes
@@ -50,7 +63,13 @@ SEMANTIC_SKILL_REFERENCES = {
     "Machine Learning": "intelligence artificielle machine learning modèles prédictifs",
     "SQL": "base de données relationnelle requêtes SQL",
 }
-SEMANTIC_MATCH_THRESHOLD = 0.55
+SEMANTIC_MATCH_THRESHOLD = 0.68
+# Note : 0.55 était trop permissif -> un vocabulaire d'automatisme
+# industriel ("GRAFCET, automates, variateurs") pouvait matcher
+# "Kubernetes" (orchestration de conteneurs) car les deux univers
+# parlent d'"orchestration"/"automatisation" en surface. 0.68 réduit
+# nettement ce faux positif tout en gardant le rattrapage de vraies
+# technologies proches (ex: "Quarkus" ~ Spring Boot).
 
 LEVEL_KEYWORDS = {
     "natif": "Natif", "native": "Natif", "maternelle": "Natif",
@@ -129,7 +148,64 @@ def extract_skills(text: str) -> list[str]:
                 found.append(label)
                 already_found_lower.add(label.lower())
 
+    # 4) Filet générique domaine-agnostique : capte ce qui reste (mécanique,
+    #    électrique, civil, business...) directement depuis la section
+    #    "Compétences" du CV, sans dépendre d'un dictionnaire IT figé.
+    found.extend(extract_generic_skills(text, found))
+
     return found
+
+
+GENERIC_STOPWORDS = {
+    "et", "de", "la", "le", "les", "des", "en", "avec", "pour", "un", "une",
+    "and", "or", "of", "the", "with", "for", "a", "an", "niveau", "level",
+    "compétences", "skills", "techniques", "technique", "outils", "logiciels"
+}
+
+
+def extract_generic_skills(text: str, already_found: list[str]) -> list[str]:
+    """
+    Filet générique, domaine-agnostique : au lieu de ne reconnaître que les
+    technologies IT écrites en dur dans SKILLS_LIST, on va chercher les
+    éléments de la section "Compétences" (quel que soit le domaine :
+    mécanique, électrique, business...) et on les extrait tels quels s'ils
+    ressemblent à un item de liste court (2-4 mots), pas déjà capturé.
+    Ça évite qu'un CV mécanique/électrique/civil/autre se retrouve avec une
+    liste de compétences vide simplement parce que son vocabulaire n'est
+    pas dans le dictionnaire IT.
+    """
+    lines = [l.strip() for l in text.split("\n")]
+    start, end = _find_section_bounds(
+        lines,
+        ["compétences", "skills", "technical skills", "compétences techniques"],
+        ["expérience", "experience", "formation", "education", "projets",
+         "projects", "langues", "languages", "certifications"]
+    )
+    if start == -1:
+        return []
+
+    already_lower = {f.lower() for f in already_found}
+    generic = []
+    for line in lines[start:end]:
+        # éclate la ligne sur les séparateurs de liste habituels
+        parts = re.split(r'[,•;|/]|(?:\s-\s)', line)
+        for part in parts:
+            item = part.strip(" :.-\t")
+            if not item or len(item) > 40:
+                continue
+            words = item.split()
+            if not (1 <= len(words) <= 4):
+                continue
+            if item.lower() in GENERIC_STOPWORDS:
+                continue
+            if item.lower() in already_lower:
+                continue
+            if any(w.lower() in GENERIC_STOPWORDS for w in words) and len(words) == 1:
+                continue
+            generic.append(item)
+            already_lower.add(item.lower())
+
+    return generic[:25]
 
 
 def _find_section_bounds(lines: list[str], section_names: list[str], end_names: list[str]) -> tuple[int, int]:
@@ -205,6 +281,68 @@ def extract_education(text: str) -> list[dict]:
         i += 1
 
     return education[:5]
+
+
+def extract_projects(text: str) -> list[dict]:
+    """
+    Extrait la section Projets/Projects du CV. Contrairement à
+    extract_experience, un projet n'a pas forcément d'entreprise ni
+    de date précise -> on capture titre + description, et une période
+    si elle existe (sinon "Non spécifié").
+    """
+    projects = []
+    lines = [l.strip() for l in text.split("\n")]
+
+    start, end = _find_section_bounds(
+        lines,
+        ["projets", "projects", "projets académiques", "projets personnels",
+         "academic projects", "personal projects"],
+        ["experience", "expérience", "education", "formation", "skills",
+         "compétences", "langues", "languages", "certifications", "loisirs",
+         "activities", "interests"]
+    )
+
+    if start == -1:
+        return []
+
+    section_lines = [l for l in lines[start:end] if l]
+    i = 0
+    while i < len(section_lines):
+        line = section_lines[i].lstrip("∠•-→> ").strip()
+
+        # On ignore les lignes vides ou trop courtes pour être un titre de projet
+        if len(line) < 4:
+            i += 1
+            continue
+
+        date_match = re.search(
+            r'(\d{2}-\d{2}-\d{4}|\d{4}\s*[-–]\s*\d{4}|\d{2}/\d{4})',
+            line, re.IGNORECASE
+        )
+        period = date_match.group(0) if date_match else "Non spécifié"
+        title = line[:date_match.start()].strip(" -–—:") if date_match else line
+
+        # Retire les préfixes du style "Projet 1 :" ou "—"
+        title = re.sub(r'^(projet\s*\d*\s*[:\-–]\s*)', '', title, flags=re.IGNORECASE).strip()
+
+        description = ""
+        if i + 1 < len(section_lines):
+            nxt = section_lines[i + 1].lstrip("∠•-→> ").strip()
+            # Si la ligne suivante n'est pas elle-même un nouveau titre de
+            # projet (heuristique : elle commence en minuscule ou est une
+            # puce), on la prend comme description.
+            if nxt and not re.match(r'^[A-ZÀ-Ý]', nxt):
+                description = nxt
+
+        if title and len(title) > 3 and not any(p["title"] == title[:100] for p in projects):
+            projects.append({
+                "title": title[:100],
+                "period": period,
+                "description": description[:200]
+            })
+        i += 1
+
+    return projects[:6]
 
 
 def extract_experience(text: str) -> list[dict]:

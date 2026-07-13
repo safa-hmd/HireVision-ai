@@ -14,6 +14,7 @@ export interface CvAnalysis {
   skills: string[];
   education: { degree: string; institution: string; period: string; }[];
   experience: { title: string; company: string; period: string; description: string; }[];
+  projects: { title: string; period: string; description: string; }[];
   certifications: string[];
   languages: { language: string; level: string; }[];
   summary: string;
@@ -66,4 +67,8 @@ export class CvService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  getLatestAnalysis(userId: number): Observable<CvUploadResponse> {
+  return this.http.get<CvUploadResponse>(`${this.baseUrl}/user/${userId}/latest-analysis`);
+}
 }

@@ -14,6 +14,7 @@ export class CvAnalyseComponent implements AfterViewInit {
 
   showResults = false;
   isLoading = false;
+  isChecking = true; // pour éviter un flash du drop-zone pendant la vérification
   uploadedCv: CvDTO | null = null;
   analysis: CvAnalysis | null = null;
   fileName = '';
@@ -25,7 +26,35 @@ export class CvAnalyseComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     lucide.createIcons();
-    this.initDropZone();
+    this.loadExistingAnalysis();
+  }
+
+  private loadExistingAnalysis(): void {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      this.isChecking = false;
+      setTimeout(() => this.initDropZone(), 50);
+      return;
+    }
+
+    this.cvService.getLatestAnalysis(userId).subscribe({
+      next: (res: CvUploadResponse) => {
+        this.isChecking = false;
+        if (res && res.analysis) {
+          this.uploadedCv = res.cv;
+          this.analysis = res.analysis;
+          this.fileName = res.cv?.filePath?.split('/').pop() || 'CV';
+          this.showResults = true;
+          setTimeout(() => lucide.createIcons(), 50);
+        } else {
+          setTimeout(() => this.initDropZone(), 50);
+        }
+      },
+      error: () => {
+        this.isChecking = false;
+        setTimeout(() => this.initDropZone(), 50);
+      }
+    });
   }
 
   triggerFileInput(): void {
@@ -49,6 +78,7 @@ export class CvAnalyseComponent implements AfterViewInit {
 
     this.fileName = file.name;
     this.isLoading = true;
+    this.showResults = false;
     showToast('Analyse IA en cours...', 'info');
 
     this.cvService.uploadAndAnalyze(file, userId).subscribe({
@@ -88,6 +118,18 @@ export class CvAnalyseComponent implements AfterViewInit {
           company: 'StartupXYZ',
           period: '2020 – 2022',
           description: 'Applications Java Spring + Angular'
+        }
+      ],
+      projects: [
+        {
+          title: 'Plateforme e-commerce microservices',
+          period: '2023 – 2024',
+          description: 'Architecture Spring Boot + Angular, déploiement Docker/Kubernetes sur AWS'
+        },
+        {
+          title: 'Système de recommandation ML',
+          period: '2022',
+          description: 'Modèle de recommandation basé sur le filtrage collaboratif, Python + scikit-learn'
         }
       ],
       certifications: [

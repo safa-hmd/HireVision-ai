@@ -1,6 +1,7 @@
 package com.projet.hirevisionai.Dto;
 
 import com.projet.hirevisionai.Entity.MissedSkill;
+import com.projet.hirevisionai.Entity.SkillPriority;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public class MissedSkillDTO {
 
     private Long              id;
     private String            skillName;
+    private SkillPriority     priority;
+    private Integer           estimatedWeeks;
     private Long              matchingResultId;
     private List<LearningPlanDTO> learningPlans;
 
@@ -22,6 +25,8 @@ public class MissedSkillDTO {
         return MissedSkillDTO.builder()
                 .id(ms.getId())
                 .skillName(ms.getSkillName())
+                .priority(ms.getPriority())
+                .estimatedWeeks(ms.getEstimatedWeeks())
                 .matchingResultId(ms.getMatchingResult() != null ? ms.getMatchingResult().getId() : null)
                 .learningPlans(ms.getLearningPlans() != null
                         ? ms.getLearningPlans().stream()

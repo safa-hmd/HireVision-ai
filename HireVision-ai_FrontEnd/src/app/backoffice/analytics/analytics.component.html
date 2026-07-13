@@ -1,89 +1,101 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Analytics — HireVision AI Admin</title>
- 
-</head>
-<body>
-<div class="app-shell">
+<div class="main-content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Analytics</h1>
+      <p class="page-subtitle">Performance des analyses IA de la plateforme</p>
+    </div>
+    <div class="page-header-actions">
+      <span class="text-sm text-muted">Données en direct</span>
+      <button class="btn btn-primary btn-sm" (click)="refreshData()">
+        <i data-lucide="refresh-cw"></i> Actualiser
+      </button>
+    </div>
+  </header>
 
-  <div class="main-content">
-    <header class="page-header">
-      <div><h1 class="page-title">Analytics</h1><p class="page-subtitle">Performances et tendances de la plateforme</p></div>
-      <div class="page-header-actions">
-        <select class="form-select" style="width:160px"><option>Ce mois</option><option>3 mois</option><option>6 mois</option><option>Cette année</option></select>
-        <button class="btn btn-outline btn-sm" onclick="showToast('Rapport exporté !')"><i data-lucide="download"></i> Exporter</button>
+  <div class="page-body">
+
+    <!-- Chargement -->
+    <div class="card" *ngIf="loading">
+      <div class="card-body text-center text-muted" style="padding:40px">
+        <div class="spinner" style="margin:0 auto 12px"></div>
+        Chargement des analytics...
       </div>
-    </header>
+    </div>
 
-    <div class="page-body">
+    <!-- Erreur -->
+    <div class="card" *ngIf="error && !stats">
+      <div class="card-body text-center" style="padding:40px">
+        <p class="text-danger">Impossible de charger les analytics.</p>
+        <button class="btn btn-outline btn-sm" (click)="loadStats()">Réessayer</button>
+      </div>
+    </div>
+
+    <ng-container *ngIf="stats && !loading">
 
       <!-- KPIs -->
-      <div class="grid-4 mb-6">
-        <div class="stat-card"><div class="stat-label">Taux de Rétention</div><div class="stat-value text-success" data-countup="87" data-suffix="%">0%</div><div class="stat-change text-success">↑ +4% ce mois</div></div>
-        <div class="stat-card"><div class="stat-label">Taux de Conversion</div><div class="stat-value text-primary" data-countup="23.5" data-suffix="%">0%</div><div class="stat-change text-success">↑ +2.1%</div></div>
-        <div class="stat-card"><div class="stat-label">Temps de Session Moy.</div><div class="stat-value" style="color:#7C3AED">47 min</div><div class="stat-change text-success">↑ +5 min</div></div>
-        <div class="stat-card"><div class="stat-label">NPS Score</div><div class="stat-value text-success" data-countup="72">0</div><div class="stat-change text-success">Excellent</div></div>
+      <div class="grid-3 mb-6">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#EDE9FE"><i data-lucide="file-text" style="color:#7C3AED;width:18px;height:18px"></i></div>
+          <div class="stat-label">CV Analysés</div>
+          <div class="stat-value" style="color:#4F46E5" [attr.data-countup]="stats.totalCvsAnalyzed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#D1FAE5"><i data-lucide="target" style="color:#10B981;width:18px;height:18px"></i></div>
+          <div class="stat-label">Matchings Effectués</div>
+          <div class="stat-value text-success" [attr.data-countup]="stats.totalMatchings">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FEF3C7"><i data-lucide="trending-up" style="color:#F59E0B;width:18px;height:18px"></i></div>
+          <div class="stat-label">Score de Matching Moyen</div>
+          <div class="stat-value" style="color:#F59E0B" [attr.data-countup]="stats.avgMatchingScore" data-suffix="%">0%</div>
+        </div>
       </div>
 
       <!-- Charts row 1 -->
       <div class="grid-2 mb-6">
         <div class="card">
-          <div class="card-header"><h3>Croissance des Utilisateurs</h3><p>6 derniers mois</p></div>
-          <div class="card-body"><div style="height:240px"><canvas id="chart-growth"></canvas></div></div>
+          <div class="card-header"><h3>Évolution du Score Moyen d'Entretien</h3><p>6 derniers mois</p></div>
+          <div class="card-body"><div style="height:240px"><canvas id="chart-score-trend"></canvas></div></div>
         </div>
         <div class="card">
-          <div class="card-header"><h3>Entretiens vs Scores Moyens</h3><p>Corrélation volume / qualité</p></div>
-          <div class="card-body"><div style="height:240px"><canvas id="chart-corr"></canvas></div></div>
+          <div class="card-header"><h3>CV Analysés</h3><p>7 derniers jours</p></div>
+          <div class="card-body"><div style="height:240px"><canvas id="chart-cv-uploads"></canvas></div></div>
         </div>
       </div>
 
       <!-- Charts row 2 -->
       <div class="grid-2 mb-6">
         <div class="card">
-          <div class="card-header"><h3>Scores par Catégorie</h3><p>Performance moyenne par domaine</p></div>
-          <div class="card-body"><div style="height:230px"><canvas id="chart-bycat"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Rétention vs Churn</h3><p>Évolution mensuelle</p></div>
-          <div class="card-body"><div style="height:230px"><canvas id="chart-retention"></canvas></div></div>
-        </div>
-      </div>
-
-      <!-- Top performers + categories -->
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header"><h3>Top Performers</h3><p>Utilisateurs avec les meilleurs scores</p></div>
-          <div class="card-body" style="padding:0">
-            <table>
-              <thead><tr><th>#</th><th>Utilisateur</th><th>Score Moy.</th><th>Entretiens</th></tr></thead>
-              <tbody>
-                <tr><td><strong>1</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#F59E0B">TM</div> Thomas Martin</div></td><td><strong class="text-success">91%</strong></td><td>31</td></tr>
-                <tr><td><strong>2</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#10B981">MD</div> Marie Dubois</div></td><td><strong class="text-success">85%</strong></td><td>24</td></tr>
-                <tr><td><strong>3</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm">JD</div> Jean Dupont</div></td><td><strong class="text-success">78%</strong></td><td>12</td></tr>
-                <tr><td><strong>4</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#7C3AED">AB</div> Ahmed Bensali</div></td><td><strong class="text-primary">75%</strong></td><td>18</td></tr>
-                <tr><td><strong>5</strong></td><td><div class="flex items-center gap-2"><div class="avatar avatar-sm" style="background:#06B6D4">SC</div> Sara Chadi</div></td><td><strong class="text-primary">71%</strong></td><td>9</td></tr>
-              </tbody>
-            </table>
+          <div class="card-header"><h3>Répartition des Scores de Matching</h3></div>
+          <div class="card-body">
+            <div style="height:220px" *ngIf="stats.matchingScoreDistribution.length"><canvas id="chart-matching-distribution"></canvas></div>
+            <p *ngIf="!stats.matchingScoreDistribution.length" class="text-muted text-center" style="padding:40px">Aucune donnée pour le moment.</p>
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><h3>Distribution Géographique</h3><p>Utilisateurs par pays</p></div>
-          <div class="card-body space-y-4">
-            <div class="metric-row"><div class="metric-row-header"><span>🇫🇷 France</span><span>42%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:42%"></div></div></div>
-            <div class="metric-row"><div class="metric-row-header"><span>🇩🇿 Algérie</span><span>18%</span></div><div class="progress-wrap"><div class="progress-bar progress-primary" style="width:18%"></div></div></div>
-            <div class="metric-row"><div class="metric-row-header"><span>🇲🇦 Maroc</span><span>14%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:14%"></div></div></div>
-            <div class="metric-row"><div class="metric-row-header"><span>🇹🇳 Tunisie</span><span>11%</span></div><div class="progress-wrap"><div class="progress-bar progress-success" style="width:11%"></div></div></div>
-            <div class="metric-row"><div class="metric-row-header"><span>🇧🇪 Belgique</span><span>8%</span></div><div class="progress-wrap"><div class="progress-bar progress-warning" style="width:8%"></div></div></div>
-            <div class="metric-row"><div class="metric-row-header"><span>🌍 Autres</span><span>7%</span></div><div class="progress-wrap"><div class="progress-bar progress-warning" style="width:7%"></div></div></div>
+          <div class="card-header"><h3>Questions par Difficulté</h3></div>
+          <div class="card-body">
+            <div style="height:220px" *ngIf="stats.interviewsByDifficulty.length"><canvas id="chart-difficulty"></canvas></div>
+            <p *ngIf="!stats.interviewsByDifficulty.length" class="text-muted text-center" style="padding:40px">Aucune donnée pour le moment.</p>
           </div>
         </div>
       </div>
 
-    </div>
+      <!-- Top missing skills -->
+      <div class="card">
+        <div class="card-header"><h3>Top 5 des Compétences Manquantes</h3><p>Tous candidats confondus, via le Job Matching</p></div>
+        <div class="card-body">
+          <div *ngIf="!stats.topMissingSkills.length" class="text-muted text-center" style="padding:24px">Aucune donnée pour le moment.</div>
+          <div *ngFor="let s of stats.topMissingSkills" style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <span class="badge badge-danger" style="min-width:90px;text-align:center">{{ s.label }}</span>
+            <div class="progress-wrap" style="flex:1">
+              <div class="progress-bar progress-danger" [style.width.%]="(s.value / (stats.topMissingSkills[0].value || 1)) * 100"></div>
+            </div>
+            <span class="text-sm text-muted">{{ s.value }}</span>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
   </div>
 </div>
-
-</body>
-</html>

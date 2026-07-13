@@ -51,6 +51,11 @@ SKILL_ALIASES = {
 }
 
 # ── Descriptions de référence par profil : le coeur de la classification ───
+# IMPORTANT : ne JAMAIS avoir uniquement des profils IT ici, sinon le modèle
+# est structurellement obligé de faire rentrer un CV non-IT (mécanique,
+# électrique, civil, business...) dans une case informatique. On garde une
+# liste ouverte, et surtout un seuil de confiance qui déclenche un profil
+# générique plutôt qu'un faux positif IT.
 PROFILE_DESCRIPTIONS = {
     "Backend": "développeur backend : Java, Spring Boot, Python, PHP, Node.js, "
                "C#, .NET, API REST, bases de données, architecture serveur",
@@ -62,6 +67,16 @@ PROFILE_DESCRIPTIONS = {
               "infrastructure, automatisation des déploiements",
     "MLOps": "ingénieur MLOps machine learning : Python, MLflow, entraînement "
              "de modèles, Docker, Kubernetes, déploiement de modèles ML en production",
+    "Mécanique": "ingénieur génie mécanique : conception mécanique, CAO SolidWorks "
+                 "CATIA, résistance des matériaux, thermique, transmission de puissance, "
+                 "engrenages, maintenance industrielle",
+    "Électrique": "ingénieur génie électrique et électrotechnique : automates "
+                  "programmables, GRAFCET, variateurs de vitesse, moteurs électriques, "
+                  "circuits de puissance, électronique de commande",
+    "Civil": "ingénieur génie civil : béton armé, structures, chantier, "
+             "topographie, AutoCAD, dimensionnement de bâtiments",
+    "Business": "gestion, business, finance, marketing, comptabilité, "
+                "management de projet, ressources humaines",
 }
 
 CATEGORY_HINTS = {
@@ -69,7 +84,17 @@ CATEGORY_HINTS = {
     "Frontend": ["angular", "react", "vue", "typescript", "javascript", "flutter", "dart"],
     "DevOps": ["docker", "kubernetes", "azure", "aws", "cicd"],
     "MLOps": ["python", "mlflow", "docker", "kubernetes", "aws", "azure"],
+    "Mécanique": ["solidworks", "catia", "autocad", "rdm", "engrenages", "thermique"],
+    "Électrique": ["grafcet", "automates", "siemens", "schneider", "variateur", "moteur"],
+    "Civil": ["autocad", "béton", "structures", "topographie"],
+    "Business": ["gestion", "finance", "marketing", "management", "rh"],
 }
+
+# En dessous de ce seuil de similarité cosinus BRUTE (pas la pseudo-proba
+# normalisée après division par la somme), on considère qu'aucun profil ne
+# correspond vraiment et on renvoie un profil générique plutôt qu'une
+# fausse certitude ("DevOps" pour un CV mécanique, par exemple).
+MIN_RAW_SIMILARITY = 0.28
 
 
 def load_rf_model():
@@ -106,19 +131,24 @@ def skill_to_vector(skills: list[str]) -> list[int]:
     return vector
 
 
-def _semantic_profile_scores(skills: list[str]) -> dict:
+def _semantic_profile_scores(skills: list[str]) -> tuple[dict, dict]:
     """Similarité cosinus entre le profil de compétences du candidat et
-    chaque description de référence -> converti en pseudo-probabilités."""
+    chaque description de référence. Retourne (scores_bruts, scores_normalisés).
+    Les scores bruts servent à détecter le cas "aucun profil ne correspond
+    vraiment" ; les scores normalisés servent à départager entre profils
+    quand il y a un vrai signal."""
     if not skills:
-        return {p: 0.0 for p in PROFILE_DESCRIPTIONS}
+        raw = {p: 0.0 for p in PROFILE_DESCRIPTIONS}
+        return raw, raw
 
     skills_text = ", ".join(skills)
-    sims = {
+    raw = {
         profile: max(0.0, cosine_sim(skills_text, description))
         for profile, description in PROFILE_DESCRIPTIONS.items()
     }
-    total = sum(sims.values()) or 1e-9
-    return {p: v / total for p, v in sims.items()}  # normalisation -> pseudo-proba
+    total = sum(raw.values()) or 1e-9
+    normalized = {p: v / total for p, v in raw.items()}
+    return raw, normalized
 
 
 def predict_profile(skills: list[str]) -> dict:
@@ -126,9 +156,23 @@ def predict_profile(skills: list[str]) -> dict:
         return {"profile": "Non déterminé", "confidence": 0, "global_score": 0, "skill_scores": {}}
 
     # ── 1) Prédiction sémantique (source principale, fonctionne sans entraînement) ──
-    semantic_scores = _semantic_profile_scores(skills)
+    raw_scores, semantic_scores = _semantic_profile_scores(skills)
     semantic_profile = max(semantic_scores, key=semantic_scores.get)
     semantic_confidence = semantic_scores[semantic_profile]
+
+    # Garde-fou : si même le meilleur profil a une similarité brute trop
+    # faible, aucun des profils connus ne décrit vraiment ce candidat.
+    # On refuse de forcer un label IT et on renvoie un profil générique
+    # qui laisse le reste du pipeline (recommandations d'entretien, etc.)
+    # basculer sur un mode "custom" au lieu d'un mode IT câblé en dur.
+    if raw_scores[semantic_profile] < MIN_RAW_SIMILARITY:
+        return {
+            "profile": "Profil non catégorisé",
+            "confidence": round(raw_scores[semantic_profile] * 100),
+            "global_score": 60,
+            "skill_scores": {s: 60 for s in skills},
+            "is_generic": True,
+        }
 
     # ── 2) Signal secondaire du RandomForest, si le modèle est chargeable ──
     rf_model = load_rf_model()

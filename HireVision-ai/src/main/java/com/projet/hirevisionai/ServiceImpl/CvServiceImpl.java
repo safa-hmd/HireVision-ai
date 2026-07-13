@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.ServiceImpl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projet.hirevisionai.Dto.CvAnalysisDTO;
 import com.projet.hirevisionai.Dto.CvDTO;
 import com.projet.hirevisionai.Dto.CvUploadResponseDTO;
@@ -13,7 +14,6 @@ import com.projet.hirevisionai.ServiceInterface.ICvService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 
-
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,6 +39,7 @@ public class CvServiceImpl implements ICvService {
     private final CvRepository   cvRepository;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
+    private final ObjectMapper objectMapper;
 
     private static final String UPLOAD_DIR = "uploads/cvs/";
 
@@ -127,7 +127,7 @@ public class CvServiceImpl implements ICvService {
 
         CvAnalysisDTO analysis = response.getBody();
 
-// 3. Sauvegarder les skills en DB
+        // 3. Sauvegarder les skills en DB
         if (analysis != null && analysis.getSkills() != null) {
             for (String skillName : analysis.getSkills()) {
                 Skill skill = skillRepository.findByName(skillName)
@@ -144,8 +144,17 @@ public class CvServiceImpl implements ICvService {
                     cv.getSkills().add(skill);
                 }
             }
-            cvRepository.save(cv);
         }
+
+        // 4. Sauvegarder l'analyse complète en JSON pour la retrouver plus tard
+        if (analysis != null) {
+            try {
+                cv.setAnalysisJson(objectMapper.writeValueAsString(analysis));
+            } catch (Exception e) {
+                // si la sérialisation échoue, on continue sans bloquer l'upload
+            }
+        }
+        cvRepository.save(cv);
 
         return CvUploadResponseDTO.builder()
                 .cv(CvDTO.fromEntity(cv))
@@ -153,8 +162,23 @@ public class CvServiceImpl implements ICvService {
                 .build();
     }
 
-    private byte[] getFileBytes(MultipartFile file) {
-        try { return file.getBytes(); }
-        catch (IOException e) { throw new RuntimeException(e); }
+    @Override
+    public CvUploadResponseDTO getLatestAnalysis(Long userId) {
+        return cvRepository.findTopByUserIdUserOrderByUploadDateDesc(userId)
+                .map(cv -> {
+                    CvAnalysisDTO analysis = null;
+                    if (cv.getAnalysisJson() != null) {
+                        try {
+                            analysis = objectMapper.readValue(cv.getAnalysisJson(), CvAnalysisDTO.class);
+                        } catch (Exception e) {
+                            analysis = null;
+                        }
+                    }
+                    return CvUploadResponseDTO.builder()
+                            .cv(CvDTO.fromEntity(cv))
+                            .analysis(analysis)
+                            .build();
+                })
+                .orElse(CvUploadResponseDTO.builder().cv(null).analysis(null).build());
     }
 }

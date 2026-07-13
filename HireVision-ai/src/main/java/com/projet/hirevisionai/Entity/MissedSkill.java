@@ -12,17 +12,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel. PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MissedSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String skillName;
+    Long id;
+    String skillName;
+
+    @Enumerated(EnumType.STRING)
+    SkillPriority priority;
+
+    Integer estimatedWeeks;
 
     @ManyToOne
     @JoinColumn(name = "matching_result_id")
-    private MatchingResult matchingResult;
+    MatchingResult matchingResult;
 
     @OneToMany(mappedBy = "missedSkill", cascade = CascadeType.ALL)
-    private List<LearningPlan> learningPlans;
+    List<LearningPlan> learningPlans;
 }

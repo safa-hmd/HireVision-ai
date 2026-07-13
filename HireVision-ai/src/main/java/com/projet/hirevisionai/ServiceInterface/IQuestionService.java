@@ -14,5 +14,6 @@ public interface IQuestionService {
     List<QuestionDTO> getByInterviewId(Long interviewId);
     List<QuestionDTO> getUnanswered(Long interviewId);
     List<QuestionDTO> getByDifficulty(Question.Difficulty difficulty);
+    List<QuestionDTO> getAll();
     void delete(Long id);
     Map<String, Object> generateFromPython(GenerateQuestionsRequestDTO request);}

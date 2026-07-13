@@ -8,6 +8,7 @@ import { AnalyticsComponent } from './analytics/analytics.component';
 import { QuestionsComponent } from './questions/questions.component';
 import { SettingsComponent } from './settings/settings.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
+import { JobOffersComponent } from './job-offers/job-offers.component';
 
 const routes: Routes = [{ path: '', component: BackofficeComponent ,
    children: [
@@ -18,6 +19,7 @@ const routes: Routes = [{ path: '', component: BackofficeComponent ,
         {path:'analytics',component:AnalyticsComponent},
         {path:'questions',component:QuestionsComponent},
         {path:'subscriptions',component:SubscriptionsComponent},
+        {path:'job-offers',component:JobOffersComponent},
         {path:'settings',component:SettingsComponent},
 
       ] 

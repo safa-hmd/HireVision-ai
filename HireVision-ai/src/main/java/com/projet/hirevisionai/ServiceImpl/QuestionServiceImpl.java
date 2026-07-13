@@ -77,6 +77,14 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
+    public List<QuestionDTO> getAll() {
+        return questionRepository.findAllByOrderByIdDesc()
+                .stream()
+                .map(QuestionDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Long id) {
         if (!questionRepository.existsById(id)) {
             throw new RuntimeException("Question introuvable : " + id);

@@ -21,6 +21,12 @@ public class QuestionController {
 
     private final IQuestionService questionService;
 
+    /** Toutes les questions posées, utilisé par la vue admin "Questions" */
+    @GetMapping
+    public ResponseEntity<List<QuestionDTO>> getAll() {
+        return ResponseEntity.ok(questionService.getAll());
+    }
+
     @PostMapping("add")
     public ResponseEntity<QuestionDTO> create(@Valid @RequestBody QuestionCreateRequestDTO request) {
         return ResponseEntity.ok(questionService.create(request));

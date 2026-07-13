@@ -2,6 +2,7 @@ package com.projet.hirevisionai.Controller;
 
 import com.projet.hirevisionai.Dto.InterviewCreateRequestDTO;
 import com.projet.hirevisionai.Dto.InterviewDTO;
+import com.projet.hirevisionai.Dto.RecentInterviewDTO;
 import com.projet.hirevisionai.ServiceInterface.IInterviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,12 @@ import java.util.List;
 public class InterviewController {
 
     private final IInterviewService interviewService;
+
+    /** Toutes les interviews, utilisé par la vue admin "Gestion des Entretiens" */
+    @GetMapping
+    public ResponseEntity<List<RecentInterviewDTO>> getAll() {
+        return ResponseEntity.ok(interviewService.getAllForAdmin());
+    }
 
     @PostMapping("add")
     public ResponseEntity<InterviewDTO> create(@Valid @RequestBody InterviewCreateRequestDTO request) {

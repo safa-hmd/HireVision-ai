@@ -10,6 +10,7 @@ import { InterviewsComponent } from './interviews/interviews.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
 import { QuestionsComponent } from './questions/questions.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
+import { JobOffersComponent } from './job-offers/job-offers.component';
 import { SettingsComponent } from './settings/settings.component';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -25,6 +26,7 @@ import { RouterModule } from '@angular/router';
     AnalyticsComponent,
     QuestionsComponent,
     SubscriptionsComponent,
+    JobOffersComponent,
     SettingsComponent
   ],
   imports: [

@@ -153,6 +153,28 @@
   to { transform: rotate(360deg); }
 }
 
+/* ── Loading Banner (discret, n'obstrue plus caméra/UI) ── */
+.loading-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: rgba(79, 70, 229, 0.1);
+  border-bottom: 1px solid rgba(79, 70, 229, 0.25);
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.loading-ring-sm {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
 /* ── Main Layout Grid ── */
 .session-body {
   display: grid;
@@ -275,6 +297,19 @@
   background: rgba(239, 68, 68, 0.2) !important;
   border-color: rgba(239, 68, 68, 0.4) !important;
   color: var(--danger) !important;
+}
+
+.voice-toggle-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-2, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  color: var(--text-muted);
+}
+
+.voice-toggle-btn:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
 .cam-btn-pulse {

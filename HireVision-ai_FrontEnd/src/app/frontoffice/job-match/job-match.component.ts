@@ -1,7 +1,8 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { MatchingService, MatchingResultDTO } from '../../services/matching.service';
 import { CvService } from '../../services/cv.service';
 import { AuthService } from '../../services/auth.service';
+import { JobOfferService, JobOfferDTO } from '../../services/job-offer.service';
 
 declare const lucide: any;
 declare function animateNumbers(): void;
@@ -13,21 +14,37 @@ declare function showToast(message: string, type?: string): void;
   templateUrl: './job-match.component.html',
   styleUrls: ['./job-match.component.css']
 })
-export class JobMatchComponent implements AfterViewInit {
+export class JobMatchComponent implements AfterViewInit, OnInit {
 
   jobDescription = '';
   showResults    = false;
   isLoading      = false;
   result: MatchingResultDTO | null = null;
 
+  jobOffers: JobOfferDTO[] = [];
+  selectedJobOfferId: number | null = null;
+
   constructor(
     private matchingService: MatchingService,
     private cvService: CvService,
-    private authService: AuthService
+    private authService: AuthService,
+    private jobOfferService: JobOfferService
   ) {}
+
+  ngOnInit(): void {
+    this.jobOfferService.getActive().subscribe({
+      next: (offers) => this.jobOffers = offers,
+      error: () => this.jobOffers = []
+    });
+  }
 
   ngAfterViewInit(): void {
     lucide.createIcons();
+  }
+
+  onJobOfferSelected(): void {
+    const offer = this.jobOffers.find(o => o.id === this.selectedJobOfferId);
+    this.jobDescription = offer ? (offer.description || offer.title) : '';
   }
 
   extractSkillsFromText(text: string): string[] {
@@ -45,8 +62,8 @@ export class JobMatchComponent implements AfterViewInit {
   }
 
   analyzeJob(): void {
-    if (!this.jobDescription.trim()) {
-      showToast('Veuillez entrer une description de poste', 'warning');
+    if (!this.selectedJobOfferId && !this.jobDescription.trim()) {
+      showToast('Veuillez entrer une description de poste ou choisir une offre', 'warning');
       return;
     }
 
@@ -56,8 +73,9 @@ export class JobMatchComponent implements AfterViewInit {
       return;
     }
 
-    const jobSkills = this.extractSkillsFromText(this.jobDescription);
-    if (jobSkills.length === 0) {
+    // Si une offre publiée est sélectionnée, le backend calcule jobSkills depuis l'offre.
+    const jobSkills = this.selectedJobOfferId ? [] : this.extractSkillsFromText(this.jobDescription);
+    if (!this.selectedJobOfferId && jobSkills.length === 0) {
       showToast('Aucune compétence détectée dans la description', 'warning');
       return;
     }
@@ -72,7 +90,8 @@ export class JobMatchComponent implements AfterViewInit {
         this.matchingService.matchAndSave({
           cvId: cv.id!,
           cvSkills,
-          jobSkills
+          jobSkills,
+          jobOfferId: this.selectedJobOfferId
         }).subscribe({
           next: (res) => {
             this.result      = res;

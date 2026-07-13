@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Controller;
 
+import com.projet.hirevisionai.Dto.InterviewPlanItemDTO;
 import com.projet.hirevisionai.Dto.LearningPlanDTO;
 import com.projet.hirevisionai.ServiceInterface.ILearningPlanService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,13 @@ public class LearningPlanController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         learningPlanService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Appelé par Angular juste après réception du feedback IA post-entretien
+    @PostMapping("/from-interview/{interviewId}")
+    public ResponseEntity<List<LearningPlanDTO>> createFromInterview(
+            @PathVariable Long interviewId,
+            @RequestBody List<InterviewPlanItemDTO> items) {
+        return ResponseEntity.ok(learningPlanService.createFromInterview(interviewId, items));
     }
 }

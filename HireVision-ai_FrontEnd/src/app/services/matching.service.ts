@@ -6,12 +6,15 @@ export interface JobMatchRequestDTO {
   cvId: number;
   cvSkills: string[];
   jobSkills: string[];
+  jobOfferId?: number | null;
 }
 
 export interface MatchingResultDTO {
   id?: number;
   score: number;
   cvId: number;
+  jobOfferId?: number;
+  jobOfferTitle?: string;
   label?: string;
   message?: string;
   compatible?: boolean;

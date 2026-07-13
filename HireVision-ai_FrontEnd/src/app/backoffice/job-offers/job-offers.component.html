@@ -1,0 +1,93 @@
+<div class="main-content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Offres d'Emploi</h1>
+      <p class="page-subtitle">Gérez les offres utilisées pour le matching CV / compétences</p>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i data-lucide="plus"></i> Nouvelle Offre
+      </button>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <div *ngIf="isLoading" style="text-align:center;padding:32px">
+          <div class="spinner" style="margin:0 auto 12px"></div>
+          <p class="text-muted">Chargement des offres...</p>
+        </div>
+
+        <table *ngIf="!isLoading">
+          <thead>
+            <tr>
+              <th style="width:26%">Titre</th>
+              <th>Entreprise</th>
+              <th>Compétences requises</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let offer of offers">
+              <td class="text-sm font-medium">{{ offer.title }}</td>
+              <td class="text-sm">{{ offer.company || '—' }}</td>
+              <td class="text-sm">
+                <span class="badge badge-primary" *ngFor="let s of offer.requiredSkills" style="margin-right:4px;margin-bottom:4px;display:inline-block">{{ s }}</span>
+                <span *ngIf="!offer.requiredSkills?.length" class="text-muted">—</span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-success]="offer.active" [class.badge-muted]="!offer.active"
+                      style="cursor:pointer" (click)="toggleActive(offer)">
+                  {{ offer.active ? 'Publiée' : 'Dépubliée' }}
+                </span>
+              </td>
+              <td>
+                <div class="flex gap-1">
+                  <button class="btn btn-ghost btn-sm" (click)="openEditModal(offer)"><i data-lucide="edit-2"></i></button>
+                  <button class="btn btn-ghost btn-sm" (click)="deleteOffer(offer)"><i data-lucide="trash-2"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!offers.length">
+              <td colspan="5" class="text-center text-muted" style="padding:24px">Aucune offre d'emploi pour le moment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" [class.open]="isModalOpen">
+  <div class="modal">
+    <h3 style="margin-bottom:20px">{{ isEditing ? "Modifier l'Offre" : 'Nouvelle Offre' }}</h3>
+
+    <div class="form-group">
+      <label class="form-label">Titre du poste</label>
+      <input class="form-input" [(ngModel)]="form.title" placeholder="Ex: Développeur Full Stack Java/Angular" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Entreprise</label>
+      <input class="form-input" [(ngModel)]="form.company" placeholder="Ex: HireVision AI" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" rows="4" [(ngModel)]="form.description" placeholder="Description du poste…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Compétences requises (séparées par des virgules)</label>
+      <input class="form-input" [(ngModel)]="skillsInput" placeholder="Java, Spring Boot, Angular, MySQL" />
+    </div>
+
+    <div class="flex gap-2" style="justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-outline" (click)="closeModal()">Annuler</button>
+      <button class="btn btn-primary" (click)="save()">Enregistrer</button>
+    </div>
+  </div>
+</div>

@@ -88,13 +88,33 @@ export class InterviewFeedbackComponent implements OnInit, AfterViewInit {
         this.feedback  = fb;
         this.isLoading = false;
         setTimeout(() => lucide?.createIcons(), 100);
+        this.persistLearningPlan(fb?.plan_apprentissage);
       },
       error: () => {
         this.feedback  = this.buildFallbackFeedback();
         this.isLoading = false;
         setTimeout(() => lucide?.createIcons(), 100);
+        this.persistLearningPlan(this.feedback?.plan_apprentissage);
       }
     });
+  }
+
+  // Sauvegarde le plan d'apprentissage IA en DB (visible ensuite sur "Plan de Carrière")
+  private persistLearningPlan(planItems: any[] | undefined): void {
+    const interviewId = this.results?.interviewId;
+    if (!interviewId || !planItems || !planItems.length) return;
+
+    const items = planItems.map(p => ({
+      semaine:   p.semaine,
+      theme:     p.theme,
+      ressource: p.ressource,
+      action:    p.action
+    }));
+
+    this.http.post(`${this.javaUrl}/learning-plans/from-interview/${interviewId}`, items)
+      .subscribe({
+        error: () => { /* non bloquant : la page feedback reste utilisable */ }
+      });
   }
 
   private buildFallbackFeedback(): any {

@@ -11,4 +11,7 @@ public interface MissedSkillRepository extends JpaRepository<MissedSkill, Long> 
     List<MissedSkill> findByMatchingResultId(Long matchingResultId);
     List<MissedSkill> findBySkillNameIgnoreCase(String skillName);
     long countByMatchingResultId(Long matchingResultId);
+
+    // Toutes les compétences manquantes de l'user, tous matchings confondus
+    List<MissedSkill> findByMatchingResultCvUserIdUser(Long userId);
 }

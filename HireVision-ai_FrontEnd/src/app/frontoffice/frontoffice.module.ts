@@ -16,6 +16,7 @@ import { PlanCarriereComponent } from './plan-carriere/plan-carriere.component';
 import { InterviewPreparationComponent } from './interview-preparation/interview-preparation.component';
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
 import { InterviewFeedbackComponent } from './interview-feedback/interview-feedback.component';
+import { SubscriptionComponent } from './subscription/subscription.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { InterviewFeedbackComponent } from './interview-feedback/interview-feedb
     PlanCarriereComponent,
     InterviewPreparationComponent,
     InterviewSessionComponent,
-    InterviewFeedbackComponent
+    InterviewFeedbackComponent,
+    SubscriptionComponent
   ],
   imports: [
     CommonModule,

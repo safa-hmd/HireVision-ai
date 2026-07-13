@@ -13,4 +13,5 @@ public interface ICvService {
     CvDTO getLatestByUserId(Long userId);
     void delete(Long id);
     CvUploadResponseDTO uploadAndAnalyze(MultipartFile file, Long userId);
+    CvUploadResponseDTO getLatestAnalysis(Long userId);
 }

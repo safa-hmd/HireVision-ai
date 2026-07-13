@@ -17,7 +17,7 @@ load_dotenv()
 
 from extractor import (
     extract_skills, extract_education, extract_experience,
-    extract_languages, extract_certifications, extract_name
+    extract_languages, extract_certifications, extract_name, extract_projects
 )
 from ml_model import predict_profile
 from job_matcher import match_skills
@@ -289,6 +289,7 @@ async def analyze_cv(file: UploadFile = File(...)):
     skills         = extract_skills(raw_text)
     education      = extract_education(raw_text)
     experience     = extract_experience(raw_text)
+    projects       = extract_projects(raw_text)
     languages      = extract_languages(raw_text)
     certifications = extract_certifications(raw_text)
     ml_result      = predict_profile(skills)
@@ -299,6 +300,7 @@ async def analyze_cv(file: UploadFile = File(...)):
         "skills":         skills,
         "education":      education,
         "experience":     experience,
+        "projects":       projects,
         "certifications": certifications,
         "languages":      languages,
         "summary":        summary,
@@ -432,7 +434,10 @@ def interview_questions(
         extra = [q for q in selected if q not in result]
         result += extra[:effective_count - len(result)]
 
-    rng.shuffle(result)
+    # NB : on NE mélange PAS `result` ici — l'ordre easy → medium → hard construit
+    # ci-dessus est intentionnel (entretien qui monte en difficulté). Le pool
+    # `selected` a déjà été mélangé plus haut, donc les questions restent
+    # variées à l'intérieur de chaque palier de difficulté.
     for i, q in enumerate(result):
         q = dict(q)
         q["id"] = i + 1

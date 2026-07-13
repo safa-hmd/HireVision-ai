@@ -52,4 +52,8 @@ public class CvController {
             @RequestParam("userId") Long userId) {
         return ResponseEntity.ok(cvService.uploadAndAnalyze(file, userId));
     }
+    @GetMapping("/user/{userId}/latest-analysis")
+    public ResponseEntity<CvUploadResponseDTO> getLatestAnalysis(@PathVariable Long userId) {
+        return ResponseEntity.ok(cvService.getLatestAnalysis(userId));
+    }
 }

@@ -20,15 +20,14 @@
     </div>
   </header>
 
-  <!-- ── LOADING SCREEN ── -->
-  <div *ngIf="isLoading" class="loading-screen">
-    <div class="loading-ring"></div>
-    <p class="loading-text">Génération des questions par l'IA...</p>
-    <p class="loading-sub">IA analyse votre spécialité</p>
+  <!-- ── LOADING BANNER (discret, ne bloque plus la caméra) ── -->
+  <div *ngIf="isLoading" class="loading-banner">
+    <div class="loading-ring-sm"></div>
+    <span>Génération des questions par l'IA en cours… la caméra est déjà active pendant ce temps.</span>
   </div>
 
-  <!-- ── MAIN CONTENT GRID ── -->
-  <div *ngIf="!isLoading" class="session-body">
+  <!-- ── MAIN CONTENT GRID (affiché immédiatement, plus besoin d'attendre les questions) ── -->
+  <div class="session-body">
 
     <!-- LEFT COLUMN -->
     <div class="col-main">
@@ -62,12 +61,29 @@
       </div>
 
       <!-- Question Card -->
-      <div *ngIf="currentQuestion" class="question-card">
+      <div *ngIf="isLoading" class="question-card">
+        <div class="question-header">
+          <div class="ai-avatar">IA</div>
+          <div class="question-meta">
+            <h3>Préparation des questions</h3>
+          </div>
+        </div>
+        <div style="text-align:center;padding:24px 0">
+          <div class="loading-ring-sm" style="margin:0 auto 12px"></div>
+          <p class="text-muted">L'IA génère vos questions personnalisées ({{ specialty?.title }})...</p>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && currentQuestion" class="question-card">
         <div class="question-header">
           <div class="ai-avatar">IA</div>
           <div class="question-meta">
             <h3>Question Actuelle</h3>
           </div>
+          <button class="cam-btn voice-toggle-btn" style="margin-left:auto" (click)="toggleVoice()"
+                  [title]="isVoiceEnabled ? 'Couper la voix IA' : 'Activer la voix IA'">
+            <i [attr.data-lucide]="isVoiceEnabled ? 'volume-2' : 'volume-x'"></i>
+          </button>
         </div>
         <p class="question-text">{{ currentQuestion.question }}</p>
 

@@ -16,8 +16,17 @@
           <p>Collez la description pour analyser votre score de compatibilité</p>
         </div>
         <div class="card-body">
+          <div class="form-group" *ngIf="jobOffers.length">
+            <label class="form-label">Ou choisissez une offre publiée</label>
+            <select class="form-select" [(ngModel)]="selectedJobOfferId" (change)="onJobOfferSelected()">
+              <option [ngValue]="null">— Coller une description libre —</option>
+              <option *ngFor="let o of jobOffers" [ngValue]="o.id">{{ o.title }} — {{ o.company }}</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <textarea class="form-textarea" [(ngModel)]="jobDescription"
+              [disabled]="!!selectedJobOfferId"
               rows="8" placeholder="Collez ici la description du poste…"
               style="min-height:160px"></textarea>
           </div>

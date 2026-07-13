@@ -22,4 +22,7 @@ public class Skill {
 
     @ManyToMany(mappedBy = "skills")
     private List<CV> cvs;
+
+    @ManyToMany(mappedBy = "requiredSkills")
+    private List<JobOffer> jobOffers;
 }

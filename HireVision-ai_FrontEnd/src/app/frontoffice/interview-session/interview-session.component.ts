@@ -33,6 +33,8 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild('faceCanvas')        faceCanvas!:        ElementRef<HTMLCanvasElement>;
   @ViewChild('liveTranscriptEl')  liveTranscriptEl?:  ElementRef<HTMLParagraphElement>;
 
+  savedInterviewId: number | null = null;
+
   specialty:    any      = null;
   questions:    Question[] = [];
   currentIndex: number   = 0;
@@ -74,6 +76,10 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     'Faites de courtes pauses avant de répondre',
     'Utilisez des exemples concrets (méthode STAR)'
   ];
+
+  // ── Voix (Text-to-Speech) ──
+  isVoiceEnabled = true;
+  private speechSynth = (typeof window !== 'undefined') ? window.speechSynthesis : null;
 
   // ── Difficulté progressive : score courant ──
   private currentRunningScore = 0;
@@ -189,6 +195,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
         this.questions = res.questions || [];
         this.isLoading = false;
         setTimeout(() => lucide.createIcons(), 100);
+        this.speakCurrentQuestion();
       },
       error: () => {
         this.isLoading = false;
@@ -309,6 +316,39 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   // ─────────────────────────────────────────────────
+  // VOIX DE L'IA (Text-to-Speech, gratuit — API navigateur)
+  // ─────────────────────────────────────────────────
+
+  /** Lit la question courante à voix haute (voix française si disponible). */
+  private speakCurrentQuestion(): void {
+    if (!this.isVoiceEnabled || !this.speechSynth || !this.currentQuestion) return;
+
+    this.speechSynth.cancel(); // stoppe toute lecture en cours avant d'enchaîner
+
+    const utterance = new SpeechSynthesisUtterance(this.currentQuestion.question);
+    utterance.lang  = 'fr-FR';
+    utterance.rate  = 1;
+    utterance.pitch = 1;
+
+    const frenchVoice = this.speechSynth.getVoices()
+      .find(v => v.lang?.toLowerCase().startsWith('fr'));
+    if (frenchVoice) utterance.voice = frenchVoice;
+
+    this.speechSynth.speak(utterance);
+  }
+
+  /** Active/désactive la lecture à voix haute des questions. */
+  toggleVoice(): void {
+    this.isVoiceEnabled = !this.isVoiceEnabled;
+    if (!this.isVoiceEnabled) {
+      this.speechSynth?.cancel();
+    } else {
+      this.speakCurrentQuestion();
+    }
+    setTimeout(() => lucide.createIcons(), 30);
+  }
+
+  // ─────────────────────────────────────────────────
   // BEHAVIOR SIMULATION (entre les analyses vision)
   // ─────────────────────────────────────────────────
 
@@ -349,6 +389,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
 
   toggleRecording(): void {
     if (!this.isRecording) {
+      this.speechSynth?.cancel(); // on n'entend pas l'IA pendant qu'on parle
       this.transcript        = '';
       this.interimTranscript = '';
       this.recognition?.start();
@@ -451,10 +492,12 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
             this.currentIndex++;
           }
           setTimeout(() => lucide.createIcons(), 50);
+          this.speakCurrentQuestion();
         },
         error: () => {
           this.currentIndex++;
           setTimeout(() => lucide.createIcons(), 50);
+          this.speakCurrentQuestion();
         }
       });
     } else {
@@ -494,6 +537,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     if (this.currentIndex < this.questions.length - 1) {
       this.currentIndex++;
       setTimeout(() => lucide.createIcons(), 50);
+      this.speakCurrentQuestion();
     } else {
       this.finishInterview();
     }
@@ -509,6 +553,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.audioBarInterval);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
+    this.speechSynth?.cancel();
 
     const userId = this.authService.getCurrentUserId();
     const cvId   = this.latestCv?.id;
@@ -527,6 +572,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
           userId, cvId, startDate: new Date().toISOString()
         })
       );
+      this.savedInterviewId = interview.id;
 
       // 2. Sauvegarder questions + réponses
       for (const ans of this.answers) {
@@ -599,6 +645,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       : 0;
 
     sessionStorage.setItem('interview_results', JSON.stringify({
+      interviewId:    this.savedInterviewId,
       specialty:      this.specialty,
       answers:        this.answers,
       duration:       this.timer,
@@ -628,6 +675,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.audioBarInterval);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
+    this.speechSynth?.cancel();
     this.router.navigate(['/frontoffice/interviewPrep']);
   }
 
@@ -637,5 +685,6 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.audioBarInterval);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
+    this.speechSynth?.cancel();
   }
 }

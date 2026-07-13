@@ -37,5 +37,7 @@ public class CV {
     @OneToMany(mappedBy = "cv")
     List<MatchingResult> matchingResults;
 
+    @Column(columnDefinition = "TEXT")
+    private String analysisJson;
 
 }

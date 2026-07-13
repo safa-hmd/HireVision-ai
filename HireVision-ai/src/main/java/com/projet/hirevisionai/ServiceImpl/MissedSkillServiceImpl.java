@@ -27,6 +27,8 @@ public class MissedSkillServiceImpl implements IMissedSkillService {
         MissedSkill saved = missedSkillRepository.save(
                 MissedSkill.builder()
                         .skillName(dto.getSkillName())
+                        .priority(dto.getPriority())
+                        .estimatedWeeks(dto.getEstimatedWeeks())
                         .matchingResult(matchingResult)
                         .build());
 
@@ -36,6 +38,13 @@ public class MissedSkillServiceImpl implements IMissedSkillService {
     @Override
     public List<MissedSkillDTO> getByMatchingResultId(Long matchingResultId) {
         return missedSkillRepository.findByMatchingResultId(matchingResultId)
+                .stream().map(MissedSkillDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MissedSkillDTO> getByUserId(Long userId) {
+        return missedSkillRepository.findByMatchingResultCvUserIdUser(userId)
                 .stream().map(MissedSkillDTO::fromEntity)
                 .collect(Collectors.toList());
     }

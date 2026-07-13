@@ -1,14 +1,20 @@
 package com.projet.hirevisionai.ServiceImpl;
 
+import com.projet.hirevisionai.Dto.InterviewPlanItemDTO;
 import com.projet.hirevisionai.Dto.LearningPlanDTO;
+import com.projet.hirevisionai.Entity.Interview;
 import com.projet.hirevisionai.Entity.LearningPlan;
 import com.projet.hirevisionai.Entity.MissedSkill;
+import com.projet.hirevisionai.Entity.PlanSource;
+import com.projet.hirevisionai.Repository.InterviewRepository;
 import com.projet.hirevisionai.Repository.LearningPlanRepository;
 import com.projet.hirevisionai.Repository.MissedSkillRepository;
 import com.projet.hirevisionai.ServiceInterface.ILearningPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +24,7 @@ public class LearningPlanServiceImpl implements ILearningPlanService {
 
     private final LearningPlanRepository learningPlanRepository;
     private final MissedSkillRepository  missedSkillRepository;
+    private final InterviewRepository    interviewRepository;
 
     @Override
     public LearningPlanDTO create(LearningPlanDTO dto) {
@@ -29,6 +36,7 @@ public class LearningPlanServiceImpl implements ILearningPlanService {
                         .title(dto.getTitle())
                         .content(dto.getContent())
                         .resourceUrl(dto.getResourceUrl())
+                        .source(PlanSource.JOB_MATCHING)
                         .missedSkill(missedSkill)
                         .build());
 
@@ -44,8 +52,12 @@ public class LearningPlanServiceImpl implements ILearningPlanService {
 
     @Override
     public List<LearningPlanDTO> getByUserId(Long userId) {
-        return learningPlanRepository.findByMissedSkillMatchingResultCvUserIdUser(userId)
-                .stream().map(LearningPlanDTO::fromEntity)
+        List<LearningPlan> combined = new ArrayList<>();
+        combined.addAll(learningPlanRepository.findByMissedSkillMatchingResultCvUserIdUser(userId));
+        combined.addAll(learningPlanRepository.findByInterviewUserIdUser(userId));
+
+        return combined.stream()
+                .map(LearningPlanDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -64,5 +76,31 @@ public class LearningPlanServiceImpl implements ILearningPlanService {
         if (!learningPlanRepository.existsById(id))
             throw new RuntimeException("LearningPlan introuvable : " + id);
         learningPlanRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public List<LearningPlanDTO> createFromInterview(Long interviewId, List<InterviewPlanItemDTO> items) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new RuntimeException("Interview introuvable : " + interviewId));
+
+        // Idempotent : si l'utilisateur revisite la page feedback, on remplace
+        // l'ancien plan de CET entretien au lieu de le dupliquer.
+        learningPlanRepository.deleteByInterviewId(interviewId);
+
+        List<LearningPlan> toSave = items.stream()
+                .map(item -> LearningPlan.builder()
+                        .title(item.getTheme())
+                        .content(item.getAction())
+                        .resourceUrl(item.getRessource())
+                        .weekNumber(item.getSemaine())
+                        .source(PlanSource.INTERVIEW)
+                        .interview(interview)
+                        .build())
+                .collect(Collectors.toList());
+
+        return learningPlanRepository.saveAll(toSave)
+                .stream().map(LearningPlanDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }

@@ -6,7 +6,7 @@ scikit-learn
 joblib
 pandas
 httpx
-opencv-python
+opencv-python<5
 numpy
 python-dotenv
 sentence-transformers

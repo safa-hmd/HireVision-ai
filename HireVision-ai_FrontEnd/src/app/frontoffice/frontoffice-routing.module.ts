@@ -9,6 +9,7 @@ import { PlanCarriereComponent } from './plan-carriere/plan-carriere.component';
 import { InterviewPreparationComponent } from './interview-preparation/interview-preparation.component';
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
 import { InterviewFeedbackComponent } from './interview-feedback/interview-feedback.component';
+import { SubscriptionComponent } from './subscription/subscription.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,7 @@ const routes: Routes = [
       { path: 'profil', component: ProfilComponent },
       { path: 'interview-session',  component: InterviewSessionComponent  },
       { path: 'interview-feedback', component: InterviewFeedbackComponent },
+      { path: 'subscription', component: SubscriptionComponent },
     ] 
     
   }
