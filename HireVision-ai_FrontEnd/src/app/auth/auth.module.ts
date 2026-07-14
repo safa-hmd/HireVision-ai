@@ -21,6 +21,7 @@ import { AdminLoginComponent } from './admin-login/admin-login.component';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     AdminLoginComponent
+
   ],
   imports: [
     CommonModule,

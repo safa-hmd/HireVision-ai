@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { Oauth2CallbackComponent } from './auth/oauth2-callback/oauth2-callback.component';
 
 const routes: Routes = [
   {
@@ -7,6 +8,8 @@ const routes: Routes = [
     redirectTo: 'auth/login',
     pathMatch: 'full'
   },
+  // Route de retour de Google OAuth (doit matcher exactement l'URL générée par le backend)
+  { path: 'oauth2/callback', component: Oauth2CallbackComponent },
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)

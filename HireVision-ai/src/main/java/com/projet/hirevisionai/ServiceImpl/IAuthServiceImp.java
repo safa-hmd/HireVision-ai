@@ -135,24 +135,30 @@ public class IAuthServiceImp implements IAuthService {
 
     @Override
     public void forgotPassword(ForgotPasswordRequest req) {
+        System.out.println(">>> forgotPassword appelé avec email: [" + req.email() + "]");
+
         Optional<User> optUser = userRepository.findByEmail(req.email());
-        if (optUser.isEmpty()) return;
+
+        if (optUser.isEmpty()) {
+            System.out.println(">>> Aucun utilisateur trouvé pour cet email !");
+            throw new IllegalArgumentException("Aucun compte associé à cet email");
+        }
 
         User user = optUser.get();
+        System.out.println(">>> Utilisateur trouvé: " + user.getEmail());
 
         String token = UUID.randomUUID().toString();
         user.setResetToken(token);
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
         userRepository.save(user);
 
-        String resetLink = FRONTEND_URL + "/reset-password?token=" + token;  // ✅ ici
+        String resetLink = FRONTEND_URL + "/auth/reset-password?token=" + token;
+        System.out.println(">>> Lien généré: " + resetLink);
+        System.out.println(">>> Tentative d'envoi de l'email...");
 
-        try {
-            emailService.sendResetEmail(user.getEmail(), resetLink);
-        } catch (Exception e) {
-            System.out.println("⚠️ Email non envoyé: " + e.getMessage());
-            System.out.println(">>> RESET LINK: " + resetLink);
-        }
+        emailService.sendResetEmail(user.getEmail(), resetLink);
+
+        System.out.println(">>> Email envoyé avec succès (aucune exception levée) !");
     }
 
     @Override

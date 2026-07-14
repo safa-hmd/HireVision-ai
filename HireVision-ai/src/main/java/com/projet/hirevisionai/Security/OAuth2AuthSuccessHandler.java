@@ -1,6 +1,7 @@
 package com.projet.hirevisionai.Security;
 
 
+import com.projet.hirevisionai.Entity.Role;
 import com.projet.hirevisionai.Entity.User;
 import com.projet.hirevisionai.Repository.UserRepository;
 import com.projet.hirevisionai.Security.jwt.JwtService;
@@ -30,28 +31,28 @@ public class OAuth2AuthSuccessHandler implements AuthenticationSuccessHandler {
         String email    = oAuth2User.getAttribute("email");
         String fullName = oAuth2User.getAttribute("name");
 
-        var existingUser = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> createCandidateFromGoogle(email, fullName));
 
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            String token = generateJwt(user);
+        String token = jwtService.generateToken(user);
 
-            String redirectUrl = String.format(
-                    "http://localhost:4200/oauth2/callback?token=%s&email=%s&role=ROLE_%s&id=%d",
-                    token, user.getEmail(), user.getRole().name(), user.getIdUser()
-            );
-            response.sendRedirect(redirectUrl);
-
-        } else {
-            String redirectUrl = String.format(
-                    "http://localhost:4200/oauth2/select-role?email=%s&name=%s",
-                    email, fullName != null ? fullName : "Google User"
-            );
-            response.sendRedirect(redirectUrl);
-        }
+        String redirectUrl = String.format(
+                "http://localhost:4200/oauth2/callback?token=%s&email=%s&role=ROLE_%s&id=%d",
+                token, user.getEmail(), user.getRole().name(), user.getIdUser()
+        );
+        response.sendRedirect(redirectUrl);
     }
 
-    private String generateJwt(User user) {
-        return jwtService.generateToken(user);
+    // Connexion Google réservée aux candidats : tout nouveau compte est créé en CANDIDATE,
+    // il n'y a plus de choix de rôle (les admins ne se créent jamais via Google).
+    private User createCandidateFromGoogle(String email, String fullName) {
+        User newUser = User.builder()
+                .email(email)
+                .fullName(fullName != null ? fullName : "Utilisateur Google")
+                .password("GOOGLE_OAUTH2_NO_PASSWORD")
+                .role(Role.CANDIDATE)
+                .enabled(true)
+                .build();
+        return userRepository.save(newUser);
     }
 }

@@ -51,7 +51,7 @@ source venv/bin/activate      # Windows : venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
 # puis renseigne GROQ_API_KEY dans .env
-uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 → démarre sur `http://localhost:8000`
 

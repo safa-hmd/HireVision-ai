@@ -12,7 +12,6 @@
         <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
         <button class="tab-trigger" data-tab="cvs">Mes CV</button>
         <button class="tab-trigger" data-tab="interviews">Entretiens</button>
-        <button class="tab-trigger" data-tab="achievements">Réalisations</button>
       </div>
 
       <!-- ══════════════ TAB PERSONAL ══════════════ -->
@@ -183,87 +182,32 @@
         <div class="card">
           <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
           <div class="card-body space-y-4">
-            <div class="list-item">
-              <div><div class="font-medium">Entretien Technique Java</div><div class="text-sm text-muted">8 Juin 2026</div></div>
-              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">85%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
+
+            <div *ngIf="interviews.length === 0" class="text-center text-muted" style="padding:24px 0">
+              Aucun entretien complété pour le moment.
             </div>
-            <div class="list-item">
-              <div><div class="font-medium">Session Spring Boot</div><div class="text-sm text-muted">7 Juin 2026</div></div>
-              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">78%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
+
+            <div class="list-item" *ngFor="let interview of interviews">
+              <div>
+                <div class="font-medium">Entretien #{{ interview.id }}</div>
+                <div class="text-sm text-muted">{{ interview.startDate | date:'d MMMM yyyy' }}</div>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="badge" [ngClass]="getInterviewType(interview) === 'RH' ? 'badge-success' : 'badge-primary'">
+                  {{ getInterviewType(interview) }}
+                </span>
+                <span *ngIf="getInterviewScore(interview) !== null"
+                      class="font-bold"
+                      [ngClass]="getInterviewType(interview) === 'RH' ? 'text-success' : 'text-primary'">
+                  {{ getInterviewScore(interview) }}%
+                </span>
+                <a [routerLink]="['/interview-report', interview.id]" class="btn btn-outline btn-sm">Rapport</a>
+              </div>
             </div>
-            <div class="list-item">
-              <div><div class="font-medium">Entretien RH Comportemental</div><div class="text-sm text-muted">6 Juin 2026</div></div>
-              <div class="flex items-center gap-4"><span class="badge badge-success">RH</span><span class="font-bold text-success">90%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
-            </div>
-            <div class="list-item">
-              <div><div class="font-medium">Pratique DevOps</div><div class="text-sm text-muted">5 Juin 2026</div></div>
-              <div class="flex items-center gap-4"><span class="badge badge-primary">Technique</span><span class="font-bold text-primary">72%</span><a href="#" class="btn btn-outline btn-sm">Rapport</a></div>
-            </div>
+
           </div>
         </div>
       </div>
-
-      <!-- ══════════════ TAB ACHIEVEMENTS ══════════════ -->
-      <div class="tab-panel" data-panel="achievements">
-
-        <div class="card mb-6">
-          <div class="card-header"><h3>Réalisations & Badges</h3><p>Vos jalons et accomplissements</p></div>
-          <div class="card-body">
-            <div class="grid-3" style="gap:14px">
-              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                <div style="width:60px;height:60px;background:#F59E0B;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">Premier Entretien</div><div class="text-xs text-success mt-1">Obtenu</div>
-              </div>
-              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                <div style="width:60px;height:60px;background:#2563EB;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">5 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
-              </div>
-              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                <div style="width:60px;height:60px;background:#7C3AED;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">10 Entretiens</div><div class="text-xs text-success mt-1">Obtenu</div>
-              </div>
-              <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
-                <div style="width:60px;height:60px;background:#10B981;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">Score Parfait</div><div class="text-xs text-muted mt-1">Verrouillé</div>
-              </div>
-              <div class="text-center" style="padding:24px;border:1.5px solid var(--border);border-radius:12px">
-                <div style="width:60px;height:60px;background:#F97316;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="award" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">Série Hebdo</div><div class="text-xs text-success mt-1">Obtenu</div>
-              </div>
-              <div class="text-center" style="padding:24px;border:1.5px dashed var(--border);border-radius:12px;opacity:.5">
-                <div style="width:60px;height:60px;background:#EF4444;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i data-lucide="trophy" style="color:#fff;width:28px;height:28px"></i></div>
-                <div class="font-medium">Niveau Maître</div><div class="text-xs text-muted mt-1">Verrouillé</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><h3>Statistiques</h3><p>Aperçu de vos performances</p></div>
-          <div class="card-body">
-            <div class="grid-4">
-              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
-                <div class="stat-value text-primary" data-countup="12">0</div>
-                <div class="text-sm text-muted">Total Entretiens</div>
-              </div>
-              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
-                <div class="stat-value" style="color:var(--success)" data-countup="78.5" data-suffix="%">0%</div>
-                <div class="text-sm text-muted">Score Moyen</div>
-              </div>
-              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
-                <div class="stat-value" style="color:var(--accent)" data-countup="5">0</div>
-                <div class="text-sm text-muted">Badges Obtenus</div>
-              </div>
-              <div class="text-center" style="padding:20px;border:1px solid var(--border);border-radius:10px">
-                <div class="stat-value text-warning" data-countup="24">0</div>
-                <div class="text-sm text-muted">Heures Pratiquées</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <!-- Fin tab achievements -->
 
     </div>
   </div>

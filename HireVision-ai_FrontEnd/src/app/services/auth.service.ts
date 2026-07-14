@@ -30,7 +30,7 @@ export interface AuthResponse {
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8086/HireVision'; // ✅ port + context path corrects
+  private baseUrl = 'http://localhost:8086/HireVision'; 
 
   constructor(private http: HttpClient) {}
 
@@ -68,17 +68,24 @@ getToken(): string | null {
     return this.http.post<AuthResponse>(
       `${this.baseUrl}/auth/login`, req
     ).pipe(
+      tap(response => this.storeSession(response))
+    );
+  }
 
+  // ── Stocke la session (réutilisé par le login classique ET le retour Google) ──
+  storeSession(response: AuthResponse): void {
+    localStorage.setItem('TokenUserConnect', response.token);
+    localStorage.setItem('EmailUserConnect', response.email);
+    localStorage.setItem('RoleUserConnect',  response.role);
+    localStorage.setItem('UserIdConnect', String(response.idUser));
+  }
 
-      tap(response => {
-        localStorage.setItem('TokenUserConnect', response.token);
-        localStorage.setItem('EmailUserConnect', response.email);
-        localStorage.setItem('RoleUserConnect',  response.role);
-
-       localStorage.setItem('UserIdConnect', String(response.idUser)); 
-
-
-      })
+  // ── Finalise l'inscription d'un nouvel utilisateur Google (choix du rôle) ──
+  completeGoogleRegister(req: { email: string; fullName: string; role: 'ADMIN' | 'CANDIDATE' }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.baseUrl}/auth/complete-google-register`, req
+    ).pipe(
+      tap(response => this.storeSession(response))
     );
   }
 
@@ -126,10 +133,7 @@ getToken(): string | null {
     window.location.href = 'http://localhost:8086/HireVision/oauth2/authorization/google';
   }
 
-  loginWithGithub(): void {
-    window.location.href = 'http://localhost:8086/HireVision/oauth2/authorization/github';
-  }
-
+ 
   forgotPassword(email: string): Observable<string> {
     return this.http.post(
       `http://localhost:8086/HireVision/auth/forgot-password`,

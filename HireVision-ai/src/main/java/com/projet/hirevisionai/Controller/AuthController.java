@@ -38,8 +38,15 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
-        authService.forgotPassword(req);
-        return ResponseEntity.ok("Email de réinitialisation envoyé");
+        try {
+            authService.forgotPassword(req);
+            return ResponseEntity.ok("Email de réinitialisation envoyé");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Erreur: " + e.getMessage());
+        }
     }
 
     @PostMapping("/reset-password")

@@ -5,6 +5,7 @@ import {
 import { UserService, UserDTO } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { CvService, CvDTO } from '../../services/cv.service';
+import { InterviewDTO, InterviewService } from '../../services/interview.service';
 import Cropper from 'cropperjs';
 
 declare const lucide: any;
@@ -22,6 +23,9 @@ export class ProfilComponent implements OnInit, AfterViewInit {
 
   user: UserDTO = { fullName: '', email: '', age: 0, phone: '', title: '', linkedin: '', github: '' };
   userCvs: CvDTO[] = [];
+
+  // ── Entretiens ──
+  interviews: InterviewDTO[] = [];
 
   // ── Photo de profil ──
   previewUrl: string | null = null;
@@ -44,7 +48,8 @@ export class ProfilComponent implements OnInit, AfterViewInit {
   constructor(
     private userService: UserService,
     private authService: AuthService,
-    private cvService: CvService
+    private cvService: CvService,
+    private interviewService: InterviewService,
   ) {}
 
   ngOnInit(): void { this.loadUserData(); }
@@ -71,6 +76,29 @@ export class ProfilComponent implements OnInit, AfterViewInit {
       next: (cvs) => { this.userCvs = cvs; },
       error: () => showToast('Erreur chargement CVs', 'danger')
     });
+
+    this.interviewService.getHistoryByUserId(userId).subscribe({
+      next: (data) => { this.interviews = data; },
+      error: () => showToast('Erreur chargement entretiens', 'danger')
+    });
+  }
+
+  // ─────────────────────────────────────────
+  // Helpers Entretiens
+  // ─────────────────────────────────────────
+  getInterviewScore(interview: InterviewDTO): number | null {
+    const f = interview.feedback;
+    if (!f) return null;
+    const scores = [f.technicalScore, f.communicationScore, f.confidenceScore, f.eyeContactScore]
+      .filter(s => s !== undefined && s !== null) as number[];
+    if (scores.length === 0) return null;
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    return Math.round(avg * 10) / 10;
+  }
+
+  getInterviewType(interview: InterviewDTO): string {
+    const hasTechnical = interview.questions?.some(q => q.difficulty);
+    return hasTechnical ? 'Technique' : 'RH';
   }
 
   // ─────────────────────────────────────────

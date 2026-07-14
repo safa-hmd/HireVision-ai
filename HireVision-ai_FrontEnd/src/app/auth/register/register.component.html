@@ -1,90 +1,100 @@
-<div class="card">
-  <div class="brand">
-    <div class="brand-icon">🧠</div>
-    <h1>Créer un compte</h1>
-    <p>Rejoignez HireVision AI</p>
+<div class="page">
+  <div class="card">
+    <div class="brand">
+      <div class="brand-logo-ring">
+        <img src="assets/img/brand/hirevision-icon.png" alt="HireVision AI" />
+      </div>
+      <h1>Créer un compte</h1>
+      <p>Rejoignez HireVision AI</p>
+    </div>
+
+    <form (ngSubmit)="handleSubmit()">
+
+      <div class="grid2">
+        <div class="field">
+          <label>Prénom</label>
+          <div class="input-wrap">
+            <i class="ti ti-user icon"></i>
+            <input [(ngModel)]="firstName" name="firstName" placeholder="John" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Nom</label>
+          <div class="input-wrap">
+            <i class="ti ti-user icon"></i>
+            <input [(ngModel)]="lastName" name="lastName" placeholder="Smith" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <div class="input-wrap">
+          <i class="ti ti-mail icon"></i>
+          <input [(ngModel)]="email" name="email" type="email" placeholder="john@example.com" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Âge</label>
+        <div class="input-wrap">
+          <i class="ti ti-calendar icon"></i>
+          <input [(ngModel)]="age" name="age" type="number" placeholder="25" min="18" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Mot de passe</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock icon"></i>
+          <input [(ngModel)]="password" name="password"
+                 [type]="showPwd ? 'text' : 'password'"
+                 placeholder="Minimum 6 caractères"
+                 (input)="checkStrength()" />
+          <button class="eye-btn" type="button" (click)="showPwd = !showPwd"
+                  [attr.aria-label]="showPwd ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i class="ti" [class.ti-eye]="!showPwd" [class.ti-eye-off]="showPwd"></i>
+          </button>
+        </div>
+        <div class="strength-bar" *ngIf="password">
+          <span [style.background]="score >= 1 ? strengthColor : '#E2E8F0'"></span>
+          <span [style.background]="score >= 2 ? strengthColor : '#E2E8F0'"></span>
+          <span [style.background]="score >= 3 ? strengthColor : '#E2E8F0'"></span>
+          <span [style.background]="score >= 4 ? strengthColor : '#E2E8F0'"></span>
+        </div>
+        <div class="strength-label" *ngIf="password">{{ strengthLabel }}</div>
+      </div>
+
+      <div class="field">
+        <label>Confirmer le mot de passe</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock icon"></i>
+          <input [(ngModel)]="password2" name="password2"
+                 [type]="showPwd2 ? 'text' : 'password'"
+                 placeholder="Répétez votre mot de passe" />
+          <button class="eye-btn" type="button" (click)="showPwd2 = !showPwd2"
+                  [attr.aria-label]="showPwd2 ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i class="ti" [class.ti-eye]="!showPwd2" [class.ti-eye-off]="showPwd2"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="errorMsg" class="alert-error">
+        <i class="ti ti-alert-circle"></i>{{ errorMsg }}
+      </div>
+      <div *ngIf="successMsg" class="alert-success">
+        <i class="ti ti-circle-check"></i>{{ successMsg }}
+      </div>
+
+      <button type="submit" class="btn-main full" [disabled]="loading">
+        <span *ngIf="loading">Création en cours…</span>
+        <span *ngIf="!loading">Créer mon compte</span>
+      </button>
+
+      <div class="footer">
+        Déjà un compte ? <a routerLink="/login">Se connecter</a>
+      </div>
+
+    </form>
   </div>
-
-  <form (ngSubmit)="handleSubmit()">
-
-    <div class="grid2">
-      <div class="field">
-        <label>Prénom</label>
-        <div class="input-wrap">
-          <i class="ti ti-user icon"></i>
-          <input [(ngModel)]="firstName" name="firstName" placeholder="John" />
-        </div>
-      </div>
-      <div class="field">
-        <label>Nom</label>
-        <div class="input-wrap">
-          <i class="ti ti-user icon"></i>
-          <input [(ngModel)]="lastName" name="lastName" placeholder="Smith" />
-        </div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Email</label>
-      <div class="input-wrap">
-        <i class="ti ti-mail icon"></i>
-        <input [(ngModel)]="email" name="email" type="email" placeholder="john@example.com" />
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Âge</label>
-      <div class="input-wrap">
-        <i class="ti ti-calendar icon"></i>
-        <input [(ngModel)]="age" name="age" type="number" placeholder="25" min="18" />
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Mot de passe</label>
-      <div class="input-wrap">
-        <i class="ti ti-lock icon"></i>
-        <input [(ngModel)]="password" name="password"
-               [type]="showPwd ? 'text' : 'password'"
-               placeholder="Minimum 6 caractères"
-               (input)="checkStrength()" />
-        <button class="eye-btn" type="button" (click)="showPwd = !showPwd">
-          <i class="ti" [class.ti-eye]="!showPwd" [class.ti-eye-off]="showPwd"></i>
-        </button>
-      </div>
-      <div class="strength-bar">
-        <span [style.background]="score >= 1 ? strengthColor : '#E2E8F0'"></span>
-        <span [style.background]="score >= 2 ? strengthColor : '#E2E8F0'"></span>
-        <span [style.background]="score >= 3 ? strengthColor : '#E2E8F0'"></span>
-        <span [style.background]="score >= 4 ? strengthColor : '#E2E8F0'"></span>
-      </div>
-      <div class="strength-label">{{ strengthLabel }}</div>
-    </div>
-
-    <div class="field">
-      <label>Confirmer le mot de passe</label>
-      <div class="input-wrap">
-        <i class="ti ti-lock icon"></i>
-        <input [(ngModel)]="password2" name="password2"
-               [type]="showPwd2 ? 'text' : 'password'"
-               placeholder="Répétez votre mot de passe" />
-        <button class="eye-btn" type="button" (click)="showPwd2 = !showPwd2">
-          <i class="ti" [class.ti-eye]="!showPwd2" [class.ti-eye-off]="showPwd2"></i>
-        </button>
-      </div>
-    </div>
-
-    <div *ngIf="errorMsg" class="alert-error">{{ errorMsg }}</div>
-    <div *ngIf="successMsg" class="alert-success">{{ successMsg }}</div>
-
-    <button type="submit" class="btn-main full" [disabled]="loading">
-      <span *ngIf="loading">Création en cours…</span>
-      <span *ngIf="!loading">Créer mon compte</span>
-    </button>
-
-    <div class="footer">
-      Déjà un compte ? <a routerLink="/login">Se connecter</a>
-    </div>
-
-  </form>
 </div>
