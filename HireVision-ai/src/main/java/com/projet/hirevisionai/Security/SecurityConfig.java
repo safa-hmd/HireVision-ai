@@ -66,15 +66,16 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
 
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers("/users/pictures/**").permitAll()
-                        .requestMatchers("/cvs/**").permitAll()
-                        .requestMatchers("/matching-results/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/users/pictures/**").permitAll()
 
-                                // Tout autre endpoint nécessite une authentification
+                        // /cvs/** et /matching-results/** nécessitent maintenant une authentification
+                        // (la vérification "c'est bien SON cv" se fait dans le contrôleur)
 
-                                .anyRequest().authenticated()
+                        // Tout autre endpoint nécessite une authentification
+
+                        .anyRequest().authenticated()
                 )
                 // ✅ FIX PRINCIPAL : empêche Spring de rediriger les appels REST vers OAuth2/login
                 .exceptionHandling(ex -> ex

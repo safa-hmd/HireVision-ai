@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Modèle & données entraînées (générés par train_model.py / clean_dataset.py)
+# Décommente si tu veux les régénérer plutôt que les versionner :
+# model.joblib
+# dataset_clean.csv
+
+# IDE
+.vscode/
+.idea/

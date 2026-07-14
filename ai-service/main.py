@@ -36,8 +36,11 @@ app = FastAPI(title="HireVision AI Microservice")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=[
+        "http://localhost:4200",   # frontend Angular en développement
+        # "https://ton-domaine-en-production.com",  # à décommenter/ajouter quand tu déploies
+    ],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
