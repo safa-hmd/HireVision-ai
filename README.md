@@ -107,7 +107,8 @@ npm start
 
 ## 🔒 Sécurité
 
-- Tous les secrets sont externalisés en **variables d'environnement** (`${VAR:default}`)
+- Tous les secrets sensibles sont externalisés via des variables d’environnement.
+Les fichiers `.env` et `application.properties` contenant des valeurs réelles ne doivent jamais être commités.
 - Les fichiers sensibles (`application.properties`, `.env`) sont dans `.gitignore`
 - Les endpoints CV/matching exigent un JWT valide + vérification de propriété
 - CORS restreint côté service IA
