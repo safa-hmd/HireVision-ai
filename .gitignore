@@ -1,1 +1,44 @@
+# ──────────────────────────────────────────────────────────
+#  HireVision AI — .gitignore racine
+#  Ce fichier couvre les 3 services : Spring Boot, Angular, FastAPI
+# ──────────────────────────────────────────────────────────
+
+# ── Fichiers de secrets (JAMAIS sur Git) ──────────────────
+.env
+*.env
+!.env.example
+
+# ── Spring Boot ───────────────────────────────────────────
+HireVision-ai/target/
+HireVision-ai/uploads/
+HireVision-ai/.idea/
+HireVision-ai/*.iml
+HireVision-ai/.mvn/wrapper/maven-wrapper.jar
+HireVision-ai/src/main/resources/application.properties
+
+# ── Angular Frontend ──────────────────────────────────────
+HireVision-ai_FrontEnd/node_modules/
+HireVision-ai_FrontEnd/dist/
+HireVision-ai_FrontEnd/.angular/cache/
+HireVision-ai_FrontEnd/.vscode/
+
+# ── Python / FastAPI ──────────────────────────────────────
 ai-service/.env
+ai-service/__pycache__/
+ai-service/*.pyc
+ai-service/*.pyo
+ai-service/.venv/
+ai-service/venv/
+ai-service/env/
+ai-service/.vscode/
+ai-service/.idea/
+
+# ── Docker ────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Divers ────────────────────────────────────────────────
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db

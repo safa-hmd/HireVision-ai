@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
+    private final org.springframework.web.client.RestTemplate restTemplate;
 
     @Override
     public UserDTO getById(Long id) {
@@ -73,6 +74,40 @@ public class UserServiceImpl implements IUserService {
             return UserDTO.fromEntity(userRepository.save(user));
         } catch (IOException e) {
             throw new RuntimeException("Erreur upload image : " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Object analyzeGithub(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable : " + id));
+
+        String githubUrl = user.getGithub();
+        if (githubUrl == null || githubUrl.trim().isEmpty()) {
+            throw new IllegalArgumentException("Veuillez renseigner votre profil GitHub dans vos paramètres.");
+        }
+
+        String username = githubUrl.trim();
+        // Parse the username out of URLs like: https://github.com/username/repo or https://github.com/username
+        if (username.contains("github.com/")) {
+            username = username.substring(username.indexOf("github.com/") + 11);
+        }
+        if (username.contains("/")) {
+            username = username.split("/")[0];
+        }
+        if (username.contains("?")) {
+            username = username.split("\\?")[0];
+        }
+
+        if (username.isEmpty()) {
+            throw new IllegalArgumentException("Nom d'utilisateur GitHub invalide.");
+        }
+
+        String url = "http://localhost:8000/analyze-github?username=" + username;
+        try {
+            return restTemplate.getForObject(url, Object.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Le service d'analyse GitHub est temporairement indisponible : " + e.getMessage());
         }
     }
 }

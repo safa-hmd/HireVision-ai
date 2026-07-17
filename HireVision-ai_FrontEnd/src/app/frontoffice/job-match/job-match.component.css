@@ -1,0 +1,98 @@
+/* ========== COMPARISON TABLE STYLE ========== */
+.jm-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.jm-comparison-table th {
+  background: var(--surface-2);
+  padding: 14px 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.jm-comparison-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.jm-comparison-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.jm-comparison-table tbody tr:hover {
+  background-color: var(--surface-2);
+}
+
+.jm-skill-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.jm-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ========== AI ADVICE BOX STYLE ========== */
+.jm-ai-advice {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(124, 58, 237, 0.04) 100%);
+  border: 1px solid var(--primary-light);
+  border-radius: 16px;
+  align-items: flex-start;
+}
+
+.jm-ai-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.jm-ai-label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.jm-ai-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Print mode adjustments */
+@media print {
+  .jm-ai-advice, .jm-comparison-table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

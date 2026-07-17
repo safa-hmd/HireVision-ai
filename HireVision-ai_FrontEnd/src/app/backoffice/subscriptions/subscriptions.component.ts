@@ -18,6 +18,15 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit {
   loading = true;
   error = false;
 
+  // Pagination for transactions
+  currentPage = 1;
+  pageSize = 5;
+
+  get totalPages(): number {
+    if (!this.stats || !this.stats.recentTransactions) return 1;
+    return Math.max(1, Math.ceil(this.stats.recentTransactions.length / this.pageSize));
+  }
+
   private readonly planColors: Record<string, string> = {
     'Gratuit': '#94A3B8',
     'Pro': '#4F46E5',

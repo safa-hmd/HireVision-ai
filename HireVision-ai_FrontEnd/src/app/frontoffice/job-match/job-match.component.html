@@ -1,8 +1,13 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Matching Emploi</h1>
-      <p class="page-subtitle">Comparez vos compétences aux offres d'emploi</p>
+      <h1 class="page-title">{{ 'JOB_MATCH.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'JOB_MATCH.SUBTITLE' | translate }}</p>
+    </div>
+    <div class="page-header-actions" *ngIf="showResults && !isLoading">
+      <button class="btn btn-primary btn-sm" (click)="printReport()">
+        <i data-lucide="download"></i> {{ 'JOB_MATCH.DOWNLOAD_PDF' | translate }}
+      </button>
     </div>
   </header>
 
@@ -12,14 +17,14 @@
     <div *ngIf="!showResults">
       <div class="card mb-6">
         <div class="card-header">
-          <h3>Description du Poste</h3>
-          <p>Collez la description pour analyser votre score de compatibilité</p>
+          <h3>{{ 'JOB_MATCH.JOB_DESC' | translate }}</h3>
+          <p>{{ 'JOB_MATCH.JOB_DESC_SUB' | translate }}</p>
         </div>
         <div class="card-body">
           <div class="form-group" *ngIf="jobOffers.length">
-            <label class="form-label">Ou choisissez une offre publiée</label>
+            <label class="form-label">{{ 'JOB_MATCH.CHOOSE_OFFER' | translate }}</label>
             <select class="form-select" [(ngModel)]="selectedJobOfferId" (change)="onJobOfferSelected()">
-              <option [ngValue]="null">— Coller une description libre —</option>
+              <option [ngValue]="null">{{ 'JOB_MATCH.FREE_DESC' | translate }}</option>
               <option *ngFor="let o of jobOffers" [ngValue]="o.id">{{ o.title }} — {{ o.company }}</option>
             </select>
           </div>
@@ -27,17 +32,17 @@
           <div class="form-group">
             <textarea class="form-textarea" [(ngModel)]="jobDescription"
               [disabled]="!!selectedJobOfferId"
-              rows="8" placeholder="Collez ici la description du poste…"
+              rows="8" placeholder="{{ 'JOB_MATCH.PLACEHOLDER' | translate }}"
               style="min-height:160px"></textarea>
           </div>
 
           <div *ngIf="isLoading" style="text-align:center;padding:16px">
             <div class="spinner" style="margin:0 auto 12px"></div>
-            <p class="text-muted">Analyse IA en cours...</p>
+            <p class="text-muted">{{ 'JOB_MATCH.LOADING' | translate }}</p>
           </div>
 
           <button *ngIf="!isLoading" class="btn btn-primary" (click)="analyzeJob()">
-            <i data-lucide="trending-up"></i> Analyser la Compatibilité
+            <i data-lucide="trending-up"></i> {{ 'JOB_MATCH.LAUNCH' | translate }}
           </button>
         </div>
       </div>
@@ -60,7 +65,7 @@
       <!-- Stats -->
       <div class="grid-3 mb-6">
         <div class="stat-card" [style.border-color]="getScoreColor()">
-          <div class="stat-label">Score de Compatibilité</div>
+          <div class="stat-label">{{ 'JOB_MATCH.SCORE_LABEL' | translate }}</div>
           <div class="stat-value" [style.color]="getScoreColor()"
                [attr.data-countup]="result.score" data-suffix="%">0%</div>
           <div class="progress-wrap mt-2">
@@ -73,17 +78,64 @@
         </div>
 
         <div class="stat-card" style="border-color:var(--primary)">
-          <div class="stat-label">Compétences Correspondantes</div>
+          <div class="stat-label">{{ 'JOB_MATCH.MATCHED' | translate }}</div>
           <div class="stat-value text-primary"
                [attr.data-countup]="result.matched?.length || 0">0</div>
-          <div class="stat-change text-muted">Exactes + partielles</div>
         </div>
 
         <div class="stat-card" style="border-color:var(--warning)">
-          <div class="stat-label">Compétences Manquantes</div>
+          <div class="stat-label">{{ 'JOB_MATCH.MISSING' | translate }}</div>
           <div class="stat-value text-warning"
                [attr.data-countup]="result.missingSkills?.length || 0">0</div>
-          <div class="stat-change text-muted">À acquérir</div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           SKILL COMPARISON TABLE (NEW)
+           ══════════════════════════════════════════════ -->
+      <div class="card mb-6" *ngIf="skillComparison.length">
+        <div class="card-header">
+          <h3><i data-lucide="table" style="width:15px;height:15px;vertical-align:-2px;color:var(--primary)"></i> {{ 'JOB_MATCH.COMPARISON_TITLE' | translate }}</h3>
+          <p>{{ 'JOB_MATCH.COMPARISON_SUB' | translate }}</p>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="jm-comparison-table">
+            <thead>
+              <tr>
+                <th>{{ 'JOB_MATCH.SKILL' | translate }}</th>
+                <th style="text-align:center">{{ 'JOB_MATCH.REQUIRED' | translate }}</th>
+                <th style="text-align:center">{{ 'JOB_MATCH.IN_CV' | translate }}</th>
+                <th style="text-align:center">{{ 'JOB_MATCH.STATUS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of skillComparison" [class]="'jm-row-' + s.status">
+                <td class="jm-skill-name">{{ s.skill }}</td>
+                <td style="text-align:center">✅</td>
+                <td style="text-align:center">
+                  <span *ngIf="s.status === 'match'">✅</span>
+                  <span *ngIf="s.status === 'partial'">⚠️</span>
+                  <span *ngIf="s.status === 'missing'">❌</span>
+                </td>
+                <td style="text-align:center">
+                  <span class="jm-status-pill" [style.background]="getStatusColor(s.status) + '18'" [style.color]="getStatusColor(s.status)">
+                    {{ getStatusLabel(s.status) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AI Advice -->
+      <div class="jm-ai-advice mb-6" *ngIf="aiAdvice">
+        <div class="jm-ai-icon">
+          <i data-lucide="sparkles" style="width:20px;height:20px;color:var(--primary)"></i>
+        </div>
+        <div>
+          <div class="jm-ai-label">{{ 'JOB_MATCH.AI_ADVICE' | translate }}</div>
+          <div class="jm-ai-text">{{ aiAdvice }}</div>
         </div>
       </div>
 
@@ -91,7 +143,7 @@
       <div class="grid-2 mb-6">
         <div class="card">
           <div class="card-header">
-            <h3>Répartition des Compétences</h3>
+            <h3>{{ 'JOB_MATCH.MATCHED' | translate }}</h3>
           </div>
           <div class="card-body">
             <div style="height:240px"><canvas id="chart-doughnut"></canvas></div>
@@ -100,37 +152,29 @@
 
         <div class="card">
           <div class="card-header">
-            <h3>Compétences Manquantes</h3>
-            <p>À acquérir pour ce poste</p>
+            <h3>{{ 'JOB_MATCH.MISSING' | translate }}</h3>
           </div>
           <div class="card-body">
             <ng-container *ngIf="result.missingSkills?.length; else noMissing">
               <div class="list-item" *ngFor="let skill of result.missingSkills">
                 <div><div class="font-medium">{{ skill }}</div></div>
-                <span class="badge badge-danger">Manquant</span>
+                <span class="badge badge-danger">{{ 'JOB_MATCH.MISSING_BADGE' | translate }}</span>
               </div>
             </ng-container>
             <ng-template #noMissing>
-              <p class="text-muted text-sm">✅ Aucune compétence manquante !</p>
+              <p class="text-muted text-sm">✅ {{ 'JOB_MATCH.NO_MISSING' | translate }}</p>
             </ng-template>
           </div>
-        </div>
-      </div>
-
-      <!-- Matched skills -->
-      <div class="card mb-6" *ngIf="result.matched?.length">
-        <div class="card-header">
-          <h3>Compétences Correspondantes</h3>
-        </div>
-        <div class="card-body">
-          <span class="tag tag-success" *ngFor="let skill of result.matched">{{ skill }}</span>
         </div>
       </div>
 
       <!-- Actions -->
       <div style="display:flex;gap:12px">
         <button type="button" (click)="reset()" class="btn btn-outline">
-          <i data-lucide="refresh-cw"></i> Nouvelle analyse
+          <i data-lucide="refresh-cw"></i> {{ 'JOB_MATCH.NEW_MATCH' | translate }}
+        </button>
+        <button type="button" (click)="printReport()" class="btn btn-primary">
+          <i data-lucide="download"></i> {{ 'JOB_MATCH.DOWNLOAD_PDF' | translate }}
         </button>
       </div>
 

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { CvService, CvDTO, CvAnalysis, CvUploadResponse } from '../../services/cv.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -10,7 +10,7 @@ declare function showToast(msg: string, type?: string): void;
   templateUrl: './cv-analyse.component.html',
   styleUrls: ['./cv-analyse.component.css']
 })
-export class CvAnalyseComponent implements AfterViewInit {
+export class CvAnalyseComponent implements AfterViewInit, OnDestroy {
 
   showResults = false;
   isLoading = false;
@@ -18,6 +18,8 @@ export class CvAnalyseComponent implements AfterViewInit {
   uploadedCv: CvDTO | null = null;
   analysis: CvAnalysis | null = null;
   fileName = '';
+  currentStageKey = 'CV_ANALYSE.STAGE_1';
+  private loadingInterval: any = null;
 
   constructor(
     private cvService: CvService,
@@ -27,6 +29,27 @@ export class CvAnalyseComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     lucide.createIcons();
     this.loadExistingAnalysis();
+  }
+
+  ngOnDestroy(): void {
+    this.clearLoadingInterval();
+  }
+
+  private startLoadingInterval(): void {
+    this.clearLoadingInterval();
+    this.currentStageKey = 'CV_ANALYSE.STAGE_1';
+    let stage = 1;
+    this.loadingInterval = setInterval(() => {
+      stage = stage < 5 ? stage + 1 : 1;
+      this.currentStageKey = `CV_ANALYSE.STAGE_${stage}`;
+    }, 2000);
+  }
+
+  private clearLoadingInterval(): void {
+    if (this.loadingInterval) {
+      clearInterval(this.loadingInterval);
+      this.loadingInterval = null;
+    }
   }
 
   private loadExistingAnalysis(): void {
@@ -79,6 +102,7 @@ export class CvAnalyseComponent implements AfterViewInit {
     this.fileName = file.name;
     this.isLoading = true;
     this.showResults = false;
+    this.startLoadingInterval();
     showToast('Analyse IA en cours...', 'info');
 
     this.cvService.uploadAndAnalyze(file, userId).subscribe({
@@ -87,11 +111,13 @@ export class CvAnalyseComponent implements AfterViewInit {
         this.analysis = res.analysis;
         this.showResults = true;
         this.isLoading = false;
+        this.clearLoadingInterval();
         setTimeout(() => lucide.createIcons(), 50);
         showToast('CV analysé avec succès !', 'success');
       },
       error: () => {
         this.isLoading = false;
+        this.clearLoadingInterval();
         showToast("Erreur lors de l'analyse du CV", 'danger');
       }
     });
@@ -180,5 +206,13 @@ export class CvAnalyseComponent implements AfterViewInit {
       const file = e.dataTransfer?.files[0];
       if (file) this.uploadFile(file);
     });
+  }
+
+  printReport(): void {
+    const original = document.title;
+    const cleanName = (this.fileName || 'CV').replace(/[^\w\-]+/g, '_');
+    document.title = `Rapport_Analyse_CV_${cleanName}`;
+    window.print();
+    setTimeout(() => { document.title = original; }, 500);
   }
 }

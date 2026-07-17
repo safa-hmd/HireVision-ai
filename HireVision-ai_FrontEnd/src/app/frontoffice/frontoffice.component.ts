@@ -22,6 +22,6 @@ export class FrontofficeComponent implements OnInit {
   }
 
   private updateMenuVisibility(url: string): void {
-    this.showMenu = !url.includes('interview-session');
+    this.showMenu = !url.includes('interview-session') && !url.includes('welcome');
   }
 }

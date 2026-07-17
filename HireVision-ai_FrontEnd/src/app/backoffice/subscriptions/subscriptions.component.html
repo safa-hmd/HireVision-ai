@@ -3,9 +3,6 @@
   <div class="main-content">
     <header class="page-header">
       <div><h1 class="page-title">Abonnements & Revenus</h1><p class="page-subtitle">Gestion des plans et paiements</p></div>
-      <div class="page-header-actions">
-        <button class="btn btn-outline btn-sm" (click)="exportData()"><i data-lucide="download"></i> Exporter</button>
-      </div>
     </header>
 
     <div class="page-body">
@@ -116,7 +113,7 @@
             <table>
               <thead><tr><th>Utilisateur</th><th>Plan</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
               <tbody>
-                <tr *ngFor="let t of stats.recentTransactions">
+                <tr *ngFor="let t of stats.recentTransactions | slice:(currentPage-1)*pageSize:currentPage*pageSize">
                   <td>
                     <div class="flex items-center gap-2">
                       <div class="avatar avatar-sm">{{ t.userFullName ? t.userFullName.substring(0,2).toUpperCase() : '?' }}</div>
@@ -133,6 +130,16 @@
                 </tr>
               </tbody>
             </table>
+
+            <!-- Pagination Controls -->
+            <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between" *ngIf="stats.recentTransactions.length > pageSize">
+              <span class="text-sm text-muted">Page {{ currentPage }} / {{ totalPages }} — {{ stats.recentTransactions.length }} transactions</span>
+              <div class="flex gap-2">
+                <button class="btn btn-outline btn-sm" (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">Précédent</button>
+                <button class="btn btn-outline btn-sm" (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">Suivant</button>
+              </div>
+            </div>
+
           </div>
         </div>
 

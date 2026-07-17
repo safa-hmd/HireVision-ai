@@ -1,19 +1,13 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { SubscriptionService, SubscriptionInfo, PaymentTransaction } from '../../services/subscription.service';
 import { AuthService } from '../../services/auth.service';
+import { PlanService, PlanDTO } from '../../services/plan.service';
 
 declare const lucide: any;
 declare function showToast(message: string, type?: string): void;
 declare function confirmAction(message: string, onConfirm: () => void): void;
 
-interface Plan {
-  key: 'PRO' | 'PREMIUM';
-  name: string;
-  price: number;
-  tagline: string;
-  features: string[];
-  highlighted?: boolean;
-}
+type Plan = PlanDTO;
 
 @Component({
   selector: 'app-subscription',
@@ -22,37 +16,19 @@ interface Plan {
 })
 export class SubscriptionComponent implements OnInit, AfterViewInit {
 
-  plans: Plan[] = [
-    {
-      key: 'PRO',
-      name: 'Pro',
-      price: 29,
-      tagline: 'Pour un candidat qui postule activement',
-      features: [
-        'Analyses de CV illimitées',
-        'Matching avec les offres d\'emploi',
-        'Simulations d\'entretien illimitées',
-        'Plan de carrière personnalisé'
-      ]
-    },
-    {
-      key: 'PREMIUM',
-      name: 'Premium',
-      price: 59,
-      tagline: 'Pour maximiser vos chances',
-      highlighted: true,
-      features: [
-        'Tout le plan Pro',
-        'Analyse vocale et comportementale avancée',
-        'Feedback IA détaillé après chaque entretien',
-        'Support prioritaire'
-      ]
-    }
-  ];
+  plans: Plan[] = [];
 
   currentSubscription: SubscriptionInfo | null = null;
   payments: PaymentTransaction[] = [];
   isLoading = false;
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 5;
+
+  get totalPages(): number {
+    return Math.ceil(this.payments.length / this.pageSize);
+  }
 
   // État du modal de paiement simulé
   isPaymentModalOpen = false;
@@ -67,11 +43,20 @@ export class SubscriptionComponent implements OnInit, AfterViewInit {
 
   constructor(
     private subscriptionService: SubscriptionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private planService: PlanService
   ) {}
 
   ngOnInit(): void {
+    this.loadPlans();
     this.loadSubscriptionInfo();
+  }
+
+  loadPlans(): void {
+    this.planService.getAllPlans().subscribe({
+      next: (plans) => this.plans = plans,
+      error: () => { this.plans = []; showToast('Impossible de charger les plans', 'danger'); }
+    });
   }
 
   ngAfterViewInit(): void {

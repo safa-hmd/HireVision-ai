@@ -61,4 +61,9 @@ public class UserController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
+
+    @GetMapping("/{id}/analyze-github")
+    public ResponseEntity<Object> analyzeGithub(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.analyzeGithub(id));
+    }
 }

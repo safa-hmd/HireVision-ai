@@ -40,7 +40,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let q of filteredQuestions">
+            <tr *ngFor="let q of filteredQuestions | slice:(currentPage-1)*pageSize:currentPage*pageSize">
               <td class="text-sm" style="max-width:360px">{{ q.content }}</td>
               <td>
                 <span class="badge"
@@ -62,6 +62,16 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Controls Pagination -->
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between" *ngIf="filteredQuestions.length > pageSize">
+          <span class="text-sm text-muted">Page {{ currentPage }} / {{ totalPages }} — {{ filteredQuestions.length }} résultats</span>
+          <div class="flex gap-2">
+            <button class="btn btn-outline btn-sm" (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">Précédent</button>
+            <button class="btn btn-outline btn-sm" (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">Suivant</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

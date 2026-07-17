@@ -1,9 +1,9 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Préparation aux Entretiens</h1>
+      <h1 class="page-title">{{ 'INTERVIEW_PREP.TITLE' | translate }}</h1>
       <p class="page-subtitle">
-        {{ hasCv ? 'Basé sur les compétences détectées dans votre CV' : 'Choisissez une catégorie pour commencer à pratiquer' }}
+        {{ hasCv ? ('INTERVIEW_PREP.SUBTITLE_CV' | translate) : ('INTERVIEW_PREP.SUBTITLE_NO_CV' | translate) }}
       </p>
     </div>
   </header>
@@ -13,33 +13,33 @@
       <div class="flex items-center gap-4">
         <i data-lucide="brain" style="width:28px;height:28px"></i>
         <div>
-          <h3>Entretiens Simulés par IA</h3>
-          <p>Vivez des entretiens réalistes avec retour en temps réel et analyse comportementale</p>
+          <h3>{{ 'INTERVIEW_PREP.BANNER_TITLE' | translate }}</h3>
+          <p>{{ 'INTERVIEW_PREP.BANNER_SUB' | translate }}</p>
         </div>
       </div>
     </div>
 
-    <!-- ── CV non renseigné : suggestion d'upload (sans bloquer l'accès) ── -->
+    <!-- ── CV non renseigné ── -->
     <div class="card mb-6" *ngIf="!isLoading && !hasCv">
       <div class="card-body flex items-center justify-between" style="flex-wrap:wrap;gap:12px">
         <div class="flex items-center gap-3">
           <i data-lucide="file-text" style="color:var(--primary);width:20px;height:20px"></i>
           <div>
-            <div class="font-medium">Ajoutez votre CV pour des entretiens personnalisés</div>
-            <div class="text-sm text-muted">Nous générerons des questions basées sur vos vraies compétences plutôt que sur cette liste générique.</div>
+            <div class="font-medium">{{ 'INTERVIEW_PREP.NO_CV_WARNING' | translate }}</div>
+            <div class="text-sm text-muted">{{ 'INTERVIEW_PREP.NO_CV_DESC' | translate }}</div>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" (click)="goToCvUpload()">Analyser mon CV</button>
+        <button class="btn btn-primary btn-sm" (click)="goToCvUpload()">{{ 'INTERVIEW_PREP.ANALYSE_CV' | translate }}</button>
       </div>
     </div>
 
     <!-- ── Loading ── -->
     <div *ngIf="isLoading" class="prep-loading">
       <div class="prep-spinner"></div>
-      <p class="text-muted text-sm">Analyse de votre profil...</p>
+      <p class="text-muted text-sm">{{ 'INTERVIEW_PREP.LOADING' | translate }}</p>
     </div>
 
-    <!-- ── Catégories (générées dynamiquement) ── -->
+    <!-- ── Catégories ── -->
     <div class="grid-3 mb-6" *ngIf="!isLoading">
       <div class="card category-card" *ngFor="let cat of filteredCategories" (click)="startInterview(cat)">
         <div class="card-body">
@@ -55,24 +55,27 @@
             <span class="diff-badge" [ngClass]="cat.difficultyClass">{{ cat.difficulty }}</span>
           </div>
           <div class="grid-2 text-sm mb-4" style="gap:8px">
-            <div><div class="text-muted">Durée</div><div class="font-medium">{{ cat.duration }} min</div></div>
-            <div><div class="text-muted">Questions</div><div class="font-medium">{{ cat.questions }}</div></div>
+            <div><div class="text-muted">{{ 'INTERVIEW_PREP.DURATION' | translate }}</div><div class="font-medium">{{ cat.duration }} min</div></div>
+            <div><div class="text-muted">{{ 'INTERVIEW_PREP.QUESTIONS' | translate }}</div><div class="font-medium">{{ cat.questions }}</div></div>
           </div>
-          <button (click)="startInterview(cat); $event.stopPropagation()" class="btn btn-primary w-full">Démarrer</button>
+          <button (click)="startInterview(cat); $event.stopPropagation()" class="btn btn-primary w-full">{{ 'INTERVIEW_PREP.START' | translate }}</button>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><h3>Conseils pour réussir</h3><p>Bonnes pratiques pour l'entretien</p></div>
+      <div class="card-header">
+        <h3>{{ 'INTERVIEW_PREP.TIPS_TITLE' | translate }}</h3>
+        <p>{{ 'INTERVIEW_PREP.TIPS_SUB' | translate }}</p>
+      </div>
       <div class="card-body">
         <div class="grid-2" style="gap:12px">
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="sun" style="color:var(--warning);flex-shrink:0;width:18px;height:18px"></i> Assurez-vous d'avoir un bon éclairage</div>
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="mic" style="color:var(--primary);flex-shrink:0;width:18px;height:18px"></i> Testez votre microphone et son</div>
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="eye" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Maintenez le contact visuel avec la caméra</div>
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="volume-2" style="color:var(--accent);flex-shrink:0;width:18px;height:18px"></i> Parlez clairement à rythme modéré</div>
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="wifi-off" style="color:var(--text-muted);flex-shrink:0;width:18px;height:18px"></i> Utilisez un endroit calme</div>
-          <div class="flex items-center gap-3 text-sm"><i data-lucide="smile" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> Restez calme et confiant</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="sun" style="color:var(--warning);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_LIGHT' | translate }}</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="mic" style="color:var(--primary);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_MIC' | translate }}</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="eye" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_EYE' | translate }}</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="volume-2" style="color:var(--accent);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_CLEAR' | translate }}</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="wifi-off" style="color:var(--text-muted);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_QUIET' | translate }}</div>
+          <div class="flex items-center gap-3 text-sm"><i data-lucide="smile" style="color:var(--success);flex-shrink:0;width:18px;height:18px"></i> {{ 'INTERVIEW_PREP.TIP_CONFIDENT' | translate }}</div>
         </div>
       </div>
     </div>

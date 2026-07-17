@@ -1,12 +1,12 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Bienvenue, {{ userName }}! 👋</h1>
-      <p class="page-subtitle">Votre progression de préparation aux entretiens</p>
+      <h1 class="page-title">{{ 'DASHBOARD.WELCOME' | translate }}, {{ userName }}! 👋</h1>
+      <p class="page-subtitle">{{ 'DASHBOARD.SUBTITLE' | translate }}</p>
     </div>
     <div class="page-header-actions">
       <a routerLink="/frontoffice/interviewPrep" class="btn btn-primary">
-        <i data-lucide="play"></i> Démarrer un entretien
+        <i data-lucide="play"></i> {{ 'DASHBOARD.START_INTERVIEW' | translate }}
       </a>
     </div>
   </header>
@@ -16,24 +16,73 @@
     <!-- ═══ LOADING ═══ -->
     <div *ngIf="isLoading" class="dash-loading">
       <div class="dash-spinner"></div>
-      <p class="text-muted text-sm">Chargement de votre tableau de bord...</p>
+      <p class="text-muted text-sm">{{ 'DASHBOARD.LOADING' | translate }}</p>
     </div>
 
     <ng-container *ngIf="!isLoading">
 
-      <!-- ── STATS ── -->
+      <!-- ══════════════════════════════════════════════
+           DEVELOPER READINESS SCORE — BLOC PRINCIPAL
+           ══════════════════════════════════════════════ -->
+      <div class="drs-card mb-6">
+        <div class="drs-left">
+          <!-- Ring -->
+          <div class="drs-ring-wrap">
+            <svg viewBox="0 0 120 120" class="drs-svg">
+              <circle class="drs-ring-bg"   cx="60" cy="60" r="54"/>
+              <circle class="drs-ring-fill" cx="60" cy="60" r="54"
+                [style.stroke]="drsColor"/>
+            </svg>
+            <div class="drs-ring-center">
+              <div class="drs-ring-score" [style.color]="drsColor">{{ drsScore }}</div>
+              <div class="drs-ring-label">/100</div>
+            </div>
+          </div>
+          <!-- Niveau -->
+          <div class="drs-level-badge" [style.background]="drsColor + '22'" [style.color]="drsColor">
+            <i data-lucide="shield-check" style="width:14px;height:14px"></i>
+            {{ drsLevel }}
+          </div>
+          <div class="drs-title">{{ 'DASHBOARD.DRS_TITLE' | translate }}</div>
+          <div class="drs-subtitle">{{ 'DASHBOARD.DRS_SUBTITLE' | translate }}</div>
+        </div>
+
+        <div class="drs-right">
+          <div class="drs-axes">
+            <div class="drs-axis" *ngFor="let axis of drsAxes">
+              <div class="drs-axis-header">
+                <div class="drs-axis-icon" [style.background]="axis.color + '18'">
+                  <i [attr.data-lucide]="axis.icon" [style.color]="axis.color" style="width:14px;height:14px"></i>
+                </div>
+                <span class="drs-axis-label">{{ axis.label }}</span>
+                <span class="drs-axis-value" [class]="scoreClass(axis.value)">{{ axis.value }}%</span>
+              </div>
+              <div class="drs-progress-track">
+                <div class="drs-progress-fill"
+                     [style.width.%]="axis.value"
+                     [style.background]="axis.color">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           STATS CARDS (4 en ligne)
+           ══════════════════════════════════════════════ -->
       <div class="grid-4 mb-6">
         <div class="stat-card">
           <div class="stat-card-icon" style="background:#DBEAFE">
             <i data-lucide="file-text" style="color:#2563EB;width:20px;height:20px;"></i>
           </div>
-          <div class="stat-label">Complétion du Profil</div>
+          <div class="stat-label">{{ 'DASHBOARD.PROFILE_COMPLETION' | translate }}</div>
           <div class="stat-value text-primary" [attr.data-countup]="profileCompletion" data-suffix="%">0%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar progress-primary" [style.width.%]="profileCompletion"></div>
           </div>
           <div class="stat-change text-muted">
-            {{ hasCv ? 'Profil bien renseigné' : 'Ajoutez votre CV pour progresser' }}
+            {{ hasCv ? ('DASHBOARD.PROFILE_GOOD' | translate) : ('DASHBOARD.PROFILE_BAD' | translate) }}
           </div>
         </div>
 
@@ -41,27 +90,50 @@
           <div class="stat-card-icon" style="background:#D1FAE5">
             <i data-lucide="graduation-cap" style="color:#10B981;width:20px;height:20px;"></i>
           </div>
-          <div class="stat-label">Entretiens Complétés</div>
+          <div class="stat-label">{{ 'DASHBOARD.COMPLETED_INTERVIEWS' | translate }}</div>
           <div class="stat-value text-primary" [attr.data-countup]="interviewsCount">0</div>
-          <div class="stat-change text-muted">Total depuis votre inscription</div>
+          <div class="stat-change text-muted">{{ 'DASHBOARD.TOTAL_SINCE_REG' | translate }}</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card-icon" style="background:#FEF3C7">
             <i data-lucide="award" style="color:#F59E0B;width:20px;height:20px;"></i>
           </div>
-          <div class="stat-label">Score Moyen</div>
+          <div class="stat-label">{{ 'DASHBOARD.AVG_SCORE' | translate }}</div>
           <div class="stat-value" style="color:var(--success)" [attr.data-countup]="averageScore" data-suffix="%">0%</div>
-          <div class="stat-change text-muted">Moyenne sur tous vos entretiens</div>
+          <div class="stat-change text-muted">{{ 'DASHBOARD.AVG_ON_ALL' | translate }}</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card-icon" style="background:#EDE9FE">
             <i data-lucide="briefcase" style="color:#7C3AED;width:20px;height:20px;"></i>
           </div>
-          <div class="stat-label">Offres Correspondantes</div>
+          <div class="stat-label">{{ 'DASHBOARD.MATCHING_OFFERS' | translate }}</div>
           <div class="stat-value text-primary" [attr.data-countup]="matchingOffersCount">0</div>
-          <div class="stat-change text-muted">Basé sur vos compétences</div>
+          <div class="stat-change text-muted">{{ 'DASHBOARD.BASED_ON_SKILLS' | translate }}</div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           BADGES
+           ══════════════════════════════════════════════ -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h3><i data-lucide="trophy" style="width:16px;height:16px;vertical-align:-2px"></i> {{ 'DASHBOARD.BADGES_TITLE' | translate }}</h3>
+          <p>{{ badges | badgeUnlock }} {{ 'DASHBOARD.BADGES_UNLOCKED' | translate }}</p>
+        </div>
+        <div class="card-body">
+          <div class="badges-grid">
+            <div class="badge-item" *ngFor="let b of badges"
+                 [class.badge-item--locked]="!b.unlocked"
+                 [title]="b.desc">
+              <div class="badge-icon" [style.background]="b.unlocked ? b.color + '18' : 'var(--surface-2)'">
+                <span class="badge-emoji" [class.badge-emoji--locked]="!b.unlocked">{{ b.icon }}</span>
+              </div>
+              <div class="badge-name" [class.text-muted]="!b.unlocked">{{ b.label }}</div>
+              <div class="badge-lock" *ngIf="!b.unlocked"><i data-lucide="lock" style="width:10px;height:10px"></i></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -69,22 +141,22 @@
       <div class="grid-2 mb-6">
         <div class="card">
           <div class="card-header">
-            <h3>Performance aux Entretiens</h3>
-            <p>Scores de vos derniers entretiens</p>
+            <h3>{{ 'DASHBOARD.PERFORMANCE' | translate }}</h3>
+            <p>{{ 'DASHBOARD.LAST_SCORES' | translate }}</p>
           </div>
           <div class="card-body">
             <div style="height:240px" *ngIf="performanceChartData.length">
               <canvas id="chart-perf"></canvas>
             </div>
             <p *ngIf="!performanceChartData.length" class="text-muted text-sm">
-              Aucun entretien réalisé pour le moment.
+              {{ 'DASHBOARD.NO_INTERVIEWS' | translate }}
             </p>
           </div>
         </div>
         <div class="card">
           <div class="card-header">
-            <h3>Niveau de Compétences</h3>
-            <p>Évaluation actuelle (moyenne globale)</p>
+            <h3>{{ 'DASHBOARD.SKILL_LEVEL' | translate }}</h3>
+            <p>{{ 'DASHBOARD.AVG_EVAL' | translate }}</p>
           </div>
           <div class="card-body">
             <div style="height:240px"><canvas id="chart-skills"></canvas></div>
@@ -92,25 +164,119 @@
         </div>
       </div>
 
+      <!-- ── CV RADAR + AI INSIGHTS ── -->
+      <div class="grid-2 mb-6" *ngIf="hasCvAnalysis">
+        <div class="card">
+          <div class="card-header">
+            <h3>{{ 'DASHBOARD.RADAR_TECH' | translate }}</h3>
+            <p>{{ 'DASHBOARD.BASED_ON_CV' | translate }}</p>
+          </div>
+          <div class="card-body">
+            <div class="flex items-center gap-3 mb-4" *ngIf="cvProfile">
+              <span class="badge badge-primary">{{ cvProfile }}</span>
+              <span class="badge badge-success">{{ 'DASHBOARD.GLOBAL_SCORE' | translate }} {{ cvGlobalScore }}%</span>
+            </div>
+            <div style="height:240px"><canvas id="chart-cv-radar"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3><i data-lucide="sparkles" style="width:16px;height:16px;vertical-align:-2px"></i> {{ 'DASHBOARD.AI_INSIGHTS' | translate }}</h3>
+            <p>{{ 'DASHBOARD.DETAILED_ANALYSIS' | translate }}</p>
+          </div>
+          <div class="card-body">
+            <div class="mb-4" *ngIf="strengths.length">
+              <div class="text-sm font-medium mb-2">{{ 'DASHBOARD.STRENGTHS' | translate }}</div>
+              <span class="tag tag-success" *ngFor="let s of strengths">{{ s }}</span>
+            </div>
+            <div class="mb-4" *ngIf="weaknesses.length">
+              <div class="text-sm font-medium mb-2">{{ 'DASHBOARD.WEAKNESSES' | translate }}</div>
+              <span class="tag" style="background:#FEE2E2;color:#991B1B" *ngFor="let w of weaknesses">{{ w }}</span>
+            </div>
+            <p class="text-sm text-muted" *ngIf="!strengths.length && !weaknesses.length">
+              {{ 'DASHBOARD.COMPLETE_CV_FIRST' | translate }}
+            </p>
+            <a routerLink="/frontoffice/cvAnalyse" class="btn btn-outline btn-sm mt-2">{{ 'DASHBOARD.SEE_FULL_ANALYSIS' | translate }}</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MATCHING + ROADMAP PREVIEW ── -->
+      <div class="grid-2 mb-6">
+        <div class="card">
+          <div class="card-header">
+            <h3>{{ 'DASHBOARD.JOB_COMPATIBILITY' | translate }}</h3>
+            <p>{{ 'DASHBOARD.BEST_MATCH' | translate }}</p>
+          </div>
+          <div class="card-body" *ngIf="bestMatch; else noMatch">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-medium">{{ bestMatch.jobOfferTitle || 'Offre correspondante' }}</span>
+              <span class="badge badge-primary">{{ bestMatch.score }}%</span>
+            </div>
+            <div class="progress-wrap mb-4">
+              <div class="progress-bar progress-primary" [style.width.%]="bestMatch.score"></div>
+            </div>
+            <div *ngIf="bestMatch.matched?.length">
+              <div class="text-xs text-muted mb-1">{{ 'DASHBOARD.SKILLS_MASTERED' | translate }}</div>
+              <span class="tag tag-success" *ngFor="let m of bestMatch.matched">{{ m }}</span>
+            </div>
+            <div class="mt-2" *ngIf="bestMatch.missingSkills?.length">
+              <div class="text-xs text-muted mb-1">{{ 'DASHBOARD.MISSING_SKILLS' | translate }}</div>
+              <span class="tag" style="background:#FEE2E2;color:#991B1B" *ngFor="let m of bestMatch.missingSkills">{{ m }}</span>
+            </div>
+          </div>
+          <ng-template #noMatch>
+            <div class="card-body">
+              <p class="text-muted text-sm">{{ 'DASHBOARD.NO_MATCHING' | translate }}</p>
+              <a routerLink="/frontoffice/jobMatching" class="btn btn-outline btn-sm mt-2">{{ 'DASHBOARD.COMPARE_CV_BTN' | translate }}</a>
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>{{ 'DASHBOARD.YOUR_ROADMAP' | translate }}</h3>
+            <p>{{ missedSkillsCount }} {{ 'DASHBOARD.SKILLS_TO_WORK' | translate }}</p>
+          </div>
+          <div class="card-body" *ngIf="roadmapPreview.length; else noRoadmap">
+            <div class="list-item" *ngFor="let step of roadmapPreview">
+              <div>
+                <div class="font-medium text-sm">{{ step.title }}</div>
+                <div class="text-xs text-muted">{{ step.source }}</div>
+              </div>
+              <span class="badge badge-muted">{{ step.weekLabel }}</span>
+            </div>
+            <a routerLink="/frontoffice/careerRoadmap" class="btn btn-outline btn-sm mt-2">{{ 'DASHBOARD.SEE_ROADMAP' | translate }}</a>
+          </div>
+          <ng-template #noRoadmap>
+            <div class="card-body">
+              <p class="text-muted text-sm">{{ 'DASHBOARD.NO_ROADMAP' | translate }}</p>
+              <a routerLink="/frontoffice/careerRoadmap" class="btn btn-outline btn-sm mt-2">{{ 'DASHBOARD.GEN_ROADMAP_BTN' | translate }}</a>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
       <!-- ── AI BANNER ── -->
       <div class="gradient-banner mb-6">
         <div class="flex items-center gap-4 mb-4">
           <i data-lucide="brain" style="width:28px;height:28px"></i>
-          <h3>Recommandations IA</h3>
+          <h3>{{ 'DASHBOARD.AI_RECOMMENDATIONS' | translate }}</h3>
         </div>
-        <p style="margin-bottom:16px">Basé sur votre profil et vos performances récentes :</p>
+        <p style="margin-bottom:16px">{{ 'DASHBOARD.BASED_ON_STATS' | translate }}</p>
         <div class="flex gap-3" style="flex-wrap:wrap">
-          <a routerLink="/frontoffice/interviewPrep" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Pratiquer un entretien</a>
-          <a routerLink="/frontoffice/cvAnalyse"     class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Améliorer le CV</a>
-          <a routerLink="/frontoffice/careerRoadmap" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">Plan Carrière</a>
+          <a routerLink="/frontoffice/interviewPrep" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">{{ 'DASHBOARD.PRACTICE_BTN' | translate }}</a>
+          <a routerLink="/frontoffice/cvAnalyse"     class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">{{ 'DASHBOARD.IMPROVE_CV_BTN' | translate }}</a>
+          <a routerLink="/frontoffice/careerRoadmap" class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35)">{{ 'DASHBOARD.CAREER_PLAN_BTN' | translate }}</a>
         </div>
       </div>
 
       <!-- ── RECENT ACTIVITY ── -->
       <div class="card">
         <div class="card-header">
-          <h3>Activité Récente</h3>
-          <p>Dernières sessions d'entretien</p>
+          <h3>{{ 'DASHBOARD.RECENT_ACTIVITY' | translate }}</h3>
+          <p>{{ 'DASHBOARD.LAST_SESSIONS' | translate }}</p>
         </div>
         <div class="card-body space-y-4">
           <div class="list-item" *ngFor="let iv of recentInterviews">
@@ -119,12 +285,11 @@
               <div class="text-sm text-muted">{{ iv.dateLabel }}</div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="font-bold text-primary">{{ iv.score }}%</span>
-              <a routerLink="/frontoffice/interviewPrep" class="btn btn-outline btn-sm">Nouvel entretien</a>
+              <a routerLink="/frontoffice/interviewPrep" class="btn btn-outline btn-sm">{{ 'DASHBOARD.NEW_INTERVIEW_BTN' | translate }}</a>
             </div>
           </div>
           <p *ngIf="!recentInterviews.length" class="text-muted text-sm">
-            Aucun entretien pour le moment — lancez votre premier essai !
+            {{ 'DASHBOARD.NO_RECENT_INTERVIEWS' | translate }}
           </p>
         </div>
       </div>

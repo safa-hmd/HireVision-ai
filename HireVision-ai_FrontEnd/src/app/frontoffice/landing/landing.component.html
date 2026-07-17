@@ -1,0 +1,231 @@
+<div class="landing-container">
+  <!-- Navbar -->
+  <header class="landing-header">
+    <div class="logo-area">
+      <img src="assets/img/brand/hirevision-icon.png" alt="HireVision AI" class="logo-img" />
+      <span class="logo-text">HireVision AI</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#features">{{ 'LANDING.FEATURES' | translate }}</a>
+      <a href="#how-it-works">{{ 'LANDING.HOW_IT_WORKS' | translate }}</a>
+      <a href="#stats">{{ 'LANDING.BENEFITS' | translate }}</a>
+    </nav>
+    <div class="auth-buttons">
+      <ng-container *ngIf="!isLoggedIn; else dashboardBtn">
+        <a routerLink="/auth/login" class="btn-login">{{ 'LANDING.CONNEXION' | translate }}</a>
+        <a routerLink="/auth/register" class="btn btn-primary btn-signup">{{ 'LANDING.SIGNUP' | translate }}</a>
+      </ng-container>
+      <ng-template #dashboardBtn>
+        <a routerLink="/frontoffice/home" class="btn btn-primary btn-dashboard">
+          <i data-lucide="layout-dashboard"></i> {{ 'LANDING.BTN_DASHBOARD' | translate }}
+        </a>
+      </ng-template>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="badge-pill">
+        <span class="pulse-dot"></span>
+        <span>{{ 'LANDING.POWERED_BY_AI' | translate }}</span>
+      </div>
+      <h1 class="hero-title">
+        {{ 'LANDING.TITLE' | translate }}
+      </h1>
+      <p class="hero-subtitle">
+        {{ 'LANDING.SUBTITLE' | translate }}
+      </p>
+      <div class="hero-actions">
+        <a [routerLink]="isLoggedIn ? '/frontoffice/cvAnalyse' : '/auth/login'" class="btn btn-lg btn-primary">
+          <i data-lucide="file-text"></i> {{ 'LANDING.BTN_CV' | translate }}
+        </a>
+        <a [routerLink]="isLoggedIn ? '/frontoffice/interviewPrep' : '/auth/login'" class="btn btn-lg btn-secondary">
+          <i data-lucide="video"></i> {{ 'LANDING.BTN_INTERVIEW' | translate }}
+        </a>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <div class="preview-card-wrap">
+        <!-- Floating Glass Card 1 -->
+        <div class="floating-card c1">
+          <div class="icon-circle success"><i data-lucide="check-circle2"></i></div>
+          <div>
+            <div class="f-label">{{ 'LANDING.MATCH_SCORE' | translate }}</div>
+            <div class="f-val">84%</div>
+          </div>
+        </div>
+        <!-- Floating Glass Card 2 -->
+        <div class="floating-card c2">
+          <div class="icon-circle primary"><i data-lucide="sparkles"></i></div>
+          <div>
+            <div class="f-label">{{ 'LANDING.AI_COACHING' | translate }}</div>
+            <div class="f-val">{{ 'LANDING.READY' | translate }}</div>
+          </div>
+        </div>
+        <!-- Mockup Image / Preview -->
+        <img src="assets/ai_analysis_dashboard.png" alt="HireVision AI Dashboard" class="preview-img" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem / Solution Section -->
+  <section class="comparison-section">
+    <div class="section-header text-center">
+      <h2>{{ 'LANDING.WHY_USE_HV' | translate }}</h2>
+      <p>{{ 'LANDING.WHY_SUBTITLE' | translate }}</p>
+    </div>
+    <div class="grid-2 gap-6 mt-6">
+      <div class="comparison-card problem">
+        <div class="comp-icon"><i data-lucide="x-circle"></i></div>
+        <h3>{{ 'LANDING.TRADITIONAL' | translate }}</h3>
+        <ul>
+          <li><span>•</span> {{ 'LANDING.TRADITIONAL_1' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.TRADITIONAL_2' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.TRADITIONAL_3' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.TRADITIONAL_4' | translate }}</li>
+        </ul>
+      </div>
+      <div class="comparison-card solution">
+        <div class="comp-icon"><i data-lucide="check-circle2"></i></div>
+        <h3>{{ 'LANDING.METHOD' | translate }}</h3>
+        <ul>
+          <li><span>•</span> {{ 'LANDING.METHOD_1' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.METHOD_2' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.METHOD_3' | translate }}</li>
+          <li><span>•</span> {{ 'LANDING.METHOD_4' | translate }}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Cards Section -->
+  <section id="features" class="features-section">
+    <div class="section-header text-center">
+      <h2>{{ 'LANDING.FEAT_TITLE' | translate }}</h2>
+      <p>{{ 'LANDING.FEAT_SUBTITLE' | translate }}</p>
+    </div>
+    <div class="grid-3 gap-6 mt-6">
+      <!-- Card 1 -->
+      <div class="feature-card">
+        <div class="feat-icon primary"><i data-lucide="file-text"></i></div>
+        <h3>{{ 'LANDING.FEAT_CV_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_CV_DESC' | translate }}</p>
+        <span class="feat-badge">Analyse IA</span>
+      </div>
+      <!-- Card 2 -->
+      <div class="feature-card">
+        <div class="feat-icon secondary"><i data-lucide="briefcase"></i></div>
+        <h3>{{ 'LANDING.FEAT_MATCH_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_MATCH_DESC' | translate }}</p>
+        <span class="feat-badge">Job Match</span>
+      </div>
+      <!-- Card 3 -->
+      <div class="feature-card">
+        <div class="feat-icon accent"><i data-lucide="video"></i></div>
+        <h3>{{ 'LANDING.FEAT_INT_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_INT_DESC' | translate }}</p>
+        <span class="feat-badge">Entraînement</span>
+      </div>
+      <!-- Card 4 -->
+      <div class="feature-card">
+        <div class="feat-icon success"><i data-lucide="mic"></i></div>
+        <h3>{{ 'LANDING.FEAT_FEEDBACK_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_FEEDBACK_DESC' | translate }}</p>
+        <span class="feat-badge">Rapport Comportemental</span>
+      </div>
+      <!-- Card 5 -->
+      <div class="feature-card">
+        <div class="feat-icon primary"><i data-lucide="map"></i></div>
+        <h3>{{ 'LANDING.FEAT_ROADMAP_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_ROADMAP_DESC' | translate }}</p>
+        <span class="feat-badge">Plan Carrière</span>
+      </div>
+      <!-- Card 6 -->
+      <div class="feature-card">
+        <div class="feat-icon secondary"><i data-lucide="award"></i></div>
+        <h3>{{ 'LANDING.FEAT_GAME_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.FEAT_GAME_DESC' | translate }}</p>
+        <span class="feat-badge">Progression</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="section-header text-center">
+      <h2>{{ 'LANDING.STEP_TITLE' | translate }}</h2>
+      <p>{{ 'LANDING.STEP_SUBTITLE' | translate }}</p>
+    </div>
+    <div class="stepper-wrap mt-6">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h4>{{ 'LANDING.STEP_1_T' | translate }}</h4>
+        <p>{{ 'LANDING.STEP_1_D' | translate }}</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h4>{{ 'LANDING.STEP_2_T' | translate }}</h4>
+        <p>{{ 'LANDING.STEP_2_D' | translate }}</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h4>{{ 'LANDING.STEP_3_T' | translate }}</h4>
+        <p>{{ 'LANDING.STEP_3_D' | translate }}</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <h4>{{ 'LANDING.STEP_4_T' | translate }}</h4>
+        <p>{{ 'LANDING.STEP_4_D' | translate }}</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <h4>{{ 'LANDING.STEP_5_T' | translate }}</h4>
+        <p>{{ 'LANDING.STEP_5_D' | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section id="stats" class="stats-section">
+    <div class="grid-3 text-center">
+      <div class="stat-box">
+        <div class="stat-num">+80%</div>
+        <p class="stat-desc">{{ 'LANDING.STAT_CONFIDENCE' | translate }}</p>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">30s</div>
+        <p class="stat-desc">{{ 'LANDING.STAT_TIME' | translate }}</p>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">95%</div>
+        <p class="stat-desc">{{ 'LANDING.STAT_RECOMMEND' | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call To Action Footer -->
+  <section class="cta-section text-center">
+    <div class="cta-card">
+      <h2>{{ 'LANDING.READY_CAREER' | translate }}</h2>
+      <p>{{ 'LANDING.CTA_SUBTITLE' | translate }}</p>
+      <div class="cta-buttons">
+        <a [routerLink]="isLoggedIn ? '/frontoffice/home' : '/auth/register'" class="btn btn-lg btn-primary">
+          <i data-lucide="zap"></i> {{ 'LANDING.START_FREE' | translate }}
+        </a>
+        <a href="#features" class="btn btn-lg btn-outline btn-dark-outline">
+          {{ 'LANDING.CTA_FEATURES' | translate }}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer text-center">
+    <p>{{ 'LANDING.COPYRIGHT' | translate }}</p>
+  </footer>
+</div>

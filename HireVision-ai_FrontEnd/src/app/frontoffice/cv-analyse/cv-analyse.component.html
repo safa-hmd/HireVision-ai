@@ -1,18 +1,23 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Analyse CV</h1>
-      <p class="page-subtitle">Uploadez votre CV pour une analyse IA complète</p>
+      <h1 class="page-title">{{ 'CV_ANALYSE.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'CV_ANALYSE.SUBTITLE' | translate }}</p>
+    </div>
+    <div class="page-header-actions" *ngIf="showResults && !isLoading">
+      <button class="btn btn-primary btn-sm" (click)="printReport()">
+        <i data-lucide="download"></i> {{ 'CV_ANALYSE.DOWNLOAD_PDF' | translate }}
+      </button>
     </div>
   </header>
 
   <div class="page-body">
 
-    <!-- Checking state: éviter le flash du drop-zone pendant la vérification initiale -->
+    <!-- Checking state -->
     <div *ngIf="isChecking" class="card">
       <div class="card-body text-center" style="padding:48px 24px">
         <div class="spinner" style="margin:0 auto 20px"></div>
-        <p class="text-muted">Chargement...</p>
+        <p class="text-muted">{{ 'CV_ANALYSE.LOADING' | translate }}</p>
       </div>
     </div>
 
@@ -24,8 +29,8 @@
           <!-- Loading state -->
           <div *ngIf="isLoading" style="padding:32px 0">
             <div class="spinner" style="margin:0 auto 20px"></div>
-            <h3 style="margin-bottom:8px">Analyse IA en cours...</h3>
-            <p class="text-muted">Extraction des compétences et expériences</p>
+            <h3 style="margin-bottom:8px">{{ 'CV_ANALYSE.ANALYZING' | translate }}</h3>
+            <p class="text-muted">{{ currentStageKey | translate }}</p>
           </div>
 
           <!-- Drop zone -->
@@ -33,10 +38,10 @@
             <input type="file" id="cv-file" #cvFile accept=".pdf,.doc,.docx"
                    (change)="onFileSelected($event)" style="display:none" />
             <i data-lucide="upload-cloud" style="width:56px;height:56px;color:var(--primary);margin-bottom:16px"></i>
-            <h3 style="margin-bottom:8px">Déposez votre CV ici</h3>
-            <p class="text-muted" style="margin-bottom:20px">Format PDF, DOC ou DOCX — max 5 Mo</p>
+            <h3 style="margin-bottom:8px">{{ 'CV_ANALYSE.DROP_ZONE' | translate }}</h3>
+            <p class="text-muted" style="margin-bottom:20px">{{ 'CV_ANALYSE.FILE_LIMIT' | translate }}</p>
             <button type="button" class="btn btn-primary btn-lg">
-              <i data-lucide="upload"></i> Choisir un fichier
+              <i data-lucide="upload"></i> {{ 'CV_ANALYSE.CHOOSE_FILE' | translate }}
             </button>
           </div>
         </div>
@@ -50,14 +55,14 @@
       <div class="alert alert-success mb-6" style="display:flex;align-items:center;gap:12px">
         <i data-lucide="check-circle" style="flex-shrink:0"></i>
         <div>
-          <strong>CV analysé avec succès !</strong> {{ fileName }}
+          <strong>{{ 'CV_ANALYSE.SUCCESS' | translate }}</strong> {{ fileName }}
         </div>
       </div>
 
       <!-- Résumé IA -->
       <div class="card mb-6" *ngIf="analysis?.summary">
         <div class="card-header">
-          <h3><i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Résumé IA</h3>
+          <h3><i data-lucide="sparkles" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>{{ 'CV_ANALYSE.SUMMARY' | translate }}</h3>
         </div>
         <div class="card-body">
           <p style="line-height:1.6;margin:0">{{ analysis?.summary }}</p>
@@ -65,16 +70,93 @@
       </div>
 
       <!-- Profil ML -->
-<div class="card mb-6" *ngIf="analysis?.profile">
-  <div class="card-header">
-    <h3><i data-lucide="cpu" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Profil IA détecté</h3>
-  </div>
-  <div class="card-body" style="display:flex;align-items:center;gap:16px">
-    <span class="tag" style="font-size:16px;padding:8px 16px">{{ analysis?.profile }}</span>
-    <span class="text-muted">Confiance : <strong>{{ analysis?.confidence }}%</strong></span>
-    <span class="text-muted">Score global : <strong>{{ analysis?.global_score }}/100</strong></span>
-  </div>
-</div>
+      <div class="card mb-6" *ngIf="analysis?.profile">
+        <div class="card-header">
+          <h3><i data-lucide="cpu" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Profil IA</h3>
+        </div>
+        <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span class="tag" style="font-size:16px;padding:8px 16px">{{ analysis?.profile }}</span>
+          <span class="text-muted">Confiance : <strong>{{ analysis?.confidence }}%</strong></span>
+          <span class="text-muted">Score global : <strong>{{ analysis?.global_score }}/100</strong></span>
+        </div>
+      </div>
+
+      <!-- CV Optimizer & Proposé -->
+      <div class="grid-2 mb-6" *ngIf="analysis?.optimization_suggestions || analysis?.proposed_summary">
+        <!-- Suggestions d'optimisation -->
+        <div class="card" *ngIf="analysis?.optimization_suggestions?.length">
+          <div class="card-header">
+            <h3><i data-lucide="wrench" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;color:var(--warning)"></i>CV Optimizer — Suggestions</h3>
+          </div>
+          <div class="card-body">
+            <ul style="padding-left: 20px; line-height: 1.8;">
+              <li *ngFor="let suggestion of analysis?.optimization_suggestions" style="margin-bottom: 8px;">
+                {{ suggestion }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Résumé professionnel proposé -->
+        <div class="card" *ngIf="analysis?.proposed_summary">
+          <div class="card-header">
+            <h3><i data-lucide="file-edit" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;color:var(--primary)"></i>Résumé Professionnel Optimisé</h3>
+          </div>
+          <div class="card-body">
+            <p style="line-height:1.6;margin:0; font-style: italic; background: var(--surface-2); padding: 12px; border-radius: 8px; border-left: 4px solid var(--primary);">
+              "{{ analysis?.proposed_summary }}"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagnostic IA (Strengths / Weaknesses / Recommendations) -->
+      <div class="grid-3 mb-6" *ngIf="analysis?.strengths || analysis?.weaknesses || analysis?.recommendations">
+        <!-- Points Forts -->
+        <div class="card" *ngIf="analysis?.strengths?.length">
+          <div class="card-header" style="border-bottom: 2px solid var(--success-light)">
+            <h3 style="color: var(--success)"><i data-lucide="check-circle-2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Points Forts</h3>
+          </div>
+          <div class="card-body">
+            <ul style="list-style-type: none; padding-left: 0; line-height: 1.8;">
+              <li *ngFor="let strength of analysis?.strengths" style="margin-bottom: 8px; display: flex; align-items: start; gap: 8px;">
+                <i data-lucide="check" style="color: var(--success); width: 16px; height: 16px; margin-top: 4px; flex-shrink: 0;"></i>
+                <span>{{ strength }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Points Faibles -->
+        <div class="card" *ngIf="analysis?.weaknesses?.length">
+          <div class="card-header" style="border-bottom: 2px solid rgba(239, 68, 68, 0.1)">
+            <h3 style="color: var(--danger)"><i data-lucide="alert-circle" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Points à Améliorer</h3>
+          </div>
+          <div class="card-body">
+            <ul style="list-style-type: none; padding-left: 0; line-height: 1.8;">
+              <li *ngFor="let weakness of analysis?.weaknesses" style="margin-bottom: 8px; display: flex; align-items: start; gap: 8px;">
+                <i data-lucide="x" style="color: var(--danger); width: 16px; height: 16px; margin-top: 4px; flex-shrink: 0;"></i>
+                <span>{{ weakness }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Recommandations -->
+        <div class="card" *ngIf="analysis?.recommendations?.length">
+          <div class="card-header" style="border-bottom: 2px solid var(--accent-light)">
+            <h3 style="color: var(--accent)"><i data-lucide="lightbulb" style="width:18px;height:18px;vertical-align:middle;margin-right:6px"></i>Recommandations IA</h3>
+          </div>
+          <div class="card-body">
+            <ul style="list-style-type: none; padding-left: 0; line-height: 1.8;">
+              <li *ngFor="let recommendation of analysis?.recommendations" style="margin-bottom: 8px; display: flex; align-items: start; gap: 8px;">
+                <i data-lucide="arrow-right" style="color: var(--accent); width: 16px; height: 16px; margin-top: 4px; flex-shrink: 0;"></i>
+                <span>{{ recommendation }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       <!-- Grille principale -->
       <div class="grid-2 mb-6">
@@ -82,15 +164,14 @@
         <!-- Compétences -->
         <div class="card">
           <div class="card-header">
-            <h3>Compétences extraites</h3>
-            <p>Compétences techniques et comportementales</p>
+            <h3>Compétences</h3>
           </div>
           <div class="card-body">
             <ng-container *ngIf="analysis?.skills?.length; else noSkills">
               <span class="tag" *ngFor="let skill of analysis?.skills">{{ skill }}</span>
             </ng-container>
             <ng-template #noSkills>
-              <p class="text-muted text-sm">Aucune compétence détectée</p>
+              <p class="text-muted text-sm">—</p>
             </ng-template>
           </div>
         </div>
@@ -98,8 +179,7 @@
         <!-- Formation -->
         <div class="card">
           <div class="card-header">
-            <h3>Formation</h3>
-            <p>Parcours académique</p>
+            <h3>{{ 'CV_ANALYSE.EDUCATION' | translate }}</h3>
           </div>
           <div class="card-body">
             <ng-container *ngIf="analysis?.education?.length; else noEdu">
@@ -112,7 +192,7 @@
               </div>
             </ng-container>
             <ng-template #noEdu>
-              <p class="text-muted text-sm">Aucune formation détectée</p>
+              <p class="text-muted text-sm">—</p>
             </ng-template>
           </div>
         </div>
@@ -120,8 +200,7 @@
         <!-- Expérience -->
         <div class="card">
           <div class="card-header">
-            <h3>Expérience</h3>
-            <p>Historique professionnel</p>
+            <h3>{{ 'CV_ANALYSE.EXPERIENCE' | translate }}</h3>
           </div>
           <div class="card-body space-y-4">
             <ng-container *ngIf="analysis?.experience?.length; else noExp">
@@ -133,7 +212,7 @@
               </div>
             </ng-container>
             <ng-template #noExp>
-              <p class="text-muted text-sm">Aucune expérience détectée</p>
+              <p class="text-muted text-sm">—</p>
             </ng-template>
           </div>
         </div>
@@ -141,8 +220,7 @@
         <!-- Projets -->
         <div class="card">
           <div class="card-header">
-            <h3>Projets</h3>
-            <p>Projets académiques et personnels</p>
+            <h3>{{ 'CV_ANALYSE.PROJECTS' | translate }}</h3>
           </div>
           <div class="card-body space-y-4">
             <ng-container *ngIf="analysis?.projects?.length; else noProj">
@@ -153,7 +231,7 @@
               </div>
             </ng-container>
             <ng-template #noProj>
-              <p class="text-muted text-sm">Aucun projet détecté</p>
+              <p class="text-muted text-sm">—</p>
             </ng-template>
           </div>
         </div>
@@ -161,7 +239,7 @@
         <!-- Certifications -->
         <div class="card">
           <div class="card-header">
-            <h3>Certifications</h3>
+            <h3>{{ 'CV_ANALYSE.CERTIFICATIONS' | translate }}</h3>
           </div>
           <div class="card-body space-y-4">
             <ng-container *ngIf="analysis?.certifications?.length; else noCert">
@@ -171,36 +249,41 @@
               </div>
             </ng-container>
             <ng-template #noCert>
-              <p class="text-muted text-sm">Aucune certification détectée</p>
+              <p class="text-muted text-sm">—</p>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Langues -->
+        <div class="card">
+          <div class="card-header">
+            <h3>{{ 'CV_ANALYSE.LANGUAGES' | translate }}</h3>
+          </div>
+          <div class="card-body">
+            <ng-container *ngIf="analysis?.languages?.length; else noLang">
+              <div class="grid-4">
+                <div class="list-item flex-col text-center" style="padding:16px"
+                     *ngFor="let lang of analysis?.languages">
+                  <div class="font-medium">{{ lang.language }}</div>
+                  <div class="text-sm text-muted">{{ lang.level }}</div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #noLang>
+              <p class="text-muted text-sm">—</p>
             </ng-template>
           </div>
         </div>
 
       </div>
 
-      <!-- Langues -->
-      <div class="card mb-6">
-        <div class="card-header"><h3>Langues</h3></div>
-        <div class="card-body">
-          <ng-container *ngIf="analysis?.languages?.length; else noLang">
-            <div class="grid-4">
-              <div class="list-item flex-col text-center" style="padding:16px"
-                   *ngFor="let lang of analysis?.languages">
-                <div class="font-medium">{{ lang.language }}</div>
-                <div class="text-sm text-muted">{{ lang.level }}</div>
-              </div>
-            </div>
-          </ng-container>
-          <ng-template #noLang>
-            <p class="text-muted text-sm">Aucune langue détectée</p>
-          </ng-template>
-        </div>
-      </div>
-
       <!-- Actions -->
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <button type="button" (click)="resetUpload()" class="btn btn-outline">
-          <i data-lucide="upload"></i> Uploader un nouveau CV
+          <i data-lucide="upload"></i> {{ 'CV_ANALYSE.UPLOAD_NEW' | translate }}
+        </button>
+        <button type="button" (click)="printReport()" class="btn btn-primary">
+          <i data-lucide="download"></i> {{ 'CV_ANALYSE.DOWNLOAD_PDF' | translate }}
         </button>
       </div>
 

@@ -1,62 +1,110 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Abonnement</h1>
-      <p class="page-subtitle">Choisissez le plan qui correspond à votre recherche d'emploi</p>
+      <h1 class="page-title">{{ 'SUBSCRIPTION.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'SUBSCRIPTION.SUBTITLE' | translate }}</p>
     </div>
   </header>
 
-  <div class="page-body">
+  <div class="page-body sub-page">
 
     <!-- Abonnement actuel -->
-    <div class="alert alert-success mb-6" *ngIf="currentSubscription" style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <strong>Plan actif : {{ currentSubscription.plan }}</strong>
-        — renouvellement le {{ currentSubscription.renewalDate | date:'dd/MM/yyyy' }}
+    <div class="current-plan-banner" *ngIf="currentSubscription">
+      <div class="current-plan-info">
+        <div class="current-plan-icon"><i data-lucide="badge-check"></i></div>
+        <div>
+          <div class="current-plan-label">{{ 'SUBSCRIPTION.PLAN_ACTIVE' | translate }}</div>
+          <div class="current-plan-name">{{ currentSubscription.plan }}
+            <span class="current-plan-renewal">{{ 'SUBSCRIPTION.RENEWAL' | translate }} {{ currentSubscription.renewalDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-outline btn-sm" (click)="cancelSubscription()">Annuler l'abonnement</button>
+      <button class="btn-cancel" (click)="cancelSubscription()">
+        <i data-lucide="x-circle"></i> {{ 'SUBSCRIPTION.CANCEL_BTN' | translate }}
+      </button>
     </div>
 
     <!-- Plans -->
-    <div class="grid-2 mb-6">
-      <div class="card" *ngFor="let plan of plans"
-           [style.border]="plan.highlighted ? '2px solid var(--primary)' : ''">
-        <div class="card-body">
-          <h3>{{ plan.name }} <span *ngIf="plan.highlighted" class="badge badge-primary">Recommandé</span></h3>
-          <p class="text-muted">{{ plan.tagline }}</p>
-          <div style="font-size:32px;font-weight:700;margin:12px 0">
-            {{ plan.price }}€ <span class="text-muted" style="font-size:14px;font-weight:400">/mois</span>
+    <div class="plans-grid">
+      <div class="plan-card" *ngFor="let plan of plans"
+           [class.plan-card--highlighted]="plan.highlighted"
+           [class.plan-card--current]="currentSubscription?.plan === plan.key">
+
+        <div class="plan-ribbon" *ngIf="plan.highlighted">{{ 'SUBSCRIPTION.RECOMMENDED' | translate }}</div>
+
+        <div class="plan-card-body">
+          <h3 class="plan-name">{{ plan.name }}</h3>
+          <p class="plan-tagline">{{ plan.tagline }}</p>
+
+          <div class="plan-price">
+            <span class="plan-price-amount">{{ plan.price }}€</span>
+            <span class="plan-price-period">{{ 'SUBSCRIPTION.MONTHLY' | translate }}</span>
           </div>
-          <ul style="margin:12px 0 20px 0;padding-left:18px">
-            <li class="text-sm" *ngFor="let f of plan.features" style="margin-bottom:6px">{{ f }}</li>
+
+          <ul class="plan-features">
+            <li *ngFor="let f of plan.features">
+              <i data-lucide="check-circle"></i>
+              <span>{{ f }}</span>
+            </li>
           </ul>
-          <button class="btn"
-                  [class.btn-primary]="plan.highlighted"
-                  [class.btn-outline]="!plan.highlighted"
-                  style="width:100%"
+
+          <button class="plan-cta"
+                  [class.plan-cta--primary]="plan.highlighted && currentSubscription?.plan !== plan.key"
+                  [class.plan-cta--outline]="!plan.highlighted && currentSubscription?.plan !== plan.key"
+                  [class.plan-cta--current]="currentSubscription?.plan === plan.key"
                   [disabled]="currentSubscription?.plan === plan.key"
                   (click)="choosePlan(plan)">
-            {{ currentSubscription?.plan === plan.key ? 'Plan actuel' : 'Souscrire' }}
+            <i data-lucide="check" *ngIf="currentSubscription?.plan === plan.key"></i>
+            {{ currentSubscription?.plan === plan.key ? ('SUBSCRIPTION.CURRENT_PLAN' | translate) : ('SUBSCRIPTION.SUBSCRIBE' | translate) }}
           </button>
         </div>
       </div>
     </div>
 
     <!-- Historique des paiements -->
-    <div class="card" *ngIf="payments.length">
-      <div class="card-header"><h3>Historique des paiements</h3></div>
-      <div class="card-body" style="padding:0">
-        <table>
-          <thead><tr><th>Date</th><th>Plan</th><th>Montant</th><th>Statut</th></tr></thead>
+    <div class="payments-card" *ngIf="payments.length">
+      <div class="payments-header">
+        <h3>{{ 'SUBSCRIPTION.PAYMENTS_HISTORY' | translate }}</h3>
+      </div>
+      <div class="payments-table-wrap">
+        <table class="payments-table">
+          <thead>
+            <tr>
+              <th>{{ 'SUBSCRIPTION.PAY_DATE' | translate }}</th>
+              <th>{{ 'SUBSCRIPTION.PAY_PLAN' | translate }}</th>
+              <th>{{ 'SUBSCRIPTION.PAY_AMOUNT' | translate }}</th>
+              <th>{{ 'SUBSCRIPTION.PAY_STATUS' | translate }}</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr *ngFor="let p of payments">
-              <td class="text-sm">{{ p.paymentDate | date:'dd/MM/yyyy' }}</td>
-              <td class="text-sm">{{ p.plan }}</td>
-              <td class="text-sm">{{ p.amount }}€</td>
-              <td><span class="badge" [class.badge-success]="p.status === 'PAID'" [class.badge-danger]="p.status === 'FAILED'" [class.badge-warning]="p.status === 'PENDING'">{{ p.status }}</span></td>
+            <tr *ngFor="let p of payments | slice:(currentPage-1)*pageSize:currentPage*pageSize">
+              <td class="payments-date">{{ p.paymentDate | date:'dd/MM/yyyy' }}</td>
+              <td class="payments-plan">{{ p.plan }}</td>
+              <td class="payments-amount">{{ p.amount }}€</td>
+              <td>
+                <span class="pay-status"
+                      [class.pay-status--paid]="p.status === 'PAID'"
+                      [class.pay-status--failed]="p.status === 'FAILED'"
+                      [class.pay-status--pending]="p.status === 'PENDING'">
+                  <i [attr.data-lucide]="p.status === 'PAID' ? 'check' : (p.status === 'FAILED' ? 'x' : 'clock')"></i>
+                  {{ p.status }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
+
+        <!-- Controls Pagination -->
+        <div class="pagination-controls flex items-center justify-between mt-4" *ngIf="payments.length > pageSize">
+          <button class="btn btn-sm btn-outline" [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">
+            <i data-lucide="chevron-left" style="width:14px;height:14px"></i> {{ 'SUBSCRIPTION.PREV' | translate }}
+          </button>
+          <span class="text-sm text-muted">{{ 'SUBSCRIPTION.PAGE_OF' | translate }} {{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn btn-sm btn-outline" [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1">
+            {{ 'SUBSCRIPTION.NEXT' | translate }} <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -64,38 +112,42 @@
 </div>
 
 <!-- Modal paiement simulé -->
-<div class="modal-overlay" [class.open]="isPaymentModalOpen">
-  <div class="modal">
-    <h3 style="margin-bottom:4px">Paiement — Plan {{ selectedPlan?.name }}</h3>
-    <p class="text-muted text-sm" style="margin-bottom:20px">
-      {{ selectedPlan?.price }}€ / mois. Paiement de démonstration — aucune vraie transaction bancaire n'est effectuée.
-    </p>
+<div class="pay-modal-overlay" [class.open]="isPaymentModalOpen">
+  <div class="pay-modal">
+    <div class="pay-modal-header">
+      <div class="pay-modal-icon"><i data-lucide="credit-card"></i></div>
+      <div>
+        <h3>{{ 'SUBSCRIPTION.PAY_MODAL_TITLE' | translate }} — {{ selectedPlan?.name }}</h3>
+        <p class="pay-modal-subtitle">{{ selectedPlan?.price }}€ / mois · {{ 'SUBSCRIPTION.PAY_MODAL_SUBTITLE' | translate }}</p>
+      </div>
+    </div>
 
     <div class="form-group">
-      <label class="form-label">Nom sur la carte</label>
+      <label class="form-label">{{ 'SUBSCRIPTION.CARD_NAME' | translate }}</label>
       <input class="form-input" [(ngModel)]="cardName" placeholder="Ex: Ahmed Ben Ali" />
     </div>
 
     <div class="form-group">
-      <label class="form-label">Numéro de carte</label>
+      <label class="form-label">{{ 'SUBSCRIPTION.CARD_NUMBER' | translate }}</label>
       <input class="form-input" [(ngModel)]="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19" />
     </div>
 
-    <div class="grid-2">
+    <div class="pay-modal-row">
       <div class="form-group">
-        <label class="form-label">Expiration (MM/AA)</label>
+        <label class="form-label">{{ 'SUBSCRIPTION.CARD_EXP' | translate }}</label>
         <input class="form-input" [(ngModel)]="cardExpiry" placeholder="12/28" maxlength="5" />
       </div>
       <div class="form-group">
-        <label class="form-label">CVC</label>
+        <label class="form-label">{{ 'SUBSCRIPTION.CARD_CVC' | translate }}</label>
         <input class="form-input" [(ngModel)]="cardCvc" placeholder="123" maxlength="4" />
       </div>
     </div>
 
-    <div class="flex gap-2" style="justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-outline" (click)="closePaymentModal()" [disabled]="isProcessing">Annuler</button>
-      <button class="btn btn-primary" (click)="confirmPayment()" [disabled]="isProcessing">
-        {{ isProcessing ? 'Traitement...' : 'Payer ' + selectedPlan?.price + '€' }}
+    <div class="pay-modal-actions">
+      <button class="btn-modal btn-modal--outline" (click)="closePaymentModal()" [disabled]="isProcessing">{{ 'SUBSCRIPTION.CANCEL' | translate }}</button>
+      <button class="btn-modal btn-modal--primary" (click)="confirmPayment()" [disabled]="isProcessing">
+        <span *ngIf="!isProcessing">{{ 'SUBSCRIPTION.PAY_NOW' | translate }} {{ selectedPlan?.price }}€</span>
+        <span *ngIf="isProcessing">{{ 'SUBSCRIPTION.PROCESSING' | translate }}</span>
       </button>
     </div>
   </div>

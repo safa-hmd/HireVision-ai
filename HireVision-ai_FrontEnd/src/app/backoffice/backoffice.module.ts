@@ -27,7 +27,8 @@ import { RouterModule } from '@angular/router';
     QuestionsComponent,
     SubscriptionsComponent,
     JobOffersComponent,
-    SettingsComponent
+    SettingsComponent,
+
   ],
   imports: [
     CommonModule,

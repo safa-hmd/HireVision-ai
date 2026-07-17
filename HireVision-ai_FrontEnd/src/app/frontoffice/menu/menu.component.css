@@ -1,0 +1,54 @@
+/* Sélecteur de langue */
+.lang-switcher {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+}
+.lang-btn {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.lang-btn.active {
+  opacity: 1;
+  background: rgba(255,255,255,0.12);
+}
+
+/* Sélecteur de Thème */
+.theme-switcher {
+  padding: 0 16px;
+  margin-top: auto;
+}
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+.theme-btn:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.3);
+}
+.theme-icon-wrap {
+  display: flex;
+  align-items: center;
+}

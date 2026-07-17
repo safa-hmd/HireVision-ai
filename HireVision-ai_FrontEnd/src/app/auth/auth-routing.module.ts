@@ -6,13 +6,14 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { AdminLoginComponent } from './admin-login/admin-login.component';
+import { GuestGuard } from '../guards/guest.guard';
 
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'admin-login', component: AdminLoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'login',           component: LoginComponent,          canActivate: [GuestGuard] },
+  { path: 'admin-login',     component: AdminLoginComponent,     canActivate: [GuestGuard] },
+  { path: 'register',        component: RegisterComponent,       canActivate: [GuestGuard] },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'reset-password',  component: ResetPasswordComponent },
   { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
 
@@ -21,3 +22,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AuthRoutingModule { }
+

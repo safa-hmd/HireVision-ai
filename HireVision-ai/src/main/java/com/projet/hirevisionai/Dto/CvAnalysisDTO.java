@@ -21,6 +21,16 @@ public class CvAnalysisDTO {
     private String profile;
     private Integer confidence;
 
+    @JsonProperty("proposed_summary")
+    private String proposedSummary;
+
+    @JsonProperty("optimization_suggestions")
+    private List<String> optimizationSuggestions;
+
+    private List<String> strengths;
+    private List<String> weaknesses;
+    private List<String> recommendations;
+
     @JsonProperty("global_score")
     private Integer globalScore;
 

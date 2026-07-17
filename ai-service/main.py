@@ -32,12 +32,19 @@ from interview_analyzer import (
     SPECIALTIES
 )
 
-app = FastAPI(title="HireVision AI Microservice")
+app = FastAPI(
+    title="HireVision AI Microservice",
+    description="Service IA de HireVision : analyse CV, matching emploi, questions d'entretien, feedback vocal & comportemental.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4200",   # frontend Angular en développement
+        "http://frontend:80",      # frontend Docker
         # "https://ton-domaine-en-production.com",  # à décommenter/ajouter quand tu déploies
     ],
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -46,6 +53,21 @@ app.add_middleware(
 
 from llm_client import call_llm, GROQ_API_KEY
 GEMINI_API_KEY = GROQ_API_KEY  # alias gardé pour ne pas casser le reste du fichier
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Health Check Endpoint (utilisé par Docker et monitoring)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.get("/health", tags=["System"])
+def health_check():
+    """Vérifie que le service AI est opérationnel."""
+    return {
+        "status": "ok",
+        "service": "HireVision AI Microservice",
+        "groq_configured": bool(GROQ_API_KEY),
+        "version": "1.0.0"
+    }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Cache en mémoire — évite les appels Gemini répétés
@@ -140,6 +162,70 @@ Génère un résumé professionnel en 3 phrases max en français, sans bullet po
         return call_llm(prompt, timeout=30)
     except Exception:
         return f"Profil {profile} avec score {score}/100."
+
+
+def generate_cv_analysis_insights(raw_text: str, skills: list[str], profile: str, score: int) -> dict:
+    if not GROQ_API_KEY:
+        return {
+            "summary": f"Profil {profile} détecté avec un score global de {score}/100.",
+            "proposed_summary": f"Développeur {profile} spécialisé en {', '.join(skills[:4])}.",
+            "optimization_suggestions": [
+                "Ajouter des liens vers vos projets récents (GitHub, Portfolio).",
+                "Détailler les technologies utilisées sous chaque expérience.",
+                "Ajouter des certifications pertinentes dans votre domaine."
+            ],
+            "strengths": [f"Bonne maîtrise de {s}" for s in skills[:3]] if skills else ["Expérience pertinente"],
+            "weaknesses": ["Manque de certifications visibles"] if len(skills) < 5 else ["Compétences secondaires à renforcer"],
+            "recommendations": [
+                "Suivre des cours en ligne pour les outils DevOps et Cloud.",
+                "Créer des projets personnels démontrant l'usage de vos compétences."
+            ]
+        }
+
+    prompt = f"""Tu es un expert en recrutement technique et optimisation de CV de développeurs.
+Analyse le texte brut du CV suivant ainsi que les compétences extraites et le score calculé.
+
+Profil détecté : {profile}
+Score global calculé : {score}/100
+Compétences détectées : {', '.join(skills)}
+
+Texte brut du CV :
+{raw_text[:3000]}
+
+Génère une analyse structurée en français pour aider le candidat à s'améliorer.
+Réponds UNIQUEMENT sous la forme d'un objet JSON valide contenant exactement ces clés :
+- "summary": (string, 2-3 phrases résumant le profil actuel)
+- "proposed_summary": (string, proposition d'un résumé professionnel accrocheur et optimisé pour le CV du candidat)
+- "optimization_suggestions": (liste de strings, 3 à 5 conseils concrets et actionnables pour améliorer la rédaction, le format et le contenu de son CV)
+- "strengths": (liste de strings, 2 à 4 points forts du candidat)
+- "weaknesses": (liste de strings, 2 à 4 points faibles ou axes d'amélioration)
+- "recommendations": (liste de strings, 2 à 4 recommandations pratiques de formation ou de projets)
+"""
+    try:
+        raw = call_llm(prompt, timeout=30).strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        data = json.loads(raw.strip())
+        return data
+    except Exception as e:
+        print(f"Error in generate_cv_analysis_insights: {e}")
+        return {
+            "summary": f"Profil {profile} détecté avec un score global de {score}/100.",
+            "proposed_summary": f"Développeur {profile} spécialisé en {', '.join(skills[:4])}.",
+            "optimization_suggestions": [
+                "Ajouter des liens vers vos projets récents (GitHub, Portfolio).",
+                "Détailler les technologies utilisées sous chaque expérience.",
+                "Ajouter des certifications pertinentes dans votre domaine."
+            ],
+            "strengths": [f"Bonne maîtrise de {s}" for s in skills[:3]] if skills else ["Expérience pertinente"],
+            "weaknesses": ["Manque de certifications visibles"] if len(skills) < 5 else ["Compétences secondaires à renforcer"],
+            "recommendations": [
+                "Suivre des cours en ligne pour les outils DevOps et Cloud.",
+                "Créer des projets personnels démontrant l'usage de vos compétences."
+            ]
+        }
 
 
 def evaluate_answer_with_gemini(question: str, answer: str, category: str, skills: list[str]) -> dict:
@@ -296,9 +382,11 @@ async def analyze_cv(file: UploadFile = File(...)):
     languages      = extract_languages(raw_text)
     certifications = extract_certifications(raw_text)
     ml_result      = predict_profile(skills)
-    summary        = generate_feedback_with_gemini(
-        skills, ml_result.get("profile", "Non déterminé"), ml_result.get("global_score", 0)
+    
+    insights = generate_cv_analysis_insights(
+        raw_text, skills, ml_result.get("profile", "Non déterminé"), ml_result.get("global_score", 0)
     )
+    
     return {
         "skills":         skills,
         "education":      education,
@@ -306,12 +394,23 @@ async def analyze_cv(file: UploadFile = File(...)):
         "projects":       projects,
         "certifications": certifications,
         "languages":      languages,
-        "summary":        summary,
+        "summary":        insights.get("summary"),
+        "proposed_summary": insights.get("proposed_summary"),
+        "optimization_suggestions": insights.get("optimization_suggestions"),
+        "strengths":      insights.get("strengths"),
+        "weaknesses":     insights.get("weaknesses"),
+        "recommendations": insights.get("recommendations"),
         "profile":        ml_result.get("profile"),
         "confidence":     ml_result.get("confidence"),
         "global_score":   ml_result.get("global_score"),
         "skill_scores":   ml_result.get("skill_scores", {})
     }
+
+
+@app.get("/analyze-github")
+async def analyze_github(username: str = Query(..., description="Le nom d'utilisateur GitHub")):
+    from github_analyzer import analyze_github_profile
+    return await analyze_github_profile(username)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

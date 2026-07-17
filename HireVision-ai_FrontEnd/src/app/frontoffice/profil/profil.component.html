@@ -1,17 +1,17 @@
 <div class="main-content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Paramètres du Profil</h1>
-      <p class="page-subtitle">Gérez votre compte et vos préférences</p>
+      <h1 class="page-title">{{ 'PROFILE.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'PROFILE.SUBTITLE' | translate }}</p>
     </div>
   </header>
 
   <div class="page-body">
     <div class="tabs-root">
       <div class="tabs-list">
-        <button class="tab-trigger" data-tab="personal">Informations Personnelles</button>
-        <button class="tab-trigger" data-tab="cvs">Mes CV</button>
-        <button class="tab-trigger" data-tab="interviews">Entretiens</button>
+        <button class="tab-trigger" data-tab="personal">{{ 'PROFILE.TAB_PERSONAL' | translate }}</button>
+        <button class="tab-trigger" data-tab="cvs">{{ 'PROFILE.TAB_CVS' | translate }}</button>
+        <button class="tab-trigger" data-tab="interviews">{{ 'PROFILE.TAB_INTERVIEWS' | translate }}</button>
       </div>
 
       <!-- ══════════════ TAB PERSONAL ══════════════ -->
@@ -20,8 +20,8 @@
         <!-- Card infos personnelles -->
         <div class="card">
           <div class="card-header">
-            <h3>Informations Personnelles</h3>
-            <p>Mettez à jour vos données</p>
+            <h3>{{ 'PROFILE.PERSONAL_TITLE' | translate }}</h3>
+            <p>{{ 'PROFILE.PERSONAL_SUB' | translate }}</p>
           </div>
           <div class="card-body">
 
@@ -30,7 +30,7 @@
 
               <div style="position:relative;width:88px;height:88px;cursor:pointer" (click)="triggerFileInput()">
 
-                <!-- Preview avant confirmation -->
+                <!-- Preview -->
                 <img *ngIf="previewUrl"
                      [src]="previewUrl"
                      alt="Aperçu"
@@ -42,13 +42,13 @@
                      alt="Photo de profil"
                      style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border)" />
 
-                <!-- Initiales si aucune photo -->
+                <!-- Initiales -->
                 <div *ngIf="!previewUrl && !user.profilePicture"
                      class="avatar avatar-xl">
                   {{ getInitials() }}
                 </div>
 
-                <!-- Overlay caméra au hover -->
+                <!-- Overlay -->
                 <div class="avatar-overlay">
                   <i data-lucide="camera" style="width:20px;height:20px;color:#fff"></i>
                 </div>
@@ -59,95 +59,95 @@
                      (change)="onPictureSelected($event)" style="display:none" />
 
               <div>
-                <h3>Photo de Profil</h3>
-                <p class="text-sm text-muted">JPG, PNG ou WebP — max 2 Mo</p>
-                <!-- Boutons confirmer/annuler si preview -->
+                <h3>{{ 'PROFILE.PIC_TITLE' | translate }}</h3>
+                <p class="text-sm text-muted">{{ 'PROFILE.PIC_LIMIT' | translate }}</p>
+                <!-- Confirmer/annuler -->
                 <div *ngIf="previewUrl" style="display:flex;gap:8px;margin-top:8px">
                   <button class="btn btn-primary btn-sm" (click)="confirmUpload()">
-                    <i data-lucide="check"></i> Confirmer
+                    <i data-lucide="check"></i> {{ 'PROFILE.CONFIRM' | translate }}
                   </button>
                   <button class="btn btn-ghost btn-sm" (click)="cancelPreview()">
-                    Annuler
+                    {{ 'PROFILE.CANCEL' | translate }}
                   </button>
                 </div>
               </div>
             </div>
-            <!-- Fin Zone Avatar -->
 
             <!-- Formulaire -->
             <form (ngSubmit)="saveProfile()" class="grid-2">
               <div class="form-group">
-                <label class="form-label">Nom Complet</label>
+                <label class="form-label">{{ 'PROFILE.FULL_NAME' | translate }}</label>
                 <input class="form-input" [(ngModel)]="user.fullName" name="fullName" required />
               </div>
               <div class="form-group">
-                <label class="form-label">Email</label>
+                <label class="form-label">{{ 'PROFILE.EMAIL' | translate }}</label>
                 <input class="form-input" type="email" [(ngModel)]="user.email" name="email" required />
               </div>
               <div class="form-group">
-                <label class="form-label">Téléphone</label>
+                <label class="form-label">{{ 'PROFILE.PHONE' | translate }}</label>
                 <input class="form-input" type="tel" [(ngModel)]="user.phone" name="phone" />
               </div>
               <div class="form-group">
-                <label class="form-label">Âge</label>
+                <label class="form-label">{{ 'PROFILE.AGE' | translate }}</label>
                 <input class="form-input" type="number" [(ngModel)]="user.age" name="age" required />
               </div>
               <div class="form-group" style="grid-column:1/-1">
-                <label class="form-label">Titre Professionnel</label>
+                <label class="form-label">{{ 'PROFILE.PROFESSIONAL_TITLE' | translate }}</label>
                 <input class="form-input" [(ngModel)]="user.title" name="title" />
               </div>
               <div class="form-group" style="grid-column:1/-1">
-                <label class="form-label">LinkedIn</label>
+                <label class="form-label">{{ 'PROFILE.LINKEDIN' | translate }}</label>
                 <input class="form-input" [(ngModel)]="user.linkedin" name="linkedin" />
               </div>
               <div class="form-group" style="grid-column:1/-1">
-                <label class="form-label">GitHub</label>
+                <label class="form-label">{{ 'PROFILE.GITHUB' | translate }}</label>
                 <input class="form-input" [(ngModel)]="user.github" name="github" />
               </div>
               <div style="grid-column:1/-1">
                 <button type="submit" class="btn btn-primary">
-                  <i data-lucide="save"></i> Enregistrer
+                  <i data-lucide="save"></i> {{ 'PROFILE.SAVE' | translate }}
                 </button>
               </div>
             </form>
 
           </div>
         </div>
-        <!-- Fin Card infos -->
 
-        <!-- ── Zone Danger ── -->
+        <!-- Danger Zone -->
         <div class="card" style="border-color:#dc2626;margin-top:24px">
           <div class="card-header">
-            <h3 style="color:#dc2626">Zone Danger</h3>
-            <p>Actions irréversibles</p>
+            <h3 style="color:#dc2626">{{ 'PROFILE.DANGER_ZONE' | translate }}</h3>
+            <p>{{ 'PROFILE.DANGER_SUB' | translate }}</p>
           </div>
           <div class="card-body">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
               <div>
-                <div class="font-medium">Supprimer mon compte</div>
-                <div class="text-sm text-muted">Toutes vos données seront définitivement supprimées</div>
+                <div class="font-medium">{{ 'PROFILE.DELETE_TITLE' | translate }}</div>
+                <div class="text-sm text-muted">{{ 'PROFILE.DELETE_SUB' | translate }}</div>
               </div>
               <button class="btn btn-danger btn-sm" (click)="openDeleteModal()">
-                <i data-lucide="trash-2"></i> Supprimer le compte
+                <i data-lucide="trash-2"></i> {{ 'PROFILE.DELETE_BTN' | translate }}
               </button>
             </div>
           </div>
         </div>
 
       </div>
-      <!-- Fin tab personal -->
 
       <!-- ══════════════ TAB CVS ══════════════ -->
       <div class="tab-panel" data-panel="cvs">
         <div class="card">
-          <div class="card-header"><h3>CV Uploadés</h3><p>Gérez vos documents</p></div>
+          <div class="card-header">
+            <h3>{{ 'PROFILE.CVS_TITLE' | translate }}</h3>
+            <p>{{ 'PROFILE.CVS_SUB' | translate }}</p>
+          </div>
           <div class="card-body space-y-4">
 
             <input type="file" id="new-cv-file" accept=".pdf,.doc,.docx"
                    (change)="onFileSelected($event)" style="display:none" />
 
             <div *ngIf="userCvs.length === 0" class="text-center text-muted" style="padding:24px 0">
-              Aucun CV mis en ligne pour le moment.
+              {{ 'PROFILE.NO_CVS' | translate }}
             </div>
 
             <div class="list-item" *ngFor="let cv of userCvs; let i = index">
@@ -162,16 +162,15 @@
               </div>
               <div class="flex items-center gap-2">
                 <span class="badge" [ngClass]="i === 0 ? 'badge-success' : 'badge-muted'">
-                  {{ i === 0 ? 'Actif' : 'Inactif' }}
+                  {{ i === 0 ? ('PROFILE.CV_ACTIVE' | translate) : ('PROFILE.CV_INACTIVE' | translate) }}
                 </span>
-                <a [href]="'http://localhost:8086/HireVision/' + cv.filePath"
-                   target="_blank" class="btn btn-outline btn-sm">Voir</a>
-                <button class="btn btn-ghost btn-sm" (click)="deleteCv(cv.id)">Supprimer</button>
+              
+                <button class="btn btn-ghost btn-sm" (click)="deleteCv(cv.id)">{{ 'PROFILE.DELETE' | translate }}</button>
               </div>
             </div>
 
             <button class="btn btn-outline w-full" (click)="uploadCv()">
-              <i data-lucide="upload"></i> Uploader un Nouveau CV
+              <i data-lucide="upload"></i> {{ 'PROFILE.UPLOAD_NEW' | translate }}
             </button>
           </div>
         </div>
@@ -180,11 +179,14 @@
       <!-- ══════════════ TAB INTERVIEWS ══════════════ -->
       <div class="tab-panel" data-panel="interviews">
         <div class="card">
-          <div class="card-header"><h3>Historique des Entretiens</h3><p>Vos sessions d'entretien complétées</p></div>
+          <div class="card-header">
+            <h3>{{ 'PROFILE.HISTORY_TITLE' | translate }}</h3>
+            <p>{{ 'PROFILE.HISTORY_SUB' | translate }}</p>
+          </div>
           <div class="card-body space-y-4">
 
             <div *ngIf="interviews.length === 0" class="text-center text-muted" style="padding:24px 0">
-              Aucun entretien complété pour le moment.
+              {{ 'PROFILE.NO_INTERVIEWS' | translate }}
             </div>
 
             <div class="list-item" *ngFor="let interview of interviews">
@@ -201,7 +203,6 @@
                       [ngClass]="getInterviewType(interview) === 'RH' ? 'text-success' : 'text-primary'">
                   {{ getInterviewScore(interview) }}%
                 </span>
-                <a [routerLink]="['/interview-report', interview.id]" class="btn btn-outline btn-sm">Rapport</a>
               </div>
             </div>
 
@@ -213,12 +214,12 @@
   </div>
 </div>
 
-<!-- ══════ MODAL CROP PHOTO ══════ -->
+<!-- Modal crop photo -->
 <div class="modal-overlay" *ngIf="showCropModal" style="z-index:1000">
   <div class="modal-box" style="max-width:520px;width:95%">
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="margin:0">Ajuster la photo</h3>
+      <h3 style="margin:0">{{ 'PROFILE.ADJUST' | translate }}</h3>
       <button class="btn btn-ghost btn-sm" (click)="cancelCrop()">
         <i data-lucide="x"></i>
       </button>
@@ -236,7 +237,7 @@
       <button class="btn btn-outline btn-sm" (click)="zoomOut()">
         <i data-lucide="zoom-out"></i>
       </button>
-      <span class="text-sm text-muted">Zoom / Déplacer</span>
+      <span class="text-sm text-muted">{{ 'PROFILE.ZOOM_MOVE' | translate }}</span>
       <button class="btn btn-outline btn-sm" (click)="zoomIn()">
         <i data-lucide="zoom-in"></i>
       </button>
@@ -249,40 +250,39 @@
     </div>
 
     <p class="text-sm text-muted" style="text-align:center;margin-bottom:16px">
-      Déplacez et zoomez pour cadrer votre visage dans le cercle
+      {{ 'PROFILE.CROP_DESC' | translate }}
     </p>
 
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-outline" (click)="cancelCrop()">Annuler</button>
+      <button class="btn btn-outline" (click)="cancelCrop()">{{ 'PROFILE.CANCEL' | translate }}</button>
       <button class="btn btn-primary" (click)="applyCrop()">
-        <i data-lucide="check"></i> Confirmer la photo
+        <i data-lucide="check"></i> {{ 'PROFILE.CONFIRM' | translate }}
       </button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════ MODAL SUPPRESSION COMPTE ══════════════ -->
+<!-- Modal suppression compte -->
 <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-icon-danger">
       <i data-lucide="alert-triangle"></i>
     </div>
-    <h3>Supprimer votre compte ?</h3>
+    <h3>{{ 'PROFILE.DELETE_MODAL_TITLE' | translate }}</h3>
     <p class="text-sm text-muted" style="margin:8px 0 16px">
-      Cette action est <strong style="color:#dc2626">permanente et irréversible</strong>.
-      Tous vos entretiens, CVs et données seront supprimés.
+      {{ 'PROFILE.DELETE_MODAL_DESC' | translate }}
     </p>
     <div class="warning-box">
-      Pour confirmer, saisissez exactement votre nom complet :
+      {{ 'PROFILE.DELETE_CONFIRM_TEXT' | translate }}
       <strong>{{ user.fullName }}</strong>
     </div>
     <div class="form-group" style="margin-top:14px">
-      <label class="form-label">Nom complet</label>
+      <label class="form-label">{{ 'PROFILE.FULL_NAME' | translate }}</label>
       <input
         class="form-input"
         [(ngModel)]="deleteConfirmName"
         name="deleteConfirmName"
-        placeholder="Saisissez votre nom..."
+        placeholder="{{ 'PROFILE.ENTER_FULL_NAME' | translate }}"
         (ngModelChange)="onDeleteNameChange()"
       />
       <p class="text-sm" style="color:#dc2626;min-height:18px;margin-top:4px">
@@ -290,9 +290,9 @@
       </p>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-outline" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-outline" (click)="closeDeleteModal()">{{ 'PROFILE.CANCEL' | translate }}</button>
       <button class="btn btn-danger" [disabled]="!deleteNameMatch" (click)="deleteAccount()">
-        <i data-lucide="trash-2"></i> Supprimer définitivement
+        <i data-lucide="trash-2"></i> {{ 'PROFILE.DELETE_PERMANENTLY' | translate }}
       </button>
     </div>
   </div>

@@ -16,6 +16,14 @@ export class InterviewsComponent implements OnInit, AfterViewInit {
   interviews: RecentInterview[] = [];
   isLoading = false;
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 5;
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.interviews.length / this.pageSize));
+  }
+
   constructor(private interviewService: InterviewService) {}
 
   ngOnInit(): void {
@@ -31,6 +39,7 @@ export class InterviewsComponent implements OnInit, AfterViewInit {
     this.interviewService.getAll().subscribe({
       next: (interviews) => {
         this.interviews = interviews;
+        this.currentPage = 1;
         this.isLoading = false;
         setTimeout(() => lucide.createIcons(), 50);
       },

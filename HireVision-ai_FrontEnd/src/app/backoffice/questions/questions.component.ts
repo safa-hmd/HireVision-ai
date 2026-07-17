@@ -18,6 +18,14 @@ export class QuestionsComponent implements OnInit, AfterViewInit {
   difficultyFilter: '' | 'EASY' | 'MEDIUM' | 'HARD' = '';
   searchText = '';
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredQuestions.length / this.pageSize));
+  }
+
   constructor(private questionService: QuestionService) {}
 
   ngOnInit(): void {
@@ -51,6 +59,7 @@ export class QuestionsComponent implements OnInit, AfterViewInit {
         || q.content.toLowerCase().includes(this.searchText.trim().toLowerCase());
       return matchesDifficulty && matchesSearch;
     });
+    this.currentPage = 1;
   }
 
   difficultyLabel(difficulty: string): string {

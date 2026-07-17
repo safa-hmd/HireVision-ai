@@ -10,27 +10,35 @@ import { InterviewPreparationComponent } from './interview-preparation/interview
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
 import { InterviewFeedbackComponent } from './interview-feedback/interview-feedback.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
+import { LandingComponent } from './landing/landing.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
     component: FrontofficeComponent,
     children: [
-      { path: '',          redirectTo: 'home', pathMatch: 'full' },
-      { path: 'home',      component: HomeComponent },
-      { path: 'cvAnalyse', component: CvAnalyseComponent },
-      { path: 'jobMatching', component: JobMatchComponent },
-      { path: 'interviewPrep', component: InterviewPreparationComponent },
-      { path: 'careerRoadmap', component: PlanCarriereComponent },
+      // Première page : page welcome/landing (accessible sans connexion)
+      { path: '',          redirectTo: 'welcome', pathMatch: 'full' },
+      { path: 'welcome',   component: LandingComponent },
+
+      // Pages protégées : connexion requise
+      { path: 'home',            component: HomeComponent,                canActivate: [AuthGuard] },
+      { path: 'cvAnalyse',       component: CvAnalyseComponent,           canActivate: [AuthGuard] },
+      { path: 'jobMatching',     component: JobMatchComponent,             canActivate: [AuthGuard] },
+      { path: 'interviewPrep',   component: InterviewPreparationComponent, canActivate: [AuthGuard] },
+      { path: 'careerRoadmap',   component: PlanCarriereComponent,         canActivate: [AuthGuard] },
+      { path: 'profil',          component: ProfilComponent,               canActivate: [AuthGuard] },
+      { path: 'interview-session',  component: InterviewSessionComponent,  canActivate: [AuthGuard] },
+      { path: 'interview-feedback', component: InterviewFeedbackComponent, canActivate: [AuthGuard] },
+      { path: 'subscription',    component: SubscriptionComponent,         canActivate: [AuthGuard] },
+
+      // Alias maintenu pour compatibilité
       { path: 'plan-carriere', redirectTo: 'careerRoadmap', pathMatch: 'full' },
-      { path: 'profil', component: ProfilComponent },
-      { path: 'interview-session',  component: InterviewSessionComponent  },
-      { path: 'interview-feedback', component: InterviewFeedbackComponent },
-      { path: 'subscription', component: SubscriptionComponent },
-    ] 
-    
+    ]
   }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

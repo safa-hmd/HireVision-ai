@@ -11,6 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminLoginComponent } from './admin-login/admin-login.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { AdminLoginComponent } from './admin-login/admin-login.component';
     AuthRoutingModule,
      HttpClientModule,
     FormsModule,
-     RouterModule
+     RouterModule,
+     TranslateModule
   ]
 })
 export class AuthModule { }

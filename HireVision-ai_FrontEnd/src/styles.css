@@ -22,6 +22,15 @@ app-interview-preparation,
 app-plan-carriere,
 app-profil,
 app-interview-session,
-app-interview-feedback {
+app-interview-feedback,
+app-subscription,
+app-analytics,
+app-dashboard,
+app-interviews,
+app-job-offers,
+app-questions,
+app-settings,
+app-subscriptions,
+app-users {
   display: contents;
 }

@@ -1,0 +1,134 @@
+version: '3.9'
+
+# ══════════════════════════════════════════════════════════════
+#  HireVision AI — Docker Compose (Développement local)
+#  Usage : docker compose up --build
+#  Ports exposés :
+#    - Frontend  : http://localhost:4200  (Nginx)
+#    - Backend   : http://localhost:8086  (Spring Boot)
+#    - AI Service: http://localhost:8000  (FastAPI)
+#    - Swagger   : http://localhost:8086/HireVision/swagger-ui.html
+#    - MySQL     : localhost:3307  (évite conflit avec un MySQL local)
+# ══════════════════════════════════════════════════════════════
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  #  MySQL Database
+  # ──────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: hirevision-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: hirevisiondb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - hirevision-net
+
+  # ──────────────────────────────────────────────────────────
+  #  AI Service (FastAPI)
+  # ──────────────────────────────────────────────────────────
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: hirevision-ai
+    restart: unless-stopped
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+    volumes:
+      - ./ai-service:/app
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - hirevision-net
+
+  # ──────────────────────────────────────────────────────────
+  #  Backend (Spring Boot)
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./HireVision-ai
+      dockerfile: Dockerfile
+    container_name: hirevision-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/hirevisiondb?createDatabaseIfNotExist=true&useUnicode=true&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+      AI_SERVICE_URL: http://ai-service:8000
+      PORT: 8086
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "8086:8086"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8086/HireVision/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - hirevision-net
+
+  # ──────────────────────────────────────────────────────────
+  #  Frontend (Angular + Nginx)
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./HireVision-ai_FrontEnd
+      dockerfile: Dockerfile
+    container_name: hirevision-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    networks:
+      - hirevision-net
+
+# ──────────────────────────────────────────────────────────
+#  Volumes persistants
+# ──────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+# ──────────────────────────────────────────────────────────
+#  Réseau interne
+# ──────────────────────────────────────────────────────────
+networks:
+  hirevision-net:
+    driver: bridge

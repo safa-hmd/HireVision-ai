@@ -1,0 +1,49 @@
+spring.application.name=hirevision-ai
+
+### DATABASE ###
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/hirevisiondb?createDatabaseIfNotExist=true&useUnicode=true&serverTimezone=UTC}
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:}
+
+### JPA / HIBERNATE ###
+spring.jpa.show-sql=false
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.format_sql=false
+spring.jpa.properties.hibernate.use_sql_comments=false
+
+### SERVER ###
+server.servlet.context-path=/HireVision
+server.port=${PORT:8086}
+
+### JWT (⚠ valeur obligatoire dans .env — aucun défaut) ###
+app.jwt.secret=${JWT_SECRET}
+app.jwt.expiration-ms=${JWT_EXPIRATION:3600000}
+
+### GOOGLE OAUTH2 (⚠ valeurs obligatoires dans .env) ###
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+spring.security.oauth2.client.registration.google.scope=email,profile
+spring.security.oauth2.client.registration.google.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
+
+### MAIL (⚠ valeurs obligatoires dans .env) ###
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.trust=${MAIL_HOST:smtp.gmail.com}
+spring.mail.default-encoding=UTF-8
+
+### FRONTEND ###
+app.frontend.url=${FRONTEND_URL:http://localhost:4200}
+
+### AI SERVICE ###
+app.ai-service.url=${AI_SERVICE_URL:http://localhost:8000}
+
+### ACTUATOR / MONITORING ###
+management.endpoints.web.exposure.include=health,info,metrics
+management.endpoint.health.show-details=when-authorized
+management.info.app.name=HireVision AI
+management.info.app.version=1.0.0

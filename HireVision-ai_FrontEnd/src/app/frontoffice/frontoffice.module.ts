@@ -17,11 +17,15 @@ import { InterviewPreparationComponent } from './interview-preparation/interview
 import { InterviewSessionComponent } from './interview-session/interview-session.component';
 import { InterviewFeedbackComponent } from './interview-feedback/interview-feedback.component';
 import { SubscriptionComponent } from './subscription/subscription.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { LandingComponent } from './landing/landing.component';
+import { BadgeUnlockPipe } from './home/badge-unlock.pipe';
 
 @NgModule({
   declarations: [
     FrontofficeComponent,
     HomeComponent,
+    LandingComponent,
     CvAnalyseComponent,
     MenuComponent,
     FooterComponent,
@@ -32,13 +36,15 @@ import { SubscriptionComponent } from './subscription/subscription.component';
     InterviewPreparationComponent,
     InterviewSessionComponent,
     InterviewFeedbackComponent,
-    SubscriptionComponent
+    SubscriptionComponent,
+    BadgeUnlockPipe,
   ],
   imports: [
     CommonModule,
     FormsModule,
     RouterModule,        // ← nécessaire pour routerLink dans menu
-    FrontofficeRoutingModule
+    FrontofficeRoutingModule,
+    TranslateModule       // ← pipe {{ 'KEY' | translate }} dans tous les templates front-office
   ]
 })
 export class FrontofficeModule { }

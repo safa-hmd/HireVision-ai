@@ -94,103 +94,6 @@
           </div>
         </div>
 
-        <!-- IA -->
-        <div class="tab-panel" *ngIf="activeTab === 'ai'">
-          <div class="card mb-4">
-            <div class="card-header">
-              <h3>Configuration du Modèle IA</h3>
-              <p>Paramètres du moteur d'analyse</p>
-            </div>
-            <div class="card-body">
-              <div class="grid-2">
-                <div class="form-group">
-                  <label class="form-label">Modèle principal</label>
-                  <select class="form-select" [(ngModel)]="ai.model">
-                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                    <option value="claude-opus-4">claude-opus-4</option>
-                    <option value="claude-haiku-4">claude-haiku-4</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Température (créativité)</label>
-                  <input class="form-input" type="number" step="0.1" min="0" max="1" [(ngModel)]="ai.temperature" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Max tokens par réponse</label>
-                  <input class="form-input" type="number" [(ngModel)]="ai.maxTokens" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Langue des réponses IA</label>
-                  <select class="form-select" [(ngModel)]="ai.responseLanguage">
-                    <option>Automatique</option>
-                    <option>Français</option>
-                    <option>English</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h3>Analyse Comportementale</h3>
-              <p>Paramètres de la vision par ordinateur</p>
-            </div>
-            <div class="card-body space-y-4">
-              <div class="list-item">
-                <div>
-                  <div class="font-medium">Détection du contact visuel</div>
-                  <div class="text-sm text-muted">Analyser la direction du regard du candidat</div>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" [(ngModel)]="aiToggles.eyeContact" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <div class="list-item">
-                <div>
-                  <div class="font-medium">Analyse de la posture</div>
-                  <div class="text-sm text-muted">Évaluer la posture et le langage corporel</div>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" [(ngModel)]="aiToggles.posture" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <div class="list-item">
-                <div>
-                  <div class="font-medium">Analyse des émotions</div>
-                  <div class="text-sm text-muted">Détecter les émotions via les expressions faciales</div>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" [(ngModel)]="aiToggles.emotions" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <div class="list-item">
-                <div>
-                  <div class="font-medium">Analyse vocale</div>
-                  <div class="text-sm text-muted">Analyser le rythme, la clarté et le ton de la voix</div>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" [(ngModel)]="aiToggles.voice" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <div class="list-item">
-                <div>
-                  <div class="font-medium">Détection de stress</div>
-                  <div class="text-sm text-muted">Mesurer le niveau de stress en temps réel</div>
-                </div>
-                <label class="toggle">
-                  <input type="checkbox" [(ngModel)]="aiToggles.stress" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Notifications -->
         <div class="tab-panel" *ngIf="activeTab === 'notifs'">
           <div class="card mb-4">
@@ -219,33 +122,6 @@
                 <div><div class="font-medium">Signalement utilisateur</div><div class="text-sm text-muted">Modération de contenu</div></div>
                 <label class="toggle"><input type="checkbox" [(ngModel)]="notifToggles.userReport" /><span class="slider"></span></label>
               </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><h3>Configuration Email</h3></div>
-            <div class="card-body">
-              <div class="grid-2">
-                <div class="form-group">
-                  <label class="form-label">Serveur SMTP</label>
-                  <input class="form-input" [(ngModel)]="emailConfig.smtpServer" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Port</label>
-                  <input class="form-input" [(ngModel)]="emailConfig.port" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Expéditeur</label>
-                  <input class="form-input" [(ngModel)]="emailConfig.sender" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Clé API</label>
-                  <input class="form-input" type="password" [(ngModel)]="emailConfig.apiKey" />
-                </div>
-              </div>
-              <button class="btn btn-outline btn-sm" (click)="sendTestEmail()">
-                <i data-lucide="send"></i> Envoyer un test
-              </button>
             </div>
           </div>
         </div>
@@ -298,67 +174,6 @@
           </div>
         </div>
 
-        <!-- Intégrations -->
-        <div class="tab-panel" *ngIf="activeTab === 'integrations'">
-          <div class="card">
-            <div class="card-header">
-              <h3>Intégrations & API</h3>
-              <p>Services tiers connectés</p>
-            </div>
-            <div class="card-body space-y-4">
-              <div class="list-item">
-                <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">G</div>
-                  <div><div class="font-medium">Google OAuth</div><div class="text-sm text-muted">Connexion sociale Google</div></div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="badge badge-success">Connecté</span>
-                  <button class="btn btn-outline btn-sm" (click)="disconnectIntegration('Google OAuth')">Déconnecter</button>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;background:#0077B5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem">in</div>
-                  <div><div class="font-medium">LinkedIn OAuth</div><div class="text-sm text-muted">Connexion & import de profil</div></div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="badge badge-success">Connecté</span>
-                  <button class="btn btn-outline btn-sm" (click)="disconnectIntegration('LinkedIn OAuth')">Déconnecter</button>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;background:#635BFF;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">S</div>
-                  <div><div class="font-medium">Stripe</div><div class="text-sm text-muted">Paiements en ligne</div></div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="badge badge-success">Connecté</span>
-                  <button class="btn btn-outline btn-sm">Configurer</button>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;background:#1A1A1A;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.8rem">API</div>
-                  <div><div class="font-medium">Anthropic Claude API</div><div class="text-sm text-muted">Moteur IA des entretiens</div></div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="badge badge-success">Actif</span>
-                  <button class="btn btn-outline btn-sm" (click)="showToast('Clé copiée !')">Voir la clé</button>
-                </div>
-              </div>
-              <div class="list-item">
-                <div class="flex items-center gap-3">
-                  <div style="width:40px;height:40px;background:#F4645F;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">SG</div>
-                  <div><div class="font-medium">SendGrid</div><div class="text-sm text-muted">Envoi d'emails transactionnels</div></div>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="badge badge-success">Connecté</span>
-                  <button class="btn btn-outline btn-sm">Configurer</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>

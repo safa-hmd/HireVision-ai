@@ -1,77 +1,40 @@
-import { Component } from '@angular/core';
-
-interface AiToggles {
-  eyeContact: boolean;
-  posture: boolean;
-  emotions: boolean;
-  voice: boolean;
-  stress: boolean;
-}
-
-interface NotifToggles {
-  newUser: boolean;
-  paymentReceived: boolean;
-  dailyReport: boolean;
-  paymentFailed: boolean;
-  userReport: boolean;
-}
-
-interface SecurityToggles {
-  twoFactor: boolean;
-  socialLogin: boolean;
-  videoEncryption: boolean;
-  gdpr: boolean;
-}
+import { Component, OnInit } from '@angular/core';
+import { SettingsDTO, SettingsService } from '../../services/settings.service';
+import { LanguageService, LangCode } from '../../services/language.service';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
 
-  activeTab: 'general' | 'ai' | 'notifs' | 'security' | 'integrations' = 'general';
+  activeTab: 'general' | 'notifs' | 'security' = 'general';
 
   tabs = [
     { key: 'general', label: 'Général' },
-    { key: 'ai', label: 'IA & Modèle' },
     { key: 'notifs', label: 'Notifications' },
     { key: 'security', label: 'Sécurité' },
-    { key: 'integrations', label: 'Intégrations' },
   ] as const;
+
+  loading = true;
 
   // --- Général ---
   general = {
-    platformName: 'HireVision AI',
-    siteUrl: 'https://hirevision.ai',
-    supportEmail: 'support@hirevision.ai',
-    timezone: 'Europe/Paris (UTC+2)',
-    language: 'Français',
-    currency: 'EUR (€)',
-    freeInterviewsPerMonth: 5,
-    maxInterviewDuration: 90,
-    maxCvSizeMb: 5,
-    maxCvPerUser: 10
-  };
-
-  // --- IA ---
-  ai = {
-    model: 'claude-sonnet-4',
-    temperature: 0.7,
-    maxTokens: 1024,
-    responseLanguage: 'Automatique'
-  };
-
-  aiToggles: AiToggles = {
-    eyeContact: true,
-    posture: true,
-    emotions: true,
-    voice: true,
-    stress: false
+    platformName: '',
+    siteUrl: '',
+    supportEmail: '',
+    timezone: '',
+    language: '',
+    currency: '',
+    freeInterviewsPerMonth: 0,
+    maxInterviewDuration: 0,
+    maxCvSizeMb: 0,
+    maxCvPerUser: 0
   };
 
   // --- Notifications ---
-  notifToggles: NotifToggles = {
+  notifToggles = {
     newUser: true,
     paymentReceived: true,
     dailyReport: true,
@@ -79,15 +42,8 @@ export class SettingsComponent {
     userReport: false
   };
 
-  emailConfig = {
-    smtpServer: 'smtp.sendgrid.net',
-    port: '587',
-    sender: 'noreply@hirevision.ai',
-    apiKey: '••••••••••••••••'
-  };
-
   // --- Sécurité ---
-  securityToggles: SecurityToggles = {
+  securityToggles = {
     twoFactor: true,
     socialLogin: true,
     videoEncryption: true,
@@ -103,33 +59,89 @@ export class SettingsComponent {
   toastType: 'success' | 'warning' | 'danger' = 'success';
   private toastTimer: any;
 
+  constructor(
+    private settingsService: SettingsService,
+    private languageService: LanguageService
+  ) {}
+
+  ngOnInit(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (s) => this.applySettings(s),
+      error: () => this.showToast('Impossible de charger les paramètres', 'danger'),
+      complete: () => this.loading = false
+    });
+  }
+
+  private applySettings(s: SettingsDTO): void {
+    this.general = {
+      platformName: s.platformName,
+      siteUrl: s.siteUrl,
+      supportEmail: s.supportEmail,
+      timezone: s.timezone,
+      language: s.language,
+      currency: s.currency,
+      freeInterviewsPerMonth: s.freeInterviewsPerMonth,
+      maxInterviewDuration: s.maxInterviewDuration,
+      maxCvSizeMb: s.maxCvSizeMb,
+      maxCvPerUser: s.maxCvPerUser
+    };
+    this.notifToggles = {
+      newUser: s.notifNewUser,
+      paymentReceived: s.notifPaymentReceived,
+      dailyReport: s.notifDailyReport,
+      paymentFailed: s.notifPaymentFailed,
+      userReport: s.notifUserReport
+    };
+    this.securityToggles = {
+      twoFactor: s.twoFactor,
+      socialLogin: s.socialLogin,
+      videoEncryption: s.videoEncryption,
+      gdpr: s.gdpr
+    };
+    this.sessionDuration = s.sessionDuration;
+    this.maxLoginAttempts = s.maxLoginAttempts;
+    this.dataRetentionDays = s.dataRetentionDays;
+  }
+
   setTab(tab: typeof this.activeTab): void {
     this.activeTab = tab;
   }
 
   save(): void {
-    // TODO: appeler ton SettingsService.update(payload) ici
-    const payload = {
-      general: this.general,
-      ai: this.ai,
-      aiToggles: this.aiToggles,
-      notifToggles: this.notifToggles,
-      emailConfig: this.emailConfig,
-      securityToggles: this.securityToggles,
+    const payload: SettingsDTO = {
+      ...this.general,
+      notifNewUser: this.notifToggles.newUser,
+      notifPaymentReceived: this.notifToggles.paymentReceived,
+      notifDailyReport: this.notifToggles.dailyReport,
+      notifPaymentFailed: this.notifToggles.paymentFailed,
+      notifUserReport: this.notifToggles.userReport,
+      twoFactor: this.securityToggles.twoFactor,
+      socialLogin: this.securityToggles.socialLogin,
+      videoEncryption: this.securityToggles.videoEncryption,
+      gdpr: this.securityToggles.gdpr,
       sessionDuration: this.sessionDuration,
       maxLoginAttempts: this.maxLoginAttempts,
       dataRetentionDays: this.dataRetentionDays
     };
-    console.log('Sauvegarde des paramètres', payload);
-    this.showToast('Paramètres sauvegardés !');
+
+    this.settingsService.updateSettings(payload).subscribe({
+      next: (s) => {
+        this.applySettings(s);
+        const code = this.mapLanguageLabelToCode(s.language);
+        this.languageService.setLanguage(code);
+        this.showToast('Paramètres sauvegardés !');
+      },
+      error: () => this.showToast('Échec de la sauvegarde', 'danger')
+    });
   }
 
-  sendTestEmail(): void {
-    this.showToast('Email de test envoyé !');
-  }
-
-  disconnectIntegration(name: string): void {
-    this.showToast(`${name} déconnecté`, 'warning');
+  private mapLanguageLabelToCode(label: string): LangCode {
+    switch (label) {
+      case 'English': return 'en';
+      case 'العربية': return 'ar';
+      case 'Français':
+      default: return 'fr';
+    }
   }
 
   showToast(msg: string, type: 'success' | 'warning' | 'danger' = 'success'): void {

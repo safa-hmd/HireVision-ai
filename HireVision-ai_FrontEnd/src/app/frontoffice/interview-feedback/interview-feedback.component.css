@@ -36,6 +36,12 @@
 .fb-banner-score-label { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .9; }
 .fb-banner-text h2 { margin: 0 0 4px; font-size: 1.15rem; color: var(--text); }
 .fb-banner-text p  { margin: 0; font-size: .88rem; color: var(--text-muted); line-height: 1.5; }
+.fb-banner-recommendation {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-left: auto; padding: 6px 16px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700;
+  background: var(--primary); color: #fff;
+}
 
 /* ── Radar chart ── */
 .fb-radar-wrap { display: flex; align-items: center; justify-content: center; padding: 8px 0 4px; }

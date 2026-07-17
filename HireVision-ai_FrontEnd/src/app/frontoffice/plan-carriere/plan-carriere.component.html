@@ -1,122 +1,134 @@
 <div class="main-content">
-    <header class="page-header">
-      <div><h1 class="page-title">Plan de Carrière IA</h1><p class="page-subtitle">Parcours d'apprentissage personnalisé vers vos objectifs</p></div>
-    </header>
-    <div class="page-body">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'PLAN_CARRIERE.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'PLAN_CARRIERE.SUBTITLE' | translate }}</p>
+    </div>
+    <div class="page-header-actions" *ngIf="!isLoading && (missedSkills.length || learningPlans.length)">
+      <button class="btn btn-primary btn-sm" (click)="printReport()">
+        <i data-lucide="download"></i> {{ 'CV_ANALYSE.DOWNLOAD_PDF' | translate }}
+      </button>
+    </div>
+  </header>
 
-      <!-- Loading state -->
-      <div *ngIf="isLoading" class="card">
-        <div class="card-body text-center" style="padding:48px 24px">
-          <div class="spinner" style="margin:0 auto 20px"></div>
-          <p class="text-muted">Chargement de votre plan de carrière...</p>
-        </div>
+  <div class="page-body">
+
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="card">
+      <div class="card-body text-center" style="padding:48px 24px">
+        <div class="spinner" style="margin:0 auto 20px"></div>
+        <p class="text-muted">{{ 'PLAN_CARRIERE.LOADING' | translate }}</p>
       </div>
+    </div>
 
-      <ng-container *ngIf="!isLoading">
+    <ng-container *ngIf="!isLoading">
 
       <!-- Empty state -->
       <div class="card mb-6" *ngIf="!missedSkills.length && !learningPlans.length">
         <div class="card-body text-center" style="padding:48px 24px">
           <i data-lucide="compass" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:12px"></i>
-          <h3 style="margin-bottom:8px">Aucun plan disponible pour le moment</h3>
-          <p class="text-muted">Faites un matching CV/offre d'emploi ou passez un entretien simulé pour générer votre plan personnalisé.</p>
+          <h3 style="margin-bottom:8px">{{ 'PLAN_CARRIERE.EMPTY' | translate }}</h3>
         </div>
       </div>
 
       <ng-container *ngIf="missedSkills.length || learningPlans.length">
 
-      <!-- Goal banner -->
-      <div class="gradient-banner mb-6">
-        <div class="flex items-center gap-6">
-          <i data-lucide="trending-up" style="width:48px;height:48px;opacity:.8"></i>
-          <div style="flex:1">
-            <h2 style="margin-bottom:4px">Objectif : Combler les compétences manquantes</h2>
-            <p style="margin-bottom:12px">Basé sur vos matchings CV/offres et vos entretiens simulés</p>
-            <div class="progress-wrap" style="background:rgba(255,255,255,.2)">
-              <div class="progress-bar" [style.width.%]="progressPercent" style="background:#fff"></div>
-            </div>
-            <p style="margin-top:8px;font-size:.85rem;opacity:.8">{{ progressPercent }}% terminé</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick stats -->
-      <div class="grid-3 mb-6">
-        <div class="stat-card" style="border-color:var(--success);background:rgba(16,185,129,.04)">
-          <div style="text-align:center">
-            <i data-lucide="check-circle-2" style="width:40px;height:40px;color:var(--success);margin-bottom:8px"></i>
-            <div class="stat-value" style="color:var(--success)" [attr.data-countup]="masteredCount">0</div>
-            <div class="stat-label">Compétences Maîtrisées</div>
-          </div>
-        </div>
-        <div class="stat-card" style="border-color:var(--warning);background:rgba(245,158,11,.04)">
-          <div style="text-align:center">
-            <i data-lucide="circle" style="width:40px;height:40px;color:var(--warning);margin-bottom:8px"></i>
-            <div class="stat-value text-warning" [attr.data-countup]="inProgressCount">0</div>
-            <div class="stat-label">En Cours</div>
-          </div>
-        </div>
-        <div class="stat-card" style="border-color:var(--primary);background:rgba(37,99,235,.04)">
-          <div style="text-align:center">
-            <i data-lucide="trophy" style="width:40px;height:40px;color:var(--primary);margin-bottom:8px"></i>
-            <div class="stat-value text-primary" [attr.data-countup]="toLearnCount">0</div>
-            <div class="stat-label">À Apprendre</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Missing skills -->
-      <div class="card mb-6" *ngIf="missedSkills.length">
-        <div class="card-header"><h3>Analyse des Compétences Manquantes</h3><p>Compétences nécessaires pour atteindre votre objectif</p></div>
-        <div class="card-body space-y-4">
-          <div class="list-item" *ngFor="let skill of sortedMissedSkills">
-            <div><div class="font-medium">{{ skill.skillName }}</div></div>
-            <div class="flex items-center gap-3">
-              <span [class]="priorityBadgeClass(skill.priority)">{{ priorityLabel(skill.priority) }}</span>
-              <span class="text-sm text-muted">{{ skill.estimatedWeeks }} sem.</span>
+        <!-- Goal banner -->
+        <div class="gradient-banner mb-6">
+          <div class="flex items-center gap-6">
+            <i data-lucide="trending-up" style="width:48px;height:48px;opacity:.8"></i>
+            <div style="flex:1">
+              <h2 style="margin-bottom:4px">{{ 'PLAN_CARRIERE.PROGRESS' | translate }}</h2>
+              <div class="progress-wrap" style="background:rgba(255,255,255,.2);margin-top:10px">
+                <div class="progress-bar" [style.width.%]="progressPercent" style="background:#fff"></div>
+              </div>
+              <p style="margin-top:8px;font-size:.85rem;opacity:.8">{{ progressPercent }}%</p>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Weekly plan (issu des entretiens) -->
-      <div class="card mb-6" *ngIf="weeklySteps.length">
-        <div class="card-header"><h3>Plan Hebdomadaire</h3><p>Généré à partir de vos entretiens simulés</p></div>
-        <div class="card-body">
-          <div class="timeline">
-            <div class="timeline-item" *ngFor="let step of weeklySteps">
-              <div class="timeline-dot"><i data-lucide="circle" style="width:12px;height:12px;color:#fff;fill:#fff"></i></div>
-              <h4>Semaine {{ step.weekNumber }}</h4>
-              <div style="margin-top:8px;padding:14px;background:var(--surface-2);border-radius:8px" *ngFor="let item of step.items">
-                <div class="text-sm font-medium">{{ item.title }}</div>
-                <div class="text-sm text-muted mt-1">{{ item.content }}</div>
-                <div class="text-xs text-muted mt-2" *ngIf="item.resourceUrl">Ressource : {{ item.resourceUrl }}</div>
+        <!-- Quick stats -->
+        <div class="grid-3 mb-6">
+          <div class="stat-card" style="border-color:var(--success);background:rgba(16,185,129,.04)">
+            <div style="text-align:center">
+              <i data-lucide="check-circle-2" style="width:40px;height:40px;color:var(--success);margin-bottom:8px"></i>
+              <div class="stat-value" style="color:var(--success)" [attr.data-countup]="masteredCount">0</div>
+              <div class="stat-label">{{ 'PLAN_CARRIERE.MASTERED' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color:var(--warning);background:rgba(245,158,11,.04)">
+            <div style="text-align:center">
+              <i data-lucide="circle" style="width:40px;height:40px;color:var(--warning);margin-bottom:8px"></i>
+              <div class="stat-value text-warning" [attr.data-countup]="inProgressCount">0</div>
+              <div class="stat-label">{{ 'PLAN_CARRIERE.IN_PROGRESS' | translate }}</div>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color:var(--primary);background:rgba(37,99,235,.04)">
+            <div style="text-align:center">
+              <i data-lucide="trophy" style="width:40px;height:40px;color:var(--primary);margin-bottom:8px"></i>
+              <div class="stat-value text-primary" [attr.data-countup]="toLearnCount">0</div>
+              <div class="stat-label">{{ 'PLAN_CARRIERE.REMAINING' | translate }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Missing skills -->
+        <div class="card mb-6" *ngIf="missedSkills.length">
+          <div class="card-header">
+            <h3>{{ 'PLAN_CARRIERE.TO_ACQUIRE' | translate }}</h3>
+          </div>
+          <div class="card-body space-y-4">
+            <div class="list-item" *ngFor="let skill of sortedMissedSkills">
+              <div><div class="font-medium">{{ skill.skillName }}</div></div>
+              <div class="flex items-center gap-3">
+                <span [class]="priorityBadgeClass(skill.priority)">{{ priorityLabel(skill.priority) }}</span>
+                <span class="text-sm text-muted">{{ skill.estimatedWeeks }} sem.</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Courses (issus du job matching) -->
-      <div class="card" *ngIf="recommendedCourses.length">
-        <div class="card-header"><h3>Formations Recommandées</h3><p>Ressources liées à vos compétences manquantes</p></div>
-        <div class="card-body">
-          <div class="grid-2" style="gap:14px">
-            <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px" *ngFor="let course of recommendedCourses">
-              <div class="flex justify-between w-full mb-2">
-                <div class="font-medium">{{ course.title }}</div>
+        <!-- Weekly plan -->
+        <div class="card mb-6" *ngIf="weeklySteps.length">
+          <div class="card-header">
+            <h3>{{ 'PLAN_CARRIERE.LEARNING_PATH' | translate }}</h3>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-item" *ngFor="let step of weeklySteps">
+                <div class="timeline-dot"><i data-lucide="circle" style="width:12px;height:12px;color:#fff;fill:#fff"></i></div>
+                <h4>Semaine {{ step.weekNumber }}</h4>
+                <div style="margin-top:8px;padding:14px;background:var(--surface-2);border-radius:8px" *ngFor="let item of step.items">
+                  <div class="text-sm font-medium">{{ item.title }}</div>
+                  <div class="text-sm text-muted mt-1">{{ item.content }}</div>
+                  <div class="text-xs text-muted mt-2" *ngIf="item.resourceUrl">Ressource : {{ item.resourceUrl }}</div>
+                </div>
               </div>
-              <div class="text-sm text-muted mb-3">{{ course.content }}</div>
-              <a [href]="course.resourceUrl" target="_blank" class="btn btn-outline btn-sm w-full" *ngIf="course.resourceUrl">
-                <i data-lucide="book"></i> Voir la ressource
-              </a>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Courses -->
+        <div class="card" *ngIf="recommendedCourses.length">
+          <div class="card-header">
+            <h3>{{ 'PLAN_CARRIERE.RECOMMENDED' | translate }}</h3>
+          </div>
+          <div class="card-body">
+            <div class="grid-2" style="gap:14px">
+              <div class="list-item" style="align-items:flex-start;flex-direction:column;padding:16px" *ngFor="let course of recommendedCourses">
+                <div class="flex justify-between w-full mb-2">
+                  <div class="font-medium">{{ course.title }}</div>
+                </div>
+                <div class="text-sm text-muted mb-3">{{ course.content }}</div>
+                <a [href]="course.resourceUrl" target="_blank" class="btn btn-outline btn-sm w-full" *ngIf="course.resourceUrl">
+                  <i data-lucide="book"></i> Resource
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </ng-container>
-      </ng-container>
-
-    </div>
+    </ng-container>
   </div>
+</div>

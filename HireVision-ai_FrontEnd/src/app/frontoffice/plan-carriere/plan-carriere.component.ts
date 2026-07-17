@@ -135,4 +135,11 @@ export class PlanCarriereComponent implements OnInit, AfterViewInit {
     if (priority === 'MOYENNE') return 'Priorité Moyenne';
     return 'Basse Priorité';
   }
+
+  printReport(): void {
+    const original = document.title;
+    document.title = `Plan_Carriere_IA_${new Date().toISOString().slice(0, 10)}`;
+    window.print();
+    setTimeout(() => { document.title = original; }, 500);
+  }
 }

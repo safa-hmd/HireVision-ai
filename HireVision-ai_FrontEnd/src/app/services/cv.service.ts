@@ -23,6 +23,11 @@ export interface CvAnalysis {
   confidence?: number;
   global_score?: number;
   skill_scores?: { [key: string]: number };
+  proposed_summary?: string;
+  optimization_suggestions?: string[];
+  strengths?: string[];
+  weaknesses?: string[];
+  recommendations?: string[];
 }
 
 export interface CvUploadResponse {

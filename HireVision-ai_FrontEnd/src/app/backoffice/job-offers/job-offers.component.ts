@@ -17,6 +17,14 @@ export class JobOffersComponent implements OnInit, AfterViewInit {
   isModalOpen = false;
   isEditing = false;
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 5;
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.offers.length / this.pageSize));
+  }
+
   // Formulaire (skills saisies séparées par des virgules)
   form: JobOfferDTO = this.emptyForm();
   skillsInput = '';
@@ -41,6 +49,7 @@ export class JobOffersComponent implements OnInit, AfterViewInit {
     this.jobOfferService.getAll().subscribe({
       next: (offers) => {
         this.offers = offers;
+        this.currentPage = 1;
         this.isLoading = false;
         setTimeout(() => lucide.createIcons(), 50);
       },

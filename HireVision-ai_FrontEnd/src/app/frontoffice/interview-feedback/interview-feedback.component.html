@@ -3,17 +3,14 @@
   <!-- ═══ HEADER ═══ -->
   <header class="page-header">
     <div>
-      <h1 class="page-title">Rapport de Feedback</h1>
+      <h1 class="page-title">{{ 'FEEDBACK.TITLE' | translate }}</h1>
       <p class="page-subtitle" *ngIf="results">
-        Entretien {{ results.specialty?.title }} — {{ formatDuration(results.duration) }}
+        {{ 'FEEDBACK.SUBTITLE_PREFIX' | translate }} {{ results.specialty?.title }} — {{ formatDuration(results.duration) }}
       </p>
     </div>
     <div class="page-header-actions">
-      <button class="btn btn-outline" (click)="watchVideo()">
-        <i data-lucide="play-circle"></i> Revoir la vidéo
-      </button>
       <button class="btn btn-primary" (click)="printReport()">
-        <i data-lucide="download"></i> Télécharger
+        <i data-lucide="download"></i> {{ 'FEEDBACK.DOWNLOAD' | translate }}
       </button>
     </div>
   </header>
@@ -23,8 +20,8 @@
     <!-- ═══ LOADING ═══ -->
     <div *ngIf="isLoading" class="fb-loading">
       <div class="fb-spinner"></div>
-      <p class="fb-loading-text">Génération du rapport IA...</p>
-      <p class="text-muted text-sm">IA analyse vos réponses</p>
+      <p class="fb-loading-text">{{ 'FEEDBACK.LOADING' | translate }}</p>
+      <p class="text-muted text-sm">{{ 'FEEDBACK.LOADING_SUB' | translate }}</p>
     </div>
 
     <ng-container *ngIf="!isLoading && results">
@@ -39,36 +36,52 @@
           <h2>{{ feedback?.titre }}</h2>
           <p>{{ feedback?.message_global }}</p>
         </div>
+        <div class="fb-banner-recommendation" *ngIf="feedback?.recommandation">
+          <i data-lucide="badge-check" style="width:16px;height:16px"></i>
+          {{ feedback.recommandation }}
+        </div>
       </div>
 
       <!-- ── 4 SCORE CARDS ── -->
       <div class="grid-4 mb-6">
         <div class="stat-card">
-          <div class="stat-label">Connaissances Techniques</div>
+          <div class="stat-card-icon" style="background:#DBEAFE">
+            <i data-lucide="cpu" style="color:#2563EB;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.TECHNICAL' | translate }}</div>
           <div class="stat-value text-primary">{{ results.avg_scores?.technique || 0 }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar progress-primary" [style.width.%]="results.avg_scores?.technique || 0"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Communication</div>
+          <div class="stat-card-icon" style="background:#D1FAE5">
+            <i data-lucide="message-circle" style="color:#10B981;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.COMMUNICATION' | translate }}</div>
           <div class="stat-value" style="color:#10B981">{{ results.avg_scores?.communication || 0 }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar progress-success" [style.width.%]="results.avg_scores?.communication || 0"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Confiance</div>
+          <div class="stat-card-icon" style="background:#EDE9FE">
+            <i data-lucide="shield" style="color:#7C3AED;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.CONFIDENCE' | translate }}</div>
           <div class="stat-value" style="color:#7C3AED">{{ results.avg_scores?.confiance || 0 }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar" style="background:#7C3AED" [style.width.%]="results.avg_scores?.confiance || 0"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Score Global</div>
-          <div class="stat-value text-primary">{{ globalScore }}%</div>
+          <div class="stat-card-icon" style="background:#FEF3C7">
+            <i data-lucide="trophy" style="color:#F59E0B;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.GLOBAL_SCORE' | translate }}</div>
+          <div class="stat-value" [style.color]="scoreColor">{{ globalScore }}%</div>
           <div class="progress-wrap mt-2">
-            <div class="progress-bar progress-primary" [style.width.%]="globalScore"></div>
+            <div class="progress-bar" [style.background]="scoreColor" [style.width.%]="globalScore"></div>
           </div>
         </div>
       </div>
@@ -77,8 +90,8 @@
       <div class="grid-2 mb-6">
         <div class="card">
           <div class="card-header">
-            <h3>Vue d'ensemble des performances</h3>
-            <p>Analyse multidimensionnelle</p>
+            <h3>{{ 'FEEDBACK.OVERVIEW' | translate }}</h3>
+            <p>{{ 'FEEDBACK.OVERVIEW_SUB' | translate }}</p>
           </div>
           <div class="card-body fb-radar-wrap">
             <svg viewBox="0 0 280 270" class="fb-radar-svg">
@@ -97,8 +110,8 @@
 
         <div class="card">
           <div class="card-header">
-            <h3>Scores par Question</h3>
-            <p>Performance par question</p>
+            <h3>{{ 'FEEDBACK.SCORES_PER_Q' | translate }}</h3>
+            <p>{{ 'FEEDBACK.SCORES_PER_Q_SUB' | translate }}</p>
           </div>
           <div class="card-body">
             <div class="fb-bars-chart">
@@ -118,28 +131,40 @@
       <!-- ── 4 BEHAVIOR CARDS ── -->
       <div class="grid-4 mb-6" *ngIf="results.behavior">
         <div class="stat-card">
-          <div class="stat-label">Contact Visuel</div>
+          <div class="stat-card-icon" style="background:#D1FAE5">
+            <i data-lucide="eye" style="color:#10B981;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.EYE_CONTACT' | translate }}</div>
           <div class="stat-value" style="color:#10B981">{{ results.behavior.contactVisuel }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar progress-success" [style.width.%]="results.behavior.contactVisuel"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Posture</div>
+          <div class="stat-card-icon" style="background:#FEF3C7">
+            <i data-lucide="user" style="color:#F59E0B;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.POSTURE' | translate }}</div>
           <div class="stat-value" style="color:#F59E0B">{{ results.behavior.posture }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar progress-warning" [style.width.%]="results.behavior.posture"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Qualité Vocale</div>
-          <div class="stat-value" style="color:#10B981">{{ results.behavior.clarteVocale }}%</div>
+          <div class="stat-card-icon" style="background:#DBEAFE">
+            <i data-lucide="mic" style="color:#2563EB;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.VOCAL' | translate }}</div>
+          <div class="stat-value" style="color:#2563EB">{{ results.behavior.clarteVocale }}%</div>
           <div class="progress-wrap mt-2">
-            <div class="progress-bar progress-success" [style.width.%]="results.behavior.clarteVocale"></div>
+            <div class="progress-bar progress-primary" [style.width.%]="results.behavior.clarteVocale"></div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Niveau de Stress</div>
+          <div class="stat-card-icon" style="background:#FEE2E2">
+            <i data-lucide="activity" style="color:#EF4444;width:20px;height:20px;"></i>
+          </div>
+          <div class="stat-label">{{ 'FEEDBACK.STRESS' | translate }}</div>
           <div class="stat-value" [style.color]="stressColor(results.behavior.stress)">{{ results.behavior.stress }}%</div>
           <div class="progress-wrap mt-2">
             <div class="progress-bar" [style.background]="stressColor(results.behavior.stress)" [style.width.%]="results.behavior.stress"></div>
@@ -151,24 +176,24 @@
       <div class="grid-2 mb-6">
         <div class="card">
           <div class="card-header">
-            <h3><i data-lucide="award" style="width:15px;height:15px;color:#10B981;vertical-align:-2px"></i> Points Forts</h3>
+            <h3><i data-lucide="award" style="width:15px;height:15px;color:#10B981;vertical-align:-2px"></i> {{ 'FEEDBACK.STRENGTHS' | translate }}</h3>
           </div>
           <div class="card-body fb-point-list">
             <div *ngFor="let p of feedback?.points_forts" class="fb-point fb-point--good">
               <i data-lucide="trending-up"></i><span>{{ p }}</span>
             </div>
-            <div *ngIf="!feedback?.points_forts?.length" class="text-muted text-sm">Aucun point identifié</div>
+            <div *ngIf="!feedback?.points_forts?.length" class="text-muted text-sm">{{ 'FEEDBACK.NO_POINTS' | translate }}</div>
           </div>
         </div>
         <div class="card">
           <div class="card-header">
-            <h3><i data-lucide="trending-up" style="width:15px;height:15px;color:#F59E0B;vertical-align:-2px"></i> Axes d'Amélioration</h3>
+            <h3><i data-lucide="trending-up" style="width:15px;height:15px;color:#F59E0B;vertical-align:-2px"></i> {{ 'FEEDBACK.IMPROVEMENTS' | translate }}</h3>
           </div>
           <div class="card-body fb-point-list">
             <div *ngFor="let a of feedback?.axes_amelioration" class="fb-point fb-point--warn">
               <i data-lucide="arrow-up-right"></i><span>{{ a }}</span>
             </div>
-            <div *ngIf="!feedback?.axes_amelioration?.length" class="text-muted text-sm">Aucun axe identifié</div>
+            <div *ngIf="!feedback?.axes_amelioration?.length" class="text-muted text-sm">{{ 'FEEDBACK.NO_AXES' | translate }}</div>
           </div>
         </div>
       </div>
@@ -176,13 +201,13 @@
       <!-- ── PLAN D'APPRENTISSAGE ── -->
       <div class="card mb-6" *ngIf="feedback?.plan_apprentissage?.length">
         <div class="card-header">
-          <h3><i data-lucide="book-open" style="width:15px;height:15px;color:#2563EB;vertical-align:-2px"></i> Plan d'Apprentissage Personnalisé</h3>
-          <p>Généré par IA selon vos résultats</p>
+          <h3><i data-lucide="book-open" style="width:15px;height:15px;color:#2563EB;vertical-align:-2px"></i> {{ 'FEEDBACK.LEARNING_PLAN' | translate }}</h3>
+          <p>{{ 'FEEDBACK.LEARNING_PLAN_SUB' | translate }}</p>
         </div>
         <div class="card-body">
           <div class="fb-plan-grid">
             <div *ngFor="let step of feedback.plan_apprentissage" class="fb-plan-card">
-              <div class="fb-plan-week">Semaine {{ step.semaine }}</div>
+              <div class="fb-plan-week">{{ 'FEEDBACK.WEEK' | translate }} {{ step.semaine }}</div>
               <div class="fb-plan-theme">{{ step.theme }}</div>
               <div class="fb-plan-ressource"><i data-lucide="link"></i>{{ step.ressource }}</div>
               <div class="fb-plan-action"><i data-lucide="check-square"></i>{{ step.action }}</div>
@@ -194,7 +219,7 @@
       <!-- ── DÉTAIL PAR QUESTION ── -->
       <div class="card mb-6">
         <div class="card-header">
-          <h3><i data-lucide="list" style="width:15px;height:15px;color:#2563EB;vertical-align:-2px"></i> Détail par Question</h3>
+          <h3><i data-lucide="list" style="width:15px;height:15px;color:#2563EB;vertical-align:-2px"></i> {{ 'FEEDBACK.DETAIL_Q' | translate }}</h3>
         </div>
         <div class="card-body fb-q-list">
           <div *ngFor="let a of results.answers; let i = index"
@@ -205,18 +230,18 @@
               <p class="fb-q-text">{{ a.question?.question }}</p>
 
               <div *ngIf="a.transcript && a.transcript !== '(passé)'" class="fb-q-transcript">
-                <span class="fb-q-t-tag">Votre réponse</span>
+                <span class="fb-q-t-tag">{{ 'FEEDBACK.YOUR_ANSWER' | translate }}</span>
                 {{ a.transcript | slice:0:140 }}{{ a.transcript.length > 140 ? '…' : '' }}
               </div>
               <div *ngIf="a.transcript === '(passé)'" class="fb-q-transcript fb-q-transcript--skipped">
-                Question passée
+                {{ 'FEEDBACK.SKIPPED' | translate }}
               </div>
 
               <div *ngIf="a.evaluation?.analyse_vocale?.conseil_immediat && a.transcript !== '(passé)'" class="fb-q-vocal-hint">
                 🎙 {{ a.evaluation.analyse_vocale.conseil_immediat }}
                 <span *ngIf="a.evaluation.analyse_vocale.nb_mots" class="fb-q-vocal-stats">
-                  {{ a.evaluation.analyse_vocale.nb_mots }} mots
-                  · {{ a.evaluation.analyse_vocale.hesitations }} hésitation(s)
+                  {{ a.evaluation.analyse_vocale.nb_mots }} {{ 'FEEDBACK.WORDS' | translate }}
+                  · {{ a.evaluation.analyse_vocale.hesitations }} {{ 'FEEDBACK.HESITATIONS' | translate }}
                 </span>
               </div>
 
@@ -245,7 +270,7 @@
           <i data-lucide="star" style="width:26px;height:26px;color:#F59E0B"></i>
         </div>
         <div>
-          <h3 class="fb-conseil-titre">Conseil Final</h3>
+          <h3 class="fb-conseil-titre">{{ 'FEEDBACK.FINAL_ADVICE' | translate }}</h3>
           <p class="fb-conseil-txt">{{ feedback?.conseil_final }}</p>
         </div>
       </div>
@@ -253,10 +278,10 @@
       <!-- ── ACTIONS ── -->
       <div class="fb-actions">
         <button class="btn btn-outline btn-lg" (click)="printReport()">
-          <i data-lucide="download"></i> Télécharger le rapport
+          <i data-lucide="download"></i> {{ 'FEEDBACK.DOWNLOAD_REPORT' | translate }}
         </button>
         <button class="btn btn-primary btn-lg" (click)="restart()">
-          <i data-lucide="refresh-cw"></i> Nouvel entretien
+          <i data-lucide="refresh-cw"></i> {{ 'FEEDBACK.NEW_INTERVIEW' | translate }}
         </button>
       </div>
 
