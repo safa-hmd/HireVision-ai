@@ -2,23 +2,21 @@
 
 Plateforme intelligente de préparation aux entretiens pour développeurs — Analyse de CV, Matching emploi, Simulation d'entretien, Developer Readiness Score, Roadmap personnalisée.
 
-## Architecture
+## 🏗️ Architecture
 
-```
-Angular (frontend, port 4200)
-        │
-        ▼
-Spring Boot (backend, port 8086) ──── MySQL (hirevisiondb, port 3306)
-        │
-        ▼
-FastAPI / ai-service (Python, port 8000) ──── Groq LLM
-```
+HireVision AI repose sur une architecture multi-couches composée d’un frontend Angular, d’un backend Spring Boot, d’une base de données MySQL et d’un microservice IA basé sur FastAPI.
 
-| Service | Dossier | Techno | Port |
-|---|---|---|---|
-| Frontend | `HireVision-ai_FrontEnd/` | Angular 16 + CoreUI | 4200 |
-| Backend | `HireVision-ai/` | Spring Boot 3.5 + JWT/OAuth2 | 8086 |
-| Service IA | `ai-service/` | FastAPI + scikit-learn + Groq | 8000 |
+### Architecture logique
+
+<p align="center">
+  <img src="docs/images/architecture-logique.png" alt="Architecture logique de HireVision AI" width="900">
+</p>
+
+### Architecture physique
+
+<p align="center">
+  <img src="docs/images/architecture-physique.png" alt="Architecture physique de HireVision AI" width="900">
+</p>
 
 ---
 
