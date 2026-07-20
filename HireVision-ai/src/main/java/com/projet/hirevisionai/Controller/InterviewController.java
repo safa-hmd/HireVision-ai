@@ -1,10 +1,8 @@
 package com.projet.hirevisionai.Controller;
 
-import com.projet.hirevisionai.Dto.InterviewCreateRequestDTO;
 import com.projet.hirevisionai.Dto.InterviewDTO;
 import com.projet.hirevisionai.Dto.RecentInterviewDTO;
 import com.projet.hirevisionai.ServiceInterface.IInterviewService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +22,6 @@ public class InterviewController {
     @GetMapping
     public ResponseEntity<List<RecentInterviewDTO>> getAll() {
         return ResponseEntity.ok(interviewService.getAllForAdmin());
-    }
-
-    @PostMapping("add")
-    public ResponseEntity<InterviewDTO> create(@Valid @RequestBody InterviewCreateRequestDTO request) {
-        return ResponseEntity.ok(interviewService.create(request));
     }
 
     @GetMapping("/{id}")

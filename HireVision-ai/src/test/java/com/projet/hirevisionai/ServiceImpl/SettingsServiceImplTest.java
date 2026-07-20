@@ -25,7 +25,7 @@ class SettingsServiceImplTest {
     private SettingsServiceImpl settingsService;
 
     @Test
-    void getSettings_shouldCreateDefaults_whenNoneExist() {
+    void getSettingsTest_shouldCreateDefaults_whenNoneExist() {
         when(settingsRepository.findById(1L)).thenReturn(Optional.empty());
         when(settingsRepository.save(any(Settings.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -36,7 +36,7 @@ class SettingsServiceImplTest {
     }
 
     @Test
-    void getSettings_shouldReturnExisting_whenPresent() {
+    void getSettingsTest_shouldReturnExisting_whenPresent() {
         Settings existing = Settings.builder().id(1L).platformName("Custom Platform").build();
         when(settingsRepository.findById(1L)).thenReturn(Optional.of(existing));
 
@@ -47,7 +47,7 @@ class SettingsServiceImplTest {
     }
 
     @Test
-    void updateSettings_shouldPersistNewValues() {
+    void updateSettingsTest_shouldPersistNewValues() {
         Settings existing = Settings.builder().id(1L).platformName("Old Name").build();
         SettingsDTO dto = SettingsDTO.builder()
                 .platformName("New Name")

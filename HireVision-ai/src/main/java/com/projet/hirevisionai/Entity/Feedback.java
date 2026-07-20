@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,6 +21,7 @@ public class Feedback {
     private float confidenceScore;
     private float eyeContactScore;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "interview_id")
     private Interview interview;

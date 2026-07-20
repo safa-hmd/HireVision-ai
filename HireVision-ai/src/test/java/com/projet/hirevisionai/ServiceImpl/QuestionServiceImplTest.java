@@ -34,7 +34,7 @@ class QuestionServiceImplTest {
     }
 
     @Test
-    void getByDifficulty_shouldReturnMappedList() {
+    void getByDifficultyTest_shouldReturnMappedList() {
         Question question = Question.builder().id(1L).difficulty(Question.Difficulty.HARD).interview(interview).build();
         when(questionRepository.findByDifficulty(Question.Difficulty.HARD)).thenReturn(List.of(question));
 
@@ -42,14 +42,14 @@ class QuestionServiceImplTest {
     }
 
     @Test
-    void getByDifficulty_shouldReturnEmptyList_whenNoneMatch() {
+    void getByDifficultyTest_shouldReturnEmptyList_whenNoneMatch() {
         when(questionRepository.findByDifficulty(Question.Difficulty.EASY)).thenReturn(List.of());
 
         assertThat(questionService.getByDifficulty(Question.Difficulty.EASY)).isEmpty();
     }
 
     @Test
-    void getAll_shouldReturnMappedList() {
+    void getAllTest_shouldReturnMappedList() {
         Question question = Question.builder().id(1L).interview(interview).build();
         when(questionRepository.findAllByOrderByIdDesc()).thenReturn(List.of(question));
 
@@ -60,7 +60,7 @@ class QuestionServiceImplTest {
     }
 
     @Test
-    void delete_shouldRemove_whenExists() {
+    void deleteTest_shouldRemove_whenExists() {
         when(questionRepository.existsById(1L)).thenReturn(true);
 
         questionService.delete(1L);
@@ -69,7 +69,7 @@ class QuestionServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrow_whenNotExists() {
+    void deleteTest_shouldThrow_whenNotExists() {
         when(questionRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> questionService.delete(1L)).isInstanceOf(RuntimeException.class);

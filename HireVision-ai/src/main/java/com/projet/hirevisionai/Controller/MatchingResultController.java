@@ -49,18 +49,6 @@ public class MatchingResultController {
         checkOwnership(cv.getUserId());
     }
 
-    @PostMapping("add")
-    public ResponseEntity<MatchingResultDTO> create(@RequestBody MatchingResultDTO dto) {
-        checkOwnershipByCv(dto.getCvId());
-        return ResponseEntity.ok(matchingResultService.create(dto));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<MatchingResultDTO> getById(@PathVariable Long id) {
-        MatchingResultDTO result = matchingResultService.getById(id);
-        checkOwnershipByCv(result.getCvId());
-        return ResponseEntity.ok(result);
-    }
 
     @GetMapping("/cv/{cvId}")
     public ResponseEntity<List<MatchingResultDTO>> getByCvId(@PathVariable Long cvId) {

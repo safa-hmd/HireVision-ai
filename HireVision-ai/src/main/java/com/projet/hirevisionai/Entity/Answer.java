@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,6 +21,7 @@ public class Answer {
     private float score;
     private String aiComment;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "question_id")
     private Question question;

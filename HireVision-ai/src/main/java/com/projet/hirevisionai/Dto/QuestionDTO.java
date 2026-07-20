@@ -13,7 +13,7 @@ public class QuestionDTO {
     private String    content;
     private String    difficulty;
     private Long      interviewId;
-    private AnswerDTO answer;
+   // private AnswerDTO answer;
 
     public static QuestionDTO fromEntity(Question q) {
         if (q == null) return null;
@@ -22,7 +22,7 @@ public class QuestionDTO {
                 .content(q.getContent())
                 .difficulty(q.getDifficulty() != null ? q.getDifficulty().name() : null)
                 .interviewId(q.getInterview() != null ? q.getInterview().getId() : null)
-                .answer(AnswerDTO.fromEntity(q.getAnswer()))
+                //.answer(AnswerDTO.fromEntity(q.getAnswer()))
                 .build();
     }
 }

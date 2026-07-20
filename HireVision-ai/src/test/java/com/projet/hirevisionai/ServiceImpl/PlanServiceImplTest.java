@@ -28,7 +28,7 @@ class PlanServiceImplTest {
     private PlanServiceImpl planService;
 
     @Test
-    void getAllPlans_shouldSeedDefaults_whenRepositoryEmpty() {
+    void getAllPlansTest_shouldSeedDefaults_whenRepositoryEmpty() {
         when(planRepository.count()).thenReturn(0L);
         when(planRepository.save(any(Plan.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -46,7 +46,7 @@ class PlanServiceImplTest {
     }
 
     @Test
-    void getAllPlans_shouldNotSeed_whenRepositoryNotEmpty() {
+    void getAllPlansTest_shouldNotSeed_whenRepositoryNotEmpty() {
         when(planRepository.count()).thenReturn(2L);
         Plan pro = Plan.builder().key(PlanType.PRO).name("Pro").price(29).build();
         when(planRepository.findAll()).thenReturn(List.of(pro));
@@ -58,7 +58,7 @@ class PlanServiceImplTest {
     }
 
     @Test
-    void updatePlan_shouldUpdateExistingPlan() {
+    void updatePlanTest_shouldUpdateExistingPlan() {
         Plan existing = Plan.builder().key(PlanType.PRO).name("Pro").price(29).build();
         PlanDTO dto = PlanDTO.builder()
                 .key(PlanType.PRO)
@@ -80,7 +80,7 @@ class PlanServiceImplTest {
     }
 
     @Test
-    void updatePlan_shouldCreatePlan_whenNotExists() {
+    void updatePlanTest_shouldCreatePlan_whenNotExists() {
         PlanDTO dto = PlanDTO.builder().key(PlanType.PREMIUM).name("Premium").price(59).build();
 
         when(planRepository.findById(PlanType.PREMIUM)).thenReturn(Optional.empty());

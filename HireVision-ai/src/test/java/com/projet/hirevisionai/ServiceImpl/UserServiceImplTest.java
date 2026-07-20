@@ -37,13 +37,13 @@ class UserServiceImplTest {
     private User user;
 
     @BeforeEach
-    void setUp() {
+    void setUpTest() {
         user = User.builder().idUser(1L).fullName("Jean Dupont").email("jean@test.com")
                 .role(Role.CANDIDATE).age(30).build();
     }
 
     @Test
-    void getById_shouldReturnUser_whenFound() {
+    void getByIdTest_shouldReturnUser_whenFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         UserDTO result = userService.getById(1L);
@@ -52,21 +52,21 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getById_shouldThrow_whenNotFound() {
+    void getByIdTest_shouldThrow_whenNotFound() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getById(99L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getAll_shouldReturnMappedList() {
+    void getAllTest_shouldReturnMappedList() {
         when(userRepository.findAll()).thenReturn(List.of(user));
 
         assertThat(userService.getAll()).hasSize(1);
     }
 
     @Test
-    void update_shouldModifyUser_whenFound() {
+    void updateTest_shouldModifyUser_whenFound() {
         UserDTO dto = UserDTO.builder()
                 .fullName("Nouveau Nom")
                 .email("nouveau@test.com")
@@ -84,7 +84,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void update_shouldThrow_whenNotFound() {
+    void updateTest() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.update(1L, UserDTO.builder().build()))
@@ -92,7 +92,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void delete_shouldRemove_whenExists() {
+    void deleteTest_shouldRemove_whenExists() {
         when(userRepository.existsById(1L)).thenReturn(true);
 
         userService.delete(1L);
@@ -101,14 +101,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrow_whenNotExists() {
+    void deleteTest_shouldThrow_whenNotExists() {
         when(userRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.delete(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void uploadPicture_shouldSetProfilePicture_whenUserExists() {
+    void uploadPictureTest_shouldSetProfilePicture_whenUserExists() {
         MockMultipartFile file = new MockMultipartFile("file", "photo.png", "image/png", "contenu".getBytes());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -120,7 +120,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void uploadPicture_shouldThrow_whenUserNotFound() {
+    void uploadPictureTest_shouldThrow_whenUserNotFound() {
         MockMultipartFile file = new MockMultipartFile("file", "photo.png", "image/png", "contenu".getBytes());
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -128,7 +128,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void analyzeGithub_shouldThrow_whenGithubNotSet() {
+    void analyzeGithubTest_shouldThrow_whenGithubNotSet() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> userService.analyzeGithub(1L))
@@ -137,7 +137,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void analyzeGithub_shouldExtractUsername_andCallRestTemplate() {
+    void analyzeGithubTest_shouldExtractUsername_andCallRestTemplate() {
         user.setGithub("https://github.com/jdupont");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(restTemplate.getForObject(anyString(), eq(Object.class))).thenReturn("resultat");
@@ -149,7 +149,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void analyzeGithub_shouldThrow_whenRestTemplateFails() {
+    void analyzeGithubTest_shouldThrow_whenRestTemplateFails() {
         user.setGithub("https://github.com/jdupont");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(restTemplate.getForObject(anyString(), eq(Object.class)))

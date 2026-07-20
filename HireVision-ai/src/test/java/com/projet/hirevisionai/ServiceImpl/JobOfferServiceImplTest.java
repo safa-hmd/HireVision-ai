@@ -31,7 +31,7 @@ class JobOfferServiceImplTest {
     private JobOfferServiceImpl jobOfferService;
 
     @Test
-    void create_shouldResolveExistingSkills_andSave() {
+    void createTest_shouldResolveExistingSkills_andSave() {
         JobOfferDTO dto = JobOfferDTO.builder()
                 .title("Développeur Java")
                 .company("HireVision")
@@ -51,7 +51,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void create_shouldCreateMissingSkills() {
+    void createTest_shouldCreateMissingSkills() {
         JobOfferDTO dto = JobOfferDTO.builder()
                 .title("Développeur Angular")
                 .company("HireVision")
@@ -69,7 +69,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void getById_shouldReturn_whenFound() {
+    void getByIdTest_shouldReturn_whenFound() {
         JobOffer offer = JobOffer.builder().id(1L).title("Dev").active(true).build();
         when(jobOfferRepository.findById(1L)).thenReturn(Optional.of(offer));
 
@@ -79,14 +79,14 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void getById_shouldThrow_whenNotFound() {
+    void getByIdTest_shouldThrow_whenNotFound() {
         when(jobOfferRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobOfferService.getById(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getAll_shouldReturnMappedList() {
+    void getAllTest_shouldReturnMappedList() {
         JobOffer offer = JobOffer.builder().id(1L).title("Dev").active(true).build();
         when(jobOfferRepository.findAll()).thenReturn(List.of(offer));
 
@@ -94,7 +94,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void getActive_shouldReturnOnlyActiveOffers() {
+    void getActiveTest_shouldReturnOnlyActiveOffers() {
         JobOffer offer = JobOffer.builder().id(1L).title("Dev").active(true).build();
         when(jobOfferRepository.findByActiveTrue()).thenReturn(List.of(offer));
 
@@ -102,7 +102,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void search_shouldDelegateToRepository() {
+    void searchTest_shouldDelegateToRepository() {
         JobOffer offer = JobOffer.builder().id(1L).title("Dev Java").active(true).build();
         when(jobOfferRepository.findByTitleContainingIgnoreCase("java")).thenReturn(List.of(offer));
 
@@ -110,7 +110,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void update_shouldModifyOffer_whenFound() {
+    void updateTest_shouldModifyOffer_whenFound() {
         JobOffer offer = JobOffer.builder().id(1L).title("Old title").active(true).build();
         JobOfferDTO dto = JobOfferDTO.builder()
                 .title("New title")
@@ -130,7 +130,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void update_shouldThrow_whenNotFound() {
+    void updateTest_shouldThrow_whenNotFound() {
         when(jobOfferRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobOfferService.update(1L, JobOfferDTO.builder().build()))
@@ -138,7 +138,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void delete_shouldRemove_whenExists() {
+    void deleteTest_shouldRemove_whenExists() {
         when(jobOfferRepository.existsById(1L)).thenReturn(true);
 
         jobOfferService.delete(1L);
@@ -147,7 +147,7 @@ class JobOfferServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrow_whenNotExists() {
+    void deleteTest_shouldThrow_whenNotExists() {
         when(jobOfferRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> jobOfferService.delete(1L)).isInstanceOf(RuntimeException.class);

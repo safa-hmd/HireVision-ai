@@ -35,7 +35,7 @@ class AdminStatsServiceImplTest {
     private AdminStatsServiceImpl adminStatsService;
 
     @Test
-    void getOverview_shouldReturnZeroedStats_whenNoDataExists() {
+    void getOverviewTest_shouldReturnZeroedStats_whenNoDataExists() {
         when(userRepository.count()).thenReturn(0L);
         when(userRepository.countByCreatedAtAfter(any())).thenReturn(0L);
         when(interviewRepository.countByStartDateBetween(any(), any())).thenReturn(0L);
@@ -56,7 +56,7 @@ class AdminStatsServiceImplTest {
     }
 
     @Test
-    void getOverview_shouldComputeUserGrowthPercent() {
+    void getOverviewTest_shouldComputeUserGrowthPercent() {
         when(userRepository.count()).thenReturn(20L);
         when(userRepository.countByCreatedAtAfter(any())).thenReturn(5L);
         when(interviewRepository.countByStartDateBetween(any(), any())).thenReturn(0L);
@@ -75,7 +75,7 @@ class AdminStatsServiceImplTest {
     }
 
     @Test
-    void getOverview_shouldIncludeRecentUsersAndInterviews() {
+    void getOverviewTest_shouldIncludeRecentUsersAndInterviews() {
         User user = User.builder().idUser(1L).fullName("Jean Dupont").build();
 
         when(userRepository.count()).thenReturn(1L);
@@ -85,7 +85,7 @@ class AdminStatsServiceImplTest {
         when(interviewRepository.findAvgScoreByDateRange(any(), any())).thenReturn(null);
         when(userRepository.findByCreatedAtAfter(any())).thenReturn(List.of());
         when(questionRepository.countGroupedByDifficulty())
-                .thenReturn(List.of(new Object[]{Question.Difficulty.HARD, 2L}));
+                .thenReturn(java.util.Collections.singletonList(new Object[]{Question.Difficulty.HARD, 2L}));
         when(userRepository.findTop5ByOrderByCreatedAtDesc()).thenReturn(List.of(user));
         when(interviewRepository.findTop5ByOrderByStartDateDesc()).thenReturn(List.of());
 

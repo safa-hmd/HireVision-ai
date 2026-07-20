@@ -55,7 +55,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void register_shouldCreateUser_whenDataIsValid() {
+    void registerTest_shouldCreateUser_whenDataIsValid() {
         RegisterRequest request = new RegisterRequest("Jean Dupont", "jean@test.com", "motdepasse", 25, Role.CANDIDATE);
 
         when(userRepository.findByEmail("jean@test.com")).thenReturn(Optional.empty());
@@ -69,7 +69,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void register_shouldThrow_whenEmailIsBlank() {
+    void registerTest_shouldThrow_whenEmailIsBlank() {
         RegisterRequest request = new RegisterRequest("Jean", "", "motdepasse", 25, Role.CANDIDATE);
 
         assertThatThrownBy(() -> authService.register(request))
@@ -78,7 +78,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void register_shouldThrow_whenEmailAlreadyUsed() {
+    void registerTest_shouldThrow_whenEmailAlreadyUsed() {
         RegisterRequest request = new RegisterRequest("Jean", "jean@test.com", "motdepasse", 25, Role.CANDIDATE);
         when(userRepository.findByEmail("jean@test.com")).thenReturn(Optional.of(user));
 
@@ -88,7 +88,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void register_shouldThrow_whenPasswordTooShort() {
+    void registerTest_shouldThrow_whenPasswordTooShort() {
         RegisterRequest request = new RegisterRequest("Jean", "jean2@test.com", "123", 25, Role.CANDIDATE);
         when(userRepository.findByEmail("jean2@test.com")).thenReturn(Optional.empty());
 
@@ -98,7 +98,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void register_shouldThrow_whenRoleMissing() {
+    void registerTest_shouldThrow_whenRoleMissing() {
         RegisterRequest request = new RegisterRequest("Jean", "jean3@test.com", "motdepasse", 25, null);
         when(userRepository.findByEmail("jean3@test.com")).thenReturn(Optional.empty());
 
@@ -108,7 +108,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void login_shouldReturnAuthResponse_whenCredentialsValid() {
+    void loginTest_shouldReturnAuthResponse_whenCredentialsValid() {
         LoginRequest request = new LoginRequest("jean@test.com", "motdepasse");
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_CANDIDATE"));
@@ -129,7 +129,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void completeGoogleRegister_shouldCreateUser_whenNotExisting() {
+    void completeGoogleRegisterTest_shouldCreateUser_whenNotExisting() {
         CompleteGoogleRegisterRequest request = new CompleteGoogleRegisterRequest("google@test.com", "Google User", Role.CANDIDATE);
 
         when(userRepository.findByEmail("google@test.com")).thenReturn(Optional.empty());
@@ -144,7 +144,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void completeGoogleRegister_shouldThrow_whenEmailAlreadyUsed() {
+    void completeGoogleRegisterTest_shouldThrow_whenEmailAlreadyUsed() {
         CompleteGoogleRegisterRequest request = new CompleteGoogleRegisterRequest("jean@test.com", "Jean", Role.CANDIDATE);
         when(userRepository.findByEmail("jean@test.com")).thenReturn(Optional.of(user));
 
@@ -153,7 +153,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void forgotPassword_shouldGenerateTokenAndSendEmail_whenUserExists() {
+    void forgotPasswordTest_shouldGenerateTokenAndSendEmail_whenUserExists() {
         ForgotPasswordRequest request = new ForgotPasswordRequest("jean@test.com");
         when(userRepository.findByEmail("jean@test.com")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -165,7 +165,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void forgotPassword_shouldThrow_whenUserNotFound() {
+    void forgotPasswordTest_shouldThrow_whenUserNotFound() {
         ForgotPasswordRequest request = new ForgotPasswordRequest("inconnu@test.com");
         when(userRepository.findByEmail("inconnu@test.com")).thenReturn(Optional.empty());
 
@@ -174,7 +174,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void resetPassword_shouldUpdatePassword_whenTokenValid() {
+    void resetPasswordTest_shouldUpdatePassword_whenTokenValid() {
         user.setResetToken("valid-token");
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
         ResetPasswordRequest request = new ResetPasswordRequest("valid-token", "nouveaumdp");
@@ -190,7 +190,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void resetPassword_shouldThrow_whenTokenInvalid() {
+    void resetPasswordTest_shouldThrow_whenTokenInvalid() {
         ResetPasswordRequest request = new ResetPasswordRequest("invalid-token", "nouveaumdp");
         when(userRepository.findByResetToken("invalid-token")).thenReturn(Optional.empty());
 
@@ -198,7 +198,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void resetPassword_shouldThrow_whenTokenExpired() {
+    void resetPasswordTest_shouldThrow_whenTokenExpired() {
         user.setResetToken("expired-token");
         user.setResetTokenExpiry(LocalDateTime.now().minusMinutes(5));
         ResetPasswordRequest request = new ResetPasswordRequest("expired-token", "nouveaumdp");
@@ -211,7 +211,7 @@ class IAuthServiceImpTest {
     }
 
     @Test
-    void resetPassword_shouldThrow_whenNewPasswordTooShort() {
+    void resetPasswordTest_shouldThrow_whenNewPasswordTooShort() {
         user.setResetToken("valid-token");
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
         ResetPasswordRequest request = new ResetPasswordRequest("valid-token", "123");

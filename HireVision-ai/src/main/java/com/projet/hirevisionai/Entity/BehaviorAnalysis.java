@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class BehaviorAnalysis {
     private float expressionScore;
     private String videoPath;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "interview_id")
     private Interview interview;

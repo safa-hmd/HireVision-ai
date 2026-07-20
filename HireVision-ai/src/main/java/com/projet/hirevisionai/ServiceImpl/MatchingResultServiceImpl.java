@@ -34,27 +34,6 @@ public class MatchingResultServiceImpl implements IMatchingResultService {
     private final RestTemplate restTemplate;
 
     @Override
-    public MatchingResultDTO create(MatchingResultDTO dto) {
-        CV cv = cvRepository.findById(dto.getCvId())
-                .orElseThrow(() -> new RuntimeException("CV introuvable : " + dto.getCvId()));
-
-        MatchingResult saved = matchingResultRepository.save(
-                MatchingResult.builder()
-                        .score(dto.getScore())
-                        .cv(cv)
-                        .build());
-
-        return MatchingResultDTO.fromEntity(saved);
-    }
-
-    @Override
-    public MatchingResultDTO getById(Long id) {
-        return MatchingResultDTO.fromEntity(
-                matchingResultRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("MatchingResult introuvable : " + id)));
-    }
-
-    @Override
     public List<MatchingResultDTO> getByCvId(Long cvId) {
         return matchingResultRepository.findByCvId(cvId)
                 .stream().map(MatchingResultDTO::fromEntity)

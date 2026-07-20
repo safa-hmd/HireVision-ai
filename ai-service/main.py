@@ -92,38 +92,6 @@ class JobMatchRequest(BaseModel):
     cv_skills:  list[str]
     job_skills: list[str]
 
-class QuestionRequest(BaseModel):
-    skills:          list[str]
-    job_description: str
-    candidate_name:  str = ""
-    profile:         str = ""
-
-class EvaluateRequest(BaseModel):
-    question: str
-    answer:   str
-    category: str
-    skills:   list[str]
-
-class VoiceAnalyzeRequest(BaseModel):
-    transcript: str
-    question:   str
-    specialty:  str
-
-class FeedbackRequest(BaseModel):
-    specialty:  str
-    answers:    list
-    avg_scores: dict
-
-class FinalScoreRequest(BaseModel):
-    score_technique:     float
-    score_communication: float
-    score_confiance:     float
-    hesitation_ratio:    float = 0.0
-    eye_contact:         float = 75
-    posture:             float = 75
-    engagement:          float = 75
-    score_stress_vocal:  float | None = None
-
 
 class NextQuestionRequest(BaseModel):
     specialty_id:  str
@@ -426,23 +394,6 @@ def match_job(request: JobMatchRequest):
 # Question / Evaluate (anciens endpoints compatibles)
 # ─────────────────────────────────────────────────────────────────────────────
 
-@app.post("/generate-questions")
-def generate_questions(request: QuestionRequest):
-    from question_generator import generate_interview_questions
-    questions = generate_interview_questions(
-        skills=request.skills,
-        job_description=request.job_description,
-        candidate_name=request.candidate_name,
-        profile=request.profile
-    )
-    return {"total": len(questions), "questions": questions}
-
-
-@app.post("/evaluate-answer")
-def evaluate_answer(request: EvaluateRequest):
-    return evaluate_answer_with_gemini(
-        request.question, request.answer, request.category, request.skills
-    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -560,49 +511,8 @@ def interview_analyze_voice(request: VoiceAnalyzeRequest):
     )
 
 
-@app.post("/interview/analyze-voice-audio")
-async def interview_analyze_voice_audio(
-    transcript: str = Form(...),
-    question:   str = Form(...),
-    specialty:  str = Form(...),
-    audio:      UploadFile = File(None),
-):
-    """
-    Comme /interview/analyze-voice, mais accepte en plus le fichier audio réel
-    (webm/wav/mp3...) envoyé en multipart. Angular doit envoyer un FormData avec
-    les champs 'transcript', 'question', 'specialty' et 'audio' (le blob audio).
-    Gemini écoute alors le ton, le rythme et les vraies hésitations, pas seulement
-    les mots détectés dans le texte transcrit.
-    """
-    audio_bytes = await audio.read() if audio else None
-    audio_mime  = audio.content_type if audio else None
-    return analyze_voice_response(
-        transcript=transcript,
-        question=question,
-        specialty=specialty,
-        audio_bytes=audio_bytes,
-        audio_mime=audio_mime,
-    )
 
 
-@app.post("/interview/final-score")
-def interview_final_score(request: FinalScoreRequest):
-    """
-    Combine le score de contenu (technique), la voix, et les métriques webcam
-    (eye_contact, posture, engagement) en UN score global + UN score de stress
-    cohérents. À appeler après avoir reçu les résultats de /interview/analyze-voice(-audio)
-    et /interview/analyze-frame.
-    """
-    return compute_final_score(
-        score_technique=request.score_technique,
-        score_communication=request.score_communication,
-        score_confiance=request.score_confiance,
-        hesitation_ratio=request.hesitation_ratio,
-        eye_contact=request.eye_contact,
-        posture=request.posture,
-        engagement=request.engagement,
-        score_stress_vocal=request.score_stress_vocal,
-    )
 
 
 @app.post("/interview/analyze-frame")

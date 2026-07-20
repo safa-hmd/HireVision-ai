@@ -25,7 +25,7 @@ class MissedSkillServiceImplTest {
     private MissedSkillServiceImpl missedSkillService;
 
     @Test
-    void getByUserId_shouldReturnMappedList() {
+    void getByUserIdTest_shouldReturnMappedList() {
         MatchingResult matchingResult = MatchingResult.builder().id(10L).score(75f).build();
         MissedSkill ms = MissedSkill.builder().id(1L).skillName("Docker").matchingResult(matchingResult).build();
 
@@ -38,7 +38,7 @@ class MissedSkillServiceImplTest {
     }
 
     @Test
-    void getByUserId_shouldReturnEmptyList_whenNoMissedSkills() {
+    void getByUserIdTest_shouldReturnEmptyList_whenNoMissedSkills() {
         when(missedSkillRepository.findByMatchingResultCvUserIdUser(5L)).thenReturn(List.of());
 
         assertThat(missedSkillService.getByUserId(5L)).isEmpty();

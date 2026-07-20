@@ -1,6 +1,5 @@
 package com.projet.hirevisionai.ServiceImpl;
 
-import com.projet.hirevisionai.Dto.InterviewCreateRequestDTO;
 import com.projet.hirevisionai.Dto.InterviewDTO;
 import com.projet.hirevisionai.Dto.RecentInterviewDTO;
 import com.projet.hirevisionai.Entity.CV;
@@ -27,23 +26,6 @@ public class InterviewServiceImpl implements IInterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository      userRepository;
     private final CvRepository        cvRepository;
-
-    @Override
-    public InterviewDTO create(InterviewCreateRequestDTO request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User introuvable : " + request.getUserId()));
-        CV cv = cvRepository.findById(request.getCvId())
-                .orElseThrow(() -> new RuntimeException("CV introuvable : " + request.getCvId()));
-
-        Interview saved = interviewRepository.save(
-                Interview.builder()
-                        .user(user)
-                        .cv(cv)
-                        .startDate(request.getStartDate() != null ? request.getStartDate() : LocalDateTime.now())
-                        .build());
-
-        return InterviewDTO.fromEntity(saved);
-    }
 
     @Override
     public InterviewDTO getById(Long id) {

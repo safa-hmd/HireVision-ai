@@ -56,7 +56,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void getByCvId_shouldReturnMappedList() {
+    void getByCvIdTest_shouldReturnMappedList() {
         MatchingResult mr = MatchingResult.builder().id(1L).cv(cv).build();
         when(matchingResultRepository.findByCvId(1L)).thenReturn(List.of(mr));
 
@@ -64,7 +64,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void getByUserId_shouldReturnMappedList() {
+    void getByUserIdTest_shouldReturnMappedList() {
         MatchingResult mr = MatchingResult.builder().id(1L).cv(cv).build();
         when(matchingResultRepository.findByCvUserIdUser(5L)).thenReturn(List.of(mr));
 
@@ -72,7 +72,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void getBestByCvId_shouldReturn_whenFound() {
+    void getBestByCvIdTest_shouldReturn_whenFound() {
         MatchingResult mr = MatchingResult.builder().id(1L).score(95f).cv(cv).build();
         when(matchingResultRepository.findTopByCvIdOrderByScoreDesc(1L)).thenReturn(Optional.of(mr));
 
@@ -80,14 +80,14 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void getBestByCvId_shouldThrow_whenNotFound() {
+    void getBestByCvIdTest_shouldThrow_whenNotFound() {
         when(matchingResultRepository.findTopByCvIdOrderByScoreDesc(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> matchingResultService.getBestByCvId(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void matchAndSave_shouldCallPythonService_andPersistMissedSkills() {
+    void matchAndSaveTest_shouldCallPythonService_andPersistMissedSkills() {
         JobMatchRequestDTO request = new JobMatchRequestDTO(1L, List.of("Java"), List.of("Java", "Docker"), null);
 
         Map<String, Object> pythonResponse = Map.of(
@@ -123,7 +123,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void matchAndSave_shouldUseJobOfferSkills_whenJobOfferIdProvided() {
+    void matchAndSaveTest_shouldUseJobOfferSkills_whenJobOfferIdProvided() {
         JobMatchRequestDTO request = new JobMatchRequestDTO(1L, List.of("Java"), null, 10L);
 
         JobOffer jobOffer = JobOffer.builder().id(10L).title("Offre Java").requiredSkills(List.of()).build();
@@ -142,7 +142,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void matchAndSave_shouldThrow_whenJobOfferNotFound() {
+    void matchAndSaveTest_shouldThrow_whenJobOfferNotFound() {
         JobMatchRequestDTO request = new JobMatchRequestDTO(1L, List.of("Java"), null, 99L);
         when(jobOfferRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -150,7 +150,7 @@ class MatchingResultServiceImplTest {
     }
 
     @Test
-    void matchAndSave_shouldThrow_whenPythonServiceFails() {
+    void matchAndSaveTest_shouldThrow_whenPythonServiceFails() {
         JobMatchRequestDTO request = new JobMatchRequestDTO(1L, List.of("Java"), List.of("Java"), null);
 
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))

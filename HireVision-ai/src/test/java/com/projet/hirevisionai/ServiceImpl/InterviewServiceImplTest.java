@@ -46,7 +46,7 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void getById_shouldReturn_whenFound() {
+    void getByIdTest_shouldReturn_whenFound() {
         Interview interview = Interview.builder().id(1L).user(user).cv(cv).build();
         when(interviewRepository.findById(1L)).thenReturn(Optional.of(interview));
 
@@ -54,14 +54,14 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void getById_shouldThrow_whenNotFound() {
+    void getByIdTest_shouldThrow_whenNotFound() {
         when(interviewRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> interviewService.getById(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getByUserId_shouldReturnMappedList() {
+    void getByUserIdTest_shouldReturnMappedList() {
         Interview interview = Interview.builder().id(1L).user(user).build();
         when(interviewRepository.findByUserIdUser(1L)).thenReturn(List.of(interview));
 
@@ -69,7 +69,7 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void getByUserIdSortedByDate_shouldReturnMappedList() {
+    void getByUserIdSortedByDateTest_shouldReturnMappedList() {
         Interview interview = Interview.builder().id(1L).user(user).build();
         when(interviewRepository.findByUserIdUserOrderByStartDateDesc(1L)).thenReturn(List.of(interview));
 
@@ -77,7 +77,7 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void getByDateRange_shouldReturnMappedList() {
+    void getByDateRangeTest_shouldReturnMappedList() {
         LocalDateTime start = LocalDateTime.now().minusDays(7);
         LocalDateTime end = LocalDateTime.now();
         Interview interview = Interview.builder().id(1L).user(user).build();
@@ -87,14 +87,14 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void countByUserId_shouldDelegateToRepository() {
+    void countByUserIdTest_shouldDelegateToRepository() {
         when(interviewRepository.countByUserIdUser(1L)).thenReturn(4L);
 
         assertThat(interviewService.countByUserId(1L)).isEqualTo(4L);
     }
 
     @Test
-    void delete_shouldRemove_whenExists() {
+    void deleteTest_shouldRemove_whenExists() {
         when(interviewRepository.existsById(1L)).thenReturn(true);
 
         interviewService.delete(1L);
@@ -103,14 +103,14 @@ class InterviewServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrow_whenNotExists() {
+    void deleteTest_shouldThrow_whenNotExists() {
         when(interviewRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> interviewService.delete(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getAllForAdmin_shouldReturnListWithoutFeedback() {
+    void getAllForAdminTest_shouldReturnListWithoutFeedback() {
         Interview interview = Interview.builder().id(1L).user(user).startDate(LocalDateTime.now()).build();
         when(interviewRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of(interview));
 

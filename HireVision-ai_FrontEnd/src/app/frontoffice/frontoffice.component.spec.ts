@@ -1,5 +1,6 @@
-/// <reference types="jasmine" />
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { FrontofficeComponent } from './frontoffice.component';
 
@@ -9,7 +10,11 @@ describe('FrontofficeComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FrontofficeComponent]
+      imports: [RouterTestingModule],
+      declarations: [FrontofficeComponent],
+      // <app-menu> a sa propre arborescence de dépendances (services HTTP,
+      // LanguageService...) : hors du périmètre de ce test de shell.
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(FrontofficeComponent);
     component = fixture.componentInstance;

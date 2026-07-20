@@ -24,7 +24,7 @@ class EmailServiceTest {
     private EmailService emailService;
 
     @Test
-    void sendResetEmail_shouldBuildAndSendMessage_withResetLink() {
+    void sendResetEmailTest_shouldBuildAndSendMessage_withResetLink() {
         emailService.sendResetEmail("jean@test.com", "https://hirevision.ai/reset?token=abc");
 
         ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -37,7 +37,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendHtmlEmail_shouldSendMimeMessage_whenValid() throws Exception {
+    void sendHtmlEmailTest_shouldSendMimeMessage_whenValid() throws Exception {
         MimeMessage mimeMessage = new MimeMessage((jakarta.mail.Session) null);
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
@@ -47,7 +47,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendHtmlEmail_shouldPropagate_whenMailSenderThrowsRuntimeException() {
+    void sendHtmlEmailTest_shouldPropagate_whenMailSenderThrowsRuntimeException() {
         // Une RuntimeException (ex: MailSendException) levée par send() n'est PAS catchée
         // par le bloc try/catch (qui ne capture que MessagingException) : elle doit se propager.
         MimeMessage mimeMessage = mock(MimeMessage.class);

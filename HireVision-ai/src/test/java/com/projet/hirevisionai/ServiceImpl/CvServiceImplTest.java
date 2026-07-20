@@ -54,7 +54,7 @@ class CvServiceImplTest {
     }
 
     @Test
-    void upload_shouldSaveCv_whenUserExists() {
+    void uploadTest_shouldSaveCv_whenUserExists() {
         MockMultipartFile file = new MockMultipartFile("file", "cv.pdf", "application/pdf", "contenu".getBytes());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -67,7 +67,7 @@ class CvServiceImplTest {
     }
 
     @Test
-    void upload_shouldThrow_whenUserNotFound() {
+    void uploadTest_shouldThrow_whenUserNotFound() {
         MockMultipartFile file = new MockMultipartFile("file", "cv.pdf", "application/pdf", "contenu".getBytes());
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -75,42 +75,42 @@ class CvServiceImplTest {
     }
 
     @Test
-    void getById_shouldReturn_whenFound() {
+    void getByIdTest_shouldReturn_whenFound() {
         when(cvRepository.findById(1L)).thenReturn(Optional.of(cv));
 
         assertThat(cvService.getById(1L).getId()).isEqualTo(1L);
     }
 
     @Test
-    void getById_shouldThrow_whenNotFound() {
+    void getByIdTest_shouldThrow_whenNotFound() {
         when(cvRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> cvService.getById(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getByUserId_shouldReturnMappedList() {
+    void getByUserIdTest_shouldReturnMappedList() {
         when(cvRepository.findByUserIdUser(1L)).thenReturn(List.of(cv));
 
         assertThat(cvService.getByUserId(1L)).hasSize(1);
     }
 
     @Test
-    void getLatestByUserId_shouldReturn_whenFound() {
+    void getLatestByUserIdTest_shouldReturn_whenFound() {
         when(cvRepository.findTopByUserIdUserOrderByUploadDateDesc(1L)).thenReturn(Optional.of(cv));
 
         assertThat(cvService.getLatestByUserId(1L).getId()).isEqualTo(1L);
     }
 
     @Test
-    void getLatestByUserId_shouldThrow_whenNoneFound() {
+    void getLatestByUserIdTest_shouldThrow_whenNoneFound() {
         when(cvRepository.findTopByUserIdUserOrderByUploadDateDesc(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> cvService.getLatestByUserId(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void delete_shouldRemove_whenExists() {
+    void deleteTest_shouldRemove_whenExists() {
         when(cvRepository.existsById(1L)).thenReturn(true);
 
         cvService.delete(1L);
@@ -119,14 +119,14 @@ class CvServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrow_whenNotExists() {
+    void deleteTest_shouldThrow_whenNotExists() {
         when(cvRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> cvService.delete(1L)).isInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void getLatestAnalysis_shouldParseStoredJson_whenPresent() throws Exception {
+    void getLatestAnalysisTest_shouldParseStoredJson_whenPresent() throws Exception {
         CvAnalysisDTO analysis = CvAnalysisDTO.builder().skills(List.of("Java")).summary("Bon profil").build();
         cv.setAnalysisJson(objectMapper.writeValueAsString(analysis));
 
@@ -139,7 +139,7 @@ class CvServiceImplTest {
     }
 
     @Test
-    void getLatestAnalysis_shouldReturnEmptyResponse_whenNoCvFound() {
+    void getLatestAnalysisTest_shouldReturnEmptyResponse_whenNoCvFound() {
         when(cvRepository.findTopByUserIdUserOrderByUploadDateDesc(1L)).thenReturn(Optional.empty());
 
         CvUploadResponseDTO result = cvService.getLatestAnalysis(1L);
@@ -149,7 +149,7 @@ class CvServiceImplTest {
     }
 
     @Test
-    void getLatestAnalysis_shouldReturnNullAnalysis_whenJsonIsInvalid() {
+    void getLatestAnalysisTest_shouldReturnNullAnalysis_whenJsonIsInvalid() {
         cv.setAnalysisJson("{invalid-json");
         when(cvRepository.findTopByUserIdUserOrderByUploadDateDesc(1L)).thenReturn(Optional.of(cv));
 
