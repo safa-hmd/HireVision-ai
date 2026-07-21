@@ -100,6 +100,18 @@ class NextQuestionRequest(BaseModel):
     all_questions: list
 
 
+class VoiceAnalyzeRequest(BaseModel):
+    transcript: str
+    question:   str
+    specialty:  str
+
+
+class FeedbackRequest(BaseModel):
+    specialty:  str
+    answers:    list
+    avg_scores: dict
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────

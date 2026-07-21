@@ -93,6 +93,20 @@ SECTION_HEADERS = [
 ]
 
 
+def _skill_boundary_pattern(skill: str) -> str:
+    """
+    Frontière de mot robuste pour les compétences comme "c++", "c#", ".net".
+    `\\b` échoue quand un skill se termine par un caractère non-alphanumérique
+    suivi d'un autre caractère non-alphanumérique (ex: "c++," ou "c++" en fin
+    de ligne) : aucune frontière \\w/\\W n'existe alors à cet endroit, et le
+    skill n'est JAMAIS détecté, quel que soit le contexte. On utilise des
+    lookarounds sur l'alphanumérique à la place : ça matche "c++" isolé par
+    des espaces/virgules/ponctuation, tout en refusant toujours de matcher
+    "c++" à l'intérieur d'un mot plus long.
+    """
+    return r'(?<![a-zA-Z0-9])' + re.escape(skill) + r'(?![a-zA-Z0-9])'
+
+
 def _find_ambiguous_short_skills(text_lower: str) -> list[str]:
     """
     Détecte "c", "r", "go" UNIQUEMENT quand ils apparaissent comme un élément
@@ -116,9 +130,10 @@ def extract_skills(text: str) -> list[str]:
     text_lower = text.lower()
     found = []
 
-    # 1) Compétences "sûres" (3 caractères ou plus) : \b...\b est fiable ici.
+    # 1) Compétences "sûres" (3 caractères ou plus) : lookarounds alphanumériques
+    #    fiables même pour les skills finissant par un symbole (c++, c#, .net).
     for skill in SKILLS_LIST:
-        pattern = r'\b' + re.escape(skill) + r'\b'
+        pattern = _skill_boundary_pattern(skill)
         if re.search(pattern, text_lower) and skill not in [f.lower() for f in found]:
             if skill in ["c++", "c#", ".net", "api", "rest", "css", "git", "html", "gcp", "aws", "jpa"]:
                 found.append(skill.upper())
@@ -306,6 +321,16 @@ def extract_projects(text: str) -> list[dict]:
         return []
 
     section_lines = [l for l in lines[start:end] if l]
+    # Retire la ligne d'en-tête elle-même ("Projets") si elle a été incluse :
+    # `_find_section_bounds` renvoie l'index de la ligne d'en-tête comme
+    # `start`, donc sans ce filtre elle serait traitée comme un titre de
+    # projet à part entière.
+    header_names = {
+        "projets", "projects", "projets académiques", "projets personnels",
+        "academic projects", "personal projects"
+    }
+    if section_lines and section_lines[0].strip(" :\t-").lower() in header_names:
+        section_lines = section_lines[1:]
     i = 0
     while i < len(section_lines):
         line = section_lines[i].lstrip("∠•-→> ").strip()
@@ -326,6 +351,7 @@ def extract_projects(text: str) -> list[dict]:
         title = re.sub(r'^(projet\s*\d*\s*[:\-–]\s*)', '', title, flags=re.IGNORECASE).strip()
 
         description = ""
+        consumed_description = False
         if i + 1 < len(section_lines):
             nxt = section_lines[i + 1].lstrip("∠•-→> ").strip()
             # Si la ligne suivante n'est pas elle-même un nouveau titre de
@@ -333,6 +359,7 @@ def extract_projects(text: str) -> list[dict]:
             # puce), on la prend comme description.
             if nxt and not re.match(r'^[A-ZÀ-Ý]', nxt):
                 description = nxt
+                consumed_description = True
 
         if title and len(title) > 3 and not any(p["title"] == title[:100] for p in projects):
             projects.append({
@@ -340,7 +367,11 @@ def extract_projects(text: str) -> list[dict]:
                 "period": period,
                 "description": description[:200]
             })
-        i += 1
+        # Si la ligne suivante vient d'être consommée comme description, on
+        # saute un cran de plus pour ne pas la retraiter comme un nouveau
+        # titre de projet au tour suivant (bug historique : chaque
+        # description devenait aussi un projet fantôme).
+        i += 2 if consumed_description else 1
 
     return projects[:6]
 
@@ -421,7 +452,16 @@ def extract_languages(text: str) -> list[dict]:
         if re.search(r'\b' + re.escape(lang) + r'\b', text_lower):
             level = "Non spécifié"
             idx = text_lower.find(lang)
-            context = text_lower[max(0, idx - 40):idx + 80]
+            # Le niveau ("natif", "courant"...) suit TOUJOURS le nom de la
+            # langue dans les CV ("Anglais (courant)"), jamais avant. On ne
+            # regarde donc plus qu'en avant, jusqu'à la virgule suivante (ou
+            # 40 caractères) : regarder aussi en arrière faisait "fuiter" le
+            # niveau de la langue PRÉCÉDENTE quand plusieurs langues étaient
+            # listées sur la même ligne (ex: "Français (natif), Anglais
+            # (courant)" faisait hériter "Anglais" du niveau "Natif").
+            after = text_lower[idx + len(lang): idx + len(lang) + 40]
+            comma_pos = after.find(",")
+            context = after[:comma_pos] if comma_pos != -1 else after
             for key, value in LEVEL_KEYWORDS.items():
                 if key in context:
                     level = value
