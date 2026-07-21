@@ -6,7 +6,7 @@
 # ── Fichiers de secrets (JAMAIS sur Git) ──────────────────
 .env
 *.env
-!.env.example
+.env.example
 
 # ── Spring Boot ───────────────────────────────────────────
 HireVision-ai/target/
@@ -43,5 +43,3 @@ docker-compose.override.yml
 .DS_Store
 Thumbs.db
 
-
-.env.example
