@@ -39,8 +39,8 @@
       <p class="text-muted text-sm">{{ 'INTERVIEW_PREP.LOADING' | translate }}</p>
     </div>
 
-    <!-- ── Catégories ── -->
-    <div class="grid-3 mb-6" *ngIf="!isLoading">
+    <!-- ── Catégories (uniquement si le CV a été analysé ET a des compétences) ── -->
+    <div class="grid-3 mb-6" *ngIf="!isLoading && hasCv && filteredCategories.length">
       <div class="card category-card" *ngFor="let cat of filteredCategories" (click)="startInterview(cat)">
         <div class="card-body">
           <div class="cat-icon" [style.background]="cat.color">

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ILearningPlanService {
     List<LearningPlanDTO> getByUserId(Long userId);
+    List<LearningPlanDTO> generateFromInterview(Long interviewId);
 }

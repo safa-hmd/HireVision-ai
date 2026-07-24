@@ -14,6 +14,7 @@ import com.projet.hirevisionai.Repository.MatchingResultRepository;
 import com.projet.hirevisionai.Repository.MissedSkillRepository;
 import com.projet.hirevisionai.ServiceInterface.IMatchingResultService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -32,6 +33,9 @@ public class MatchingResultServiceImpl implements IMatchingResultService {
     private final MissedSkillRepository missedSkillRepository;
     private final JobOfferRepository jobOfferRepository;
     private final RestTemplate restTemplate;
+
+    @Value("${app.ai-service.url}")
+    private String aiServiceUrl;
 
     @Override
     public List<MatchingResultDTO> getByCvId(Long cvId) {
@@ -89,7 +93,7 @@ public class MatchingResultServiceImpl implements IMatchingResultService {
         Map pythonResult;
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
-                    "http://localhost:8000/match-job",
+                    aiServiceUrl + "/match-job",
                     HttpMethod.POST,
                     entity,
                     Map.class
@@ -100,6 +104,10 @@ public class MatchingResultServiceImpl implements IMatchingResultService {
         }
 
         // ── Extraire les résultats ──────────────────────────────────
+        if (pythonResult == null || pythonResult.get("score") == null) {
+            throw new RuntimeException(
+                    "Réponse invalide du microservice Python (champ 'score' manquant): " + pythonResult);
+        }
         float score          = ((Number) pythonResult.get("score")).floatValue();
         List<String> missing = (List<String>) pythonResult.getOrDefault("missing", List.of());
         List<String> matched = (List<String>) pythonResult.getOrDefault("matched", List.of());

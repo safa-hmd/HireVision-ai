@@ -3,6 +3,7 @@ package com.projet.hirevisionai.Controller;
 import com.projet.hirevisionai.Repository.InterviewRepository;
 import com.projet.hirevisionai.Repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -34,7 +35,8 @@ public class InterviewAIProxyController {
     private final InterviewRepository interviewRepository;
     private final QuestionRepository  questionRepository;
 
-    private static final String PYTHON_BASE = "http://localhost:8000";
+    @Value("${app.ai-service.url}")
+    private String PYTHON_BASE;
 
     // ── 1. GET questions par spécialité (anti-répétition + spécialités custom) ──
     @GetMapping("/questions/{specialtyId}")

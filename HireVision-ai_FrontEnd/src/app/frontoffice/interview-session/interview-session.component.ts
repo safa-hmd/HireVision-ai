@@ -44,6 +44,27 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   isCameraOn:   boolean  = true;
   latestCv:     any      = null;
 
+  /** true si le chargement des questions a échoué / a expiré → affiche un
+   *  bouton "Réessayer" au lieu de laisser un écran vide ou un spinner infini. */
+  loadError = false;
+
+  /** Empêche ngOnInit de tout réinitialiser en double (webcam, timers,
+   *  intervals) si Angular relance le composant sans passer par ngOnDestroy. */
+  private sessionStarted = false;
+
+  /** Empêche d'empiler plusieurs requêtes d'analyse de frame en parallèle
+   *  si le réseau/serveur IA est lent. */
+  private isCapturingFrame = false;
+
+  /** Nombre de tentatives d'attache webcam avant abandon (évite une boucle
+   *  setTimeout infinie si l'élément #webcam n'apparaît jamais dans le DOM). */
+  private attachWebcamRetries = 0;
+
+  /** Watchdog : si le chargement des questions dépasse ce délai sans
+   *  réponse (backend down, CORS, etc.), on arrête le spinner et on
+   *  propose de réessayer plutôt que de bloquer l'utilisateur. */
+  private loadingWatchdog: any;
+
   // ── Timer ──
   timer         = 0;
   timerInterval: any;
@@ -107,6 +128,11 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       { label: 'Niveau de stress', icon: 'activity', value: this.stress,         color: this.stressColor(this.stress) },
     ];
   }
+
+  trackByLabel(index: number, item: { label: string }): string {
+  return item.label;
+}
+
   get voiceMetricsDisplay() {
     if (!this.voiceMetrics) return [];
     return [
@@ -138,9 +164,22 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   ) {}
 
   ngOnInit(): void {
+    if (this.sessionStarted) return; // évite une double initialisation
     const stored = sessionStorage.getItem('interview_specialty');
     if (!stored) { this.router.navigate(['/frontoffice/interviewPrep']); return; }
-    this.specialty = JSON.parse(stored);
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(stored);
+    } catch {
+      // sessionStorage corrompu → on ne bloque jamais l'utilisateur ici
+      showToast('Session invalide, veuillez recommencer', 'danger');
+      this.router.navigate(['/frontoffice/interviewPrep']);
+      return;
+    }
+
+    this.sessionStarted = true;
+    this.specialty = parsed;
     this.loadLatestCv();
     this.loadQuestions();
     this.startTimer();
@@ -149,7 +188,19 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     this.startBehaviorSimulation();
   }
 
-  ngAfterViewInit(): void { setTimeout(() => lucide.createIcons(), 100); }
+  ngAfterViewInit(): void { setTimeout(() => this.refreshIcons(), 100); }
+
+  /** Wrapper sûr autour de lucide.createIcons() : ne throw jamais si le CDN
+   *  (unpkg.com) est lent/bloqué/hors-ligne ou si l'objet n'est pas encore
+   *  chargé. Sans ça, une seule icône ratée lève une exception non catchée
+   *  et peut laisser l'écran figé/blanc. */
+  private refreshIcons(): void {
+    try {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (e) {
+      console.error('lucide.createIcons error:', e);
+    }
+  }
 
   // ─────────────────────────────────────────────────
   // DATA LOADING
@@ -167,6 +218,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
 
   loadQuestions(): void {
     this.isLoading = true;
+    this.loadError = false;
     const userId = this.authService.getCurrentUserId();
 
     // Passer userId pour anti-répétition (Spring Boot → Python)
@@ -185,23 +237,51 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
            + `&duration=${this.specialty.duration || 45}`;
     }
 
+    // Watchdog : filet de sécurité INDÉPENDANT du timeout RxJS ci-dessous.
+    // Si pour une raison quelconque (CORS, requête jamais résolue) le
+    // subscribe ne retourne jamais, on force l'arrêt du spinner et on
+    // affiche un bouton "Réessayer" au bout de 20s.
+    clearTimeout(this.loadingWatchdog);
+    this.loadingWatchdog = setTimeout(() => {
+      if (this.isLoading) {
+        this.isLoading = false;
+        this.loadError = true;
+        showToast('Le chargement des questions prend trop de temps — réessayez', 'warning');
+      }
+    }, 20_000);
+
     this.http.get<any>(url).pipe(
-      // Filet de sécurité : même si Spring/Python restent bloqués (pas de
-      // réponse), on ne laisse jamais le spinner tourner indéfiniment.
-      timeout(65_000),
+      // Filet de sécurité RxJS : même si Spring/Python restent bloqués
+      // (pas de réponse), on ne laisse jamais l'observable pendre indéfiniment.
+      timeout(18_000),
       catchError(err => throwError(() => err))
     ).subscribe({
       next: (res) => {
-        this.questions = res.questions || [];
+        clearTimeout(this.loadingWatchdog);
+        this.questions = res?.questions || [];
         this.isLoading = false;
-        setTimeout(() => lucide.createIcons(), 100);
-        this.speakCurrentQuestion();
+        if (this.questions.length === 0) {
+          // Réponse 200 mais sans questions (ex: Python down → fallback
+          // vide côté Spring) : on ne laisse pas un écran vide silencieux.
+          this.loadError = true;
+          showToast('Aucune question reçue — le service IA est peut-être indisponible', 'danger');
+        } else {
+          setTimeout(() => this.refreshIcons(), 100);
+          this.speakCurrentQuestion();
+        }
       },
       error: () => {
+        clearTimeout(this.loadingWatchdog);
         this.isLoading = false;
+        this.loadError = true;
         showToast('Erreur chargement questions — vérifiez que le service IA (Python) tourne bien', 'danger');
       }
     });
+  }
+
+  /** Bouton "Réessayer" affiché quand loadError = true. */
+  retryLoadQuestions(): void {
+    this.loadQuestions();
   }
 
   // ─────────────────────────────────────────────────
@@ -217,6 +297,10 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   // ─────────────────────────────────────────────────
 
   initWebcam(): void {
+    // Repart de zéro à chaque (re)démarrage de la caméra : sinon, si une
+    // tentative précédente avait déjà épuisé ses 50 essais, tout nouvel
+    // appel (ex: toggleWebcam) abandonnerait immédiatement sans réessayer.
+    this.attachWebcamRetries = 0;
     navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
       .then(stream => {
         this.videoStream = stream;
@@ -227,12 +311,19 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
 
   private attachWebcam(): void {
     if (this.webcamEl?.nativeElement) {
+      this.attachWebcamRetries = 0;
       const v = this.webcamEl.nativeElement;
       v.srcObject = this.videoStream;
       v.muted = true;
       v.play().catch(console.error);
-    } else {
+    } else if (this.attachWebcamRetries < 50) {
+      // Max 50 tentatives (~5s) : si l'élément <video> n'apparaît jamais,
+      // on abandonne proprement au lieu de boucler indéfiniment.
+      this.attachWebcamRetries++;
       setTimeout(() => this.attachWebcam(), 100);
+    } else {
+      this.videoStream?.getTracks().forEach(t => t.stop());
+      this.videoStream = null;
     }
   }
 
@@ -245,12 +336,18 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       this.isCameraOn = true;
       this.initWebcam();
     }
-    setTimeout(() => lucide.createIcons(), 50);
+    setTimeout(() => this.refreshIcons(), 50);
   }
 
   /** Capture une frame webcam et l'envoie au backend Spring Boot → Python CV */
   private captureAndAnalyzeFrame(): void {
     if (!this.videoStream || !this.isCameraOn || !this.webcamEl?.nativeElement) return;
+    // Garde de concurrence : si une analyse précédente est encore en vol
+    // (réseau/IA lents), on n'empile pas une nouvelle requête par-dessus —
+    // c'est ce genre d'empilement qui peut finir par saturer le thread
+    // principal / la connexion réseau et geler l'onglet.
+    if (this.isCapturingFrame) return;
+
     const video = this.webcamEl.nativeElement;
     if (video.readyState < 2) return;
 
@@ -265,17 +362,24 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       if (!blob) return;
       const fd = new FormData();
       fd.append('frame', blob, 'frame.jpg');
+      this.isCapturingFrame = true;
 
-      // Via Spring Boot proxy
-      this.http.post<any>(`${this.javaUrl}/interview/analyze-frame`, fd).subscribe({
+      // Via Spring Boot proxy — timeout côté client en plus du timeout
+      // serveur, pour libérer la garde de concurrence même si la réponse
+      // ne revient jamais.
+      this.http.post<any>(`${this.javaUrl}/interview/analyze-frame`, fd).pipe(
+        timeout(15_000),
+        catchError(() => throwError(() => new Error('frame-analysis-failed')))
+      ).subscribe({
         next: (result) => {
+          this.isCapturingFrame = false;
           if (result.eye_contact !== undefined) this.contactVisuel = result.eye_contact;
           if (result.posture     !== undefined) this.posture       = result.posture;
           if (result.engagement  !== undefined) this.engagement    = result.engagement;
           if (result.tips?.length)              this.aiTips        = result.tips;
-          setTimeout(() => lucide.createIcons(), 30);
+          setTimeout(() => this.refreshIcons(), 30);
         },
-        error: () => {} // silencieux — simulation continue
+        error: () => { this.isCapturingFrame = false; } // silencieux — simulation continue
       });
     }, 'image/jpeg', 0.7);
   }
@@ -345,7 +449,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     } else {
       this.speakCurrentQuestion();
     }
-    setTimeout(() => lucide.createIcons(), 30);
+    setTimeout(() => this.refreshIcons(), 30);
   }
 
   // ─────────────────────────────────────────────────
@@ -412,7 +516,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
         showToast('Aucune réponse détectée — veuillez réessayer', 'warning');
       }
     }
-    setTimeout(() => lucide.createIcons(), 50);
+    setTimeout(() => this.refreshIcons(), 50);
   }
 
   // ─────────────────────────────────────────────────
@@ -430,7 +534,10 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
       transcript: this.transcript,
       question:   q.question,
       specialty:  this.specialty.title
-    }).subscribe({
+    }).pipe(
+      timeout(20_000),
+      catchError(() => throwError(() => new Error('analyze-voice-failed')))
+    ).subscribe({
       next:  (result) => this.onVoiceAnalyzed(result, q),
       error: () => {
         this.isAnalyzing = false;
@@ -471,7 +578,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     this.isAnalyzing = false;
     this.updateDynamicTips(result);
     this.goToNext();
-    setTimeout(() => lucide.createIcons(), 50);
+    setTimeout(() => this.refreshIcons(), 50);
   }
 
   private goToNext(): void {
@@ -482,7 +589,10 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
         current_score: this.currentRunningScore,
         asked_ids:     this.askedIds,
         all_questions: this.questions
-      }).subscribe({
+      }).pipe(
+        timeout(15_000),
+        catchError(() => throwError(() => new Error('next-question-failed')))
+      ).subscribe({
         next: (res) => {
           if (!res.finished && res.question) {
             // Trouver l'index de la question recommandée
@@ -491,12 +601,12 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
           } else {
             this.currentIndex++;
           }
-          setTimeout(() => lucide.createIcons(), 50);
+          setTimeout(() => this.refreshIcons(), 50);
           this.speakCurrentQuestion();
         },
         error: () => {
           this.currentIndex++;
-          setTimeout(() => lucide.createIcons(), 50);
+          setTimeout(() => this.refreshIcons(), 50);
           this.speakCurrentQuestion();
         }
       });
@@ -516,7 +626,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     if (tips.length === 0)                   tips.push('Excellente réponse — continuez sur cette lancée !');
     tips.push('Utilisez des exemples concrets issus de vos projets');
     this.aiTips = tips.slice(0, 4);
-    setTimeout(() => lucide.createIcons(), 30);
+    setTimeout(() => this.refreshIcons(), 30);
   }
 
   skipQuestion(): void {
@@ -536,7 +646,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     this.transcript = '';
     if (this.currentIndex < this.questions.length - 1) {
       this.currentIndex++;
-      setTimeout(() => lucide.createIcons(), 50);
+      setTimeout(() => this.refreshIcons(), 50);
       this.speakCurrentQuestion();
     } else {
       this.finishInterview();
@@ -551,6 +661,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.timerInterval);
     clearInterval(this.behaviorInterval);
     clearInterval(this.audioBarInterval);
+    clearTimeout(this.loadingWatchdog);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
     this.speechSynth?.cancel();
@@ -673,6 +784,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.timerInterval);
     clearInterval(this.behaviorInterval);
     clearInterval(this.audioBarInterval);
+    clearTimeout(this.loadingWatchdog);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
     this.speechSynth?.cancel();
@@ -683,6 +795,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
     clearInterval(this.timerInterval);
     clearInterval(this.behaviorInterval);
     clearInterval(this.audioBarInterval);
+    clearTimeout(this.loadingWatchdog);
     this.videoStream?.getTracks().forEach(t => t.stop());
     this.recognition?.stop();
     this.speechSynth?.cancel();

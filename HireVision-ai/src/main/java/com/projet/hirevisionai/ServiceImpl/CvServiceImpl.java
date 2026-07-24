@@ -11,7 +11,8 @@ import com.projet.hirevisionai.Repository.CvRepository;
 import com.projet.hirevisionai.Repository.SkillRepository;
 import com.projet.hirevisionai.Repository.UserRepository;
 import com.projet.hirevisionai.ServiceInterface.ICvService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 
 import org.springframework.http.*;
@@ -32,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CvServiceImpl implements ICvService {
 
     private final RestTemplate restTemplate;
@@ -40,6 +41,9 @@ public class CvServiceImpl implements ICvService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final ObjectMapper objectMapper;
+
+    @Value("${app.ai-service.url}")
+    private String aiServiceUrl;
 
     private static final String UPLOAD_DIR = "uploads/cvs/";
 
@@ -119,7 +123,7 @@ public class CvServiceImpl implements ICvService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         ResponseEntity<CvAnalysisDTO> response = restTemplate.exchange(
-                "http://localhost:8000/analyze",
+                aiServiceUrl + "/analyze",
                 HttpMethod.POST,
                 requestEntity,
                 CvAnalysisDTO.class

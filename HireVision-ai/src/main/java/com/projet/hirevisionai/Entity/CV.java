@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,11 +20,12 @@ public class CV {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;                    // ← enlever "private"
+    Long id;
 
     String filePath;
     LocalDate uploadDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     User user;
@@ -32,10 +34,11 @@ public class CV {
     @JoinTable(name = "cv_skill",
             joinColumns = @JoinColumn(name = "cv_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    List<Skill> skills = new ArrayList<>();  // ← ajouter new ArrayList<>()
+    List<Skill> skills = new ArrayList<>();
 
-    @OneToMany(mappedBy = "cv")
-    List<MatchingResult> matchingResults;
+    @JsonIgnore
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<MatchingResult> matchingResults = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     private String analysisJson;

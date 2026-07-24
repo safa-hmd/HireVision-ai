@@ -10,6 +10,7 @@ import numpy as np
 from threading import Lock
 from fastapi import FastAPI, UploadFile, File, Query, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from dotenv import load_dotenv
@@ -54,6 +55,29 @@ app.add_middleware(
 from llm_client import call_llm, GROQ_API_KEY
 GEMINI_API_KEY = GROQ_API_KEY  # alias gardé pour ne pas casser le reste du fichier
 
+from embeddings import get_model
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Préchargement du modèle sentence-transformers au démarrage
+# ─────────────────────────────────────────────────────────────────────────────
+# Avant : le modèle était chargé en lazy loading, au premier appel réel
+# (extract_skills/match_skills/predict_profile → embeddings.get_model()).
+# Ça provoquait un cold start de >60s (téléchargement HF non-authentifié)
+# pendant que Docker Compose annonçait déjà "healthy" et que le backend
+# envoyait du vrai trafic → RestTemplate readTimeout côté Spring Boot.
+# Maintenant : le modèle est chargé une bonne fois pour toutes ici, AVANT
+# qu'uvicorn ne commence à répondre, et /health ne dit "ok" qu'une fois prêt.
+_ready = False
+
+
+@app.on_event("startup")
+def preload_models():
+    global _ready
+    print("[startup] Préchargement du modèle sentence-transformers...")
+    get_model()
+    _ready = True
+    print("[startup] Modèle chargé, service prêt.")
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Health Check Endpoint (utilisé par Docker et monitoring)
@@ -61,7 +85,12 @@ GEMINI_API_KEY = GROQ_API_KEY  # alias gardé pour ne pas casser le reste du fic
 
 @app.get("/health", tags=["System"])
 def health_check():
-    """Vérifie que le service AI est opérationnel."""
+    """Vérifie que le service AI est opérationnel ET que le modèle est chargé."""
+    if not _ready:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "loading", "service": "HireVision AI Microservice"}
+        )
     return {
         "status": "ok",
         "service": "HireVision AI Microservice",
@@ -578,11 +607,12 @@ def clear_all_cache():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Health
+# Cache Info (anciennement dupliqué avec /health — renommé pour éviter le
+# conflit de route qui écrasait silencieusement le /health avec readiness ci-dessus)
 # ─────────────────────────────────────────────────────────────────────────────
 
-@app.get("/health")
-def health():
+@app.get("/cache-info")
+def cache_info():
     cache_info = {k: "cached" for k in _question_cache.keys()}
     return {
         "status": "ok",

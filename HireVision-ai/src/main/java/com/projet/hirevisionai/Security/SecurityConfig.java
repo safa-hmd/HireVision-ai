@@ -46,38 +46,33 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+            AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
-
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             @Qualifier("authProvider") DaoAuthenticationProvider daoAuthProvider
     ) throws Exception {
-        http
 
+        http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authenticationProvider(daoAuthProvider)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
                 .authorizeHttpRequests(auth -> auth
-
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/pictures/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
-                        // /cvs/** et /matching-results/** nécessitent maintenant une authentification
-                        // (la vérification "c'est bien SON cv" se fait dans le contrôleur)
-
-                        // Tout autre endpoint nécessite une authentification
-
+                        // Toutes les autres routes nécessitent un token JWT
                         .anyRequest().authenticated()
                 )
-                // ✅ FIX PRINCIPAL : empêche Spring de rediriger les appels REST vers OAuth2/login
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -90,7 +85,6 @@ public class SecurityConfig {
                         .successHandler(new OAuth2AuthSuccessHandler(userRepository, jwtService))
                 );
 
-
         return http.build();
     }
 
@@ -98,14 +92,27 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://localhost:4201",
+                "http://localhost:59619"
+        ));
 
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:4201", "http://localhost:59619"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "OPTIONS"
+        ));
+
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
-
 }

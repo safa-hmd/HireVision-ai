@@ -1,40 +1,45 @@
-# ──────────────────────────────────────────────
-#  Stage 1 : Installer les dépendances Python
-# ──────────────────────────────────────────────
-FROM python:3.11-slim AS base
+# Image Python légère
+FROM python:3.11-slim
 
+# Éviter les questions interactives pendant apt-get
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Dossier de travail dans le container
 WORKDIR /app
 
-# Dépendances système nécessaires à OpenCV et pdfplumber
-RUN apt-get update && apt-get install -y \
+# Installer les dépendances système nécessaires pour OpenCV / PDF / ML
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     libsm6 \
     libxrender1 \
     libxext6 \
+    wget \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances Python
+# Copier d'abord requirements.txt pour profiter du cache Docker
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# ──────────────────────────────────────────────
-#  Stage 2 : Image de production
-# ──────────────────────────────────────────────
-FROM base
+# Mettre pip à jour + installer les dépendances avec timeout plus long
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --default-timeout=1000 --retries=10 --no-cache-dir -r requirements.txt
 
-WORKDIR /app
+# Précharger le modèle sentence-transformers DANS L'IMAGE, au build, pas au
+# runtime. Avant : le modèle était téléchargé depuis Hugging Face Hub au
+# premier appel réel (cold start >60s, souvent plus sans HF_TOKEN), ce qui
+# dépassait le readTimeout du RestTemplate côté backend Spring Boot et
+# provoquait des 500 sur les premiers uploads de CV.
+# Après : le modèle est déjà présent dans le cache HF de l'image, donc le
+# préchargement au démarrage du container (voir main.py @app.on_event
+# ("startup")) est quasi instantané et ne dépend plus du réseau.
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')"
 
-# Copier le code source
+# Copier le reste du projet
 COPY . .
 
-# Variables d'environnement par défaut
-ENV GROQ_API_KEY="" \
-    GROQ_MODEL="openai/gpt-oss-120b"
-
+# Exposer le port FastAPI
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD python -c "import httpx; httpx.get('http://localhost:8000/health')" || exit 1
-
+# Lancer le serveur FastAPI
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -19,4 +19,9 @@ public class LearningPlanController {
     public ResponseEntity<List<LearningPlanDTO>> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(learningPlanService.getByUserId(userId));
     }
+
+    @PostMapping("/from-interview/{interviewId}")
+    public ResponseEntity<List<LearningPlanDTO>> generateFromInterview(@PathVariable Long interviewId) {
+        return ResponseEntity.ok(learningPlanService.generateFromInterview(interviewId));
+    }
 }

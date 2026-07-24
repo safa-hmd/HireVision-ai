@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel. PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Interview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +22,7 @@ public class Interview {
     private LocalDateTime startDate;
     private int durationMinutes;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -28,6 +30,7 @@ public class Interview {
     @ManyToOne @JoinColumn(name = "cv_id")
     private CV cv;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL)
     private List<Question> questions;
 

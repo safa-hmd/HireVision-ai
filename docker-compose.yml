@@ -1,21 +1,4 @@
-version: '3.9'
-
-# ══════════════════════════════════════════════════════════════
-#  HireVision AI — Docker Compose (Développement local)
-#  Usage : docker compose up --build
-#  Ports exposés :
-#    - Frontend  : http://localhost:4200  (Nginx)
-#    - Backend   : http://localhost:8086  (Spring Boot)
-#    - AI Service: http://localhost:8000  (FastAPI)
-#    - Swagger   : http://localhost:8086/HireVision/swagger-ui.html
-#    - MySQL     : localhost:3307  (évite conflit avec un MySQL local)
-# ══════════════════════════════════════════════════════════════
-
 services:
-
-  # ──────────────────────────────────────────────────────────
-  #  MySQL Database
-  # ──────────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: hirevision-mysql
@@ -36,9 +19,6 @@ services:
     networks:
       - hirevision-net
 
-  # ──────────────────────────────────────────────────────────
-  #  AI Service (FastAPI)
-  # ──────────────────────────────────────────────────────────
   ai-service:
     build:
       context: ./ai-service
@@ -48,22 +28,30 @@ services:
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+      # Optionnel mais recommandé : accélère/stabilise le téléchargement du
+      # modèle HF au tout premier build (avant qu'il soit mis en cache dans
+      # l'image par le Dockerfile). Génère un token gratuit sur huggingface.co.
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ./ai-service:/app
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      # raise_for_status() est essentiel : sans lui, httpx.get() sur une
+      # réponse 503 ("status": "loading") ne lève PAS d'exception et le
+      # healthcheck passerait au vert avant que le modèle soit vraiment prêt.
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      # Le premier chargement du modèle sentence-transformers peut prendre
+      # jusqu'à 1-2 minutes (surtout sans HF_TOKEN et sans le cache du
+      # Dockerfile). On laisse de la marge pour ne pas déclarer le service
+      # "unhealthy" à tort pendant ce chargement.
+      start_period: 120s
     networks:
       - hirevision-net
 
-  # ──────────────────────────────────────────────────────────
-  #  Backend (Spring Boot)
-  # ──────────────────────────────────────────────────────────
   backend:
     build:
       context: ./HireVision-ai
@@ -74,19 +62,26 @@ services:
       mysql:
         condition: service_healthy
       ai-service:
-        condition: service_started
+        condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/hirevisiondb?createDatabaseIfNotExist=true&useUnicode=true&serverTimezone=UTC
+      DB_URL: "jdbc:mysql://mysql:3306/hirevisiondb?createDatabaseIfNotExist=true&useUnicode=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false"
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_PASSWORD:-root}
-      JWT_SECRET: ${JWT_SECRET}
+
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/hirevisiondb?createDatabaseIfNotExist=true&useUnicode=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false"
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      JWT_SECRET: ${JWT_SECRET:-changeMeInProduction123}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
-      AI_SERVICE_URL: http://ai-service:8000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      FRONTEND_URL: "http://localhost:4200"
+      AI_SERVICE_URL: "http://ai-service:8000"
       PORT: 8086
     volumes:
       - uploads_data:/app/uploads
@@ -101,9 +96,6 @@ services:
     networks:
       - hirevision-net
 
-  # ──────────────────────────────────────────────────────────
-  #  Frontend (Angular + Nginx)
-  # ──────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./HireVision-ai_FrontEnd
@@ -114,21 +106,21 @@ services:
       - backend
     ports:
       - "4200:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
     networks:
       - hirevision-net
 
-# ──────────────────────────────────────────────────────────
-#  Volumes persistants
-# ──────────────────────────────────────────────────────────
 volumes:
   mysql_data:
     driver: local
   uploads_data:
     driver: local
 
-# ──────────────────────────────────────────────────────────
-#  Réseau interne
-# ──────────────────────────────────────────────────────────
 networks:
   hirevision-net:
     driver: bridge

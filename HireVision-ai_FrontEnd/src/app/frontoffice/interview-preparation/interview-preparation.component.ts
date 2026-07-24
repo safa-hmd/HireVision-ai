@@ -129,8 +129,11 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
   loadUserCvAndFilter(): void {
     const userId = this.authService.getCurrentUserId();
     if (!userId) {
-      this.isLoading = false; this.hasCv = false;
-      this.filteredCategories = [...this.knownCategories, this.rhCategory];
+      // Pas d'utilisateur connu → impossible de savoir s'il a un CV.
+      // On n'affiche AUCUNE carte pré-câblée par défaut.
+      this.isLoading = false;
+      this.hasCv = false;
+      this.filteredCategories = [];
       return;
     }
 
@@ -142,14 +145,19 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
           this.userSkills = cv.skillNames;
           this.buildCategories();
         } else {
+          // CV absent ou sans compétences détectées → aucune carte,
+          // seulement le message d'invitation à analyser un CV.
           this.hasCv = false;
-          this.filteredCategories = [...this.knownCategories, this.rhCategory];
+          this.filteredCategories = [];
         }
         setTimeout(() => lucide.createIcons(), 100);
       },
       error: () => {
-        this.isLoading = false; this.hasCv = false;
-        this.filteredCategories = [...this.knownCategories, this.rhCategory];
+        // Erreur réseau/serveur → même comportement : pas de CV connu,
+        // donc pas de fallback vers les 6 spécialités pré-câblées.
+        this.isLoading = false;
+        this.hasCv = false;
+        this.filteredCategories = [];
         setTimeout(() => lucide.createIcons(), 100);
       }
     });
@@ -203,12 +211,11 @@ export class InterviewPreparationComponent implements OnInit, AfterViewInit {
       });
     });
 
+    // Uniquement ce qui a été réellement détecté dans le CV (+ RH, toujours
+    // disponible). Si le CV ne matche rien de connu, ses compétences brutes
+    // partent quand même en cartes "custom" grâce à la boucle ci-dessus ;
+    // on ne retombe JAMAIS sur les 6 spécialités pré-câblées par défaut.
     this.filteredCategories = [...matchedKnown, ...customCategories, this.rhCategory];
-
-    // Filet de sécurité : profil CV vide/trop générique → afficher les 6 curées
-    if (this.filteredCategories.length <= 1) {
-      this.filteredCategories = [...this.knownCategories, this.rhCategory];
-    }
   }
 
   private pickIcon(lowerSkill: string): string {

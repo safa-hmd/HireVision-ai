@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -45,6 +46,7 @@ public class JobOffer {
     @Builder.Default
     private List<Skill> requiredSkills = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "jobOffer")
     private List<MatchingResult> matchingResults;
 }

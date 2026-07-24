@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +29,7 @@ public class MissedSkill {
     @JoinColumn(name = "matching_result_id")
     MatchingResult matchingResult;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "missedSkill", cascade = CascadeType.ALL)
     List<LearningPlan> learningPlans;
 }

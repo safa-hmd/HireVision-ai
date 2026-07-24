@@ -2,10 +2,14 @@ package com.projet.hirevisionai.ServiceImpl;
 
 import com.projet.hirevisionai.Dto.UserDTO;
 import com.projet.hirevisionai.Entity.User;
+import com.projet.hirevisionai.Repository.PaymentRepository;
+import com.projet.hirevisionai.Repository.SubscriptionRepository;
 import com.projet.hirevisionai.Repository.UserRepository;
 import com.projet.hirevisionai.ServiceInterface.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -21,7 +25,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final org.springframework.web.client.RestTemplate restTemplate;
+
+    @Value("${app.ai-service.url}")
+    private String aiServiceUrl;
 
     @Override
     public UserDTO getById(Long id) {
@@ -53,9 +62,20 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (!userRepository.existsById(id))
             throw new RuntimeException("User introuvable : " + id);
+
+        // CV et Interview sont déjà en cascade (orphanRemoval) côté entité User,
+        // mais Payment et Subscription référencent User sans cascade déclarée.
+        // Sans ça, MySQL bloque le DELETE (contrainte de clé étrangère user_id)
+        // dès que l'utilisateur a au moins un paiement ou un abonnement -> 500.
+        // Ordre important : Payment référence aussi Subscription (subscription_id),
+        // donc on supprime les paiements avant les abonnements.
+        paymentRepository.deleteAll(paymentRepository.findByUserIdUser(id));
+        subscriptionRepository.deleteAll(subscriptionRepository.findByUserIdUser(id));
+
         userRepository.deleteById(id);
     }
 
@@ -103,7 +123,7 @@ public class UserServiceImpl implements IUserService {
             throw new IllegalArgumentException("Nom d'utilisateur GitHub invalide.");
         }
 
-        String url = "http://localhost:8000/analyze-github?username=" + username;
+        String url = aiServiceUrl + "/analyze-github?username=" + username;
         try {
             return restTemplate.getForObject(url, Object.class);
         } catch (Exception e) {

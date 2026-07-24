@@ -1,5 +1,6 @@
 package com.projet.hirevisionai.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,9 +21,11 @@ public class Skill {
     private String name;
     private String category;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "skills")
     private List<CV> cvs;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "requiredSkills")
     private List<JobOffer> jobOffers;
 }
