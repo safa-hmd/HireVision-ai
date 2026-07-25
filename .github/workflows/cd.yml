@@ -30,6 +30,8 @@ jobs:
         with:
           context: ./HireVision-ai
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-backend:latest
 
       - name: Build and push frontend
@@ -37,6 +39,8 @@ jobs:
         with:
           context: ./HireVision-ai_FrontEnd
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-frontend:latest
 
       - name: Build and push ai-service
@@ -44,4 +48,6 @@ jobs:
         with:
           context: ./ai-service
           push: true
+          provenance: false
+          sbom: false
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-ai-service:latest
