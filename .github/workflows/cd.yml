@@ -1,0 +1,47 @@
+name: HireVision CD
+
+on:
+  workflow_run:
+    workflows: ["HireVision CI"]
+    branches: [main, master]
+    types:
+      - completed
+
+jobs:
+  build-and-push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./HireVision-ai
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-backend:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./HireVision-ai_FrontEnd
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-frontend:latest
+
+      - name: Build and push ai-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai-service
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hirevision-ai-service:latest
