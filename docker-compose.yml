@@ -28,26 +28,16 @@ services:
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
-      # Optionnel mais recommandé : accélère/stabilise le téléchargement du
-      # modèle HF au tout premier build (avant qu'il soit mis en cache dans
-      # l'image par le Dockerfile). Génère un token gratuit sur huggingface.co.
       HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ./ai-service:/app
     ports:
       - "8000:8000"
     healthcheck:
-      # raise_for_status() est essentiel : sans lui, httpx.get() sur une
-      # réponse 503 ("status": "loading") ne lève PAS d'exception et le
-      # healthcheck passerait au vert avant que le modèle soit vraiment prêt.
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
       interval: 5s
       timeout: 3s
       retries: 30
-      # Le premier chargement du modèle sentence-transformers peut prendre
-      # jusqu'à 1-2 minutes (surtout sans HF_TOKEN et sans le cache du
-      # Dockerfile). On laisse de la marge pour ne pas déclarer le service
-      # "unhealthy" à tort pendant ce chargement.
       start_period: 120s
     networks:
       - hirevision-net
@@ -80,7 +70,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      FRONTEND_URL: "http://localhost:4200"
+      FRONTEND_URL: "https://hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io"
       AI_SERVICE_URL: "http://ai-service:8000"
       PORT: 8086
     volumes:
