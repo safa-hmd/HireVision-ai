@@ -33,7 +33,7 @@ RUN echo 'server { \
         try_files $uri $uri/ /index.html; \
     } \
     location /api { \
-        proxy_pass http://backend:8086; \
+        proxy_pass http://hirevision-backend:8086/HireVision; \
     } \
 }' > /etc/nginx/conf.d/default.conf 
 
