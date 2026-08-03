@@ -46,7 +46,7 @@ export interface DashboardStats {
   providedIn: 'root'
 })
 export class AdminStatsService {
-  private baseUrl = 'http://localhost:8086/HireVision/admin/stats';
+  private baseUrl = '/HireVision/admin/stats';
 
   constructor(private http: HttpClient) {}
 

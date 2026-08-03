@@ -25,7 +25,7 @@ export interface MatchingResultDTO {
 
 @Injectable({ providedIn: 'root' })
 export class MatchingService {
-  private baseUrl = 'http://localhost:8086/HireVision/matching-results';
+  private baseUrl = '/HireVision/matching-results';
 
   constructor(private http: HttpClient) {}
 

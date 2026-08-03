@@ -21,7 +21,7 @@ export class InterviewFeedbackComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;
 
   // Tous les appels IA passent par Spring Boot
-  private readonly javaUrl = 'http://localhost:8086/HireVision';
+  private readonly javaUrl = '/HireVision';
 
   get globalScore(): number { return this.results?.avg_scores?.global || 0; }
   get scoreColor():  string {

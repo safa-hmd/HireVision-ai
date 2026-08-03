@@ -106,7 +106,7 @@ export class InterviewSessionComponent implements OnInit, AfterViewInit, OnDestr
   private currentRunningScore = 0;
   private askedIds:     number[] = [];
 
-  private readonly javaUrl   = 'http://localhost:8086/HireVision';
+  private readonly javaUrl   = '/HireVision';
 
   // ── Computed ──
   get currentQuestion(): Question | null { return this.questions[this.currentIndex] || null; }

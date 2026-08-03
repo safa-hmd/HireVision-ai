@@ -23,7 +23,7 @@ export interface LearningPlanDTO {
 
 @Injectable({ providedIn: 'root' })
 export class PlanCarriereService {
-  private baseUrl = 'http://localhost:8086/HireVision';
+  private baseUrl = '/HireVision';
 
   constructor(private http: HttpClient) {}
 

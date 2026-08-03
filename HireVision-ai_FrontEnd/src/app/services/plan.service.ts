@@ -13,7 +13,7 @@ export interface PlanDTO {
 
 @Injectable({ providedIn: 'root' })
 export class PlanService {
-  private baseUrl = 'http://localhost:8086/HireVision/plans';
+  private baseUrl = '/HireVision/plans';
 
   constructor(private http: HttpClient) {}
 

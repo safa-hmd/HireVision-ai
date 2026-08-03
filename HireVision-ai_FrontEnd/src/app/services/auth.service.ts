@@ -30,7 +30,7 @@ export interface AuthResponse {
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8086/HireVision'; 
+  private baseUrl = '/HireVision'; 
 
   constructor(private http: HttpClient) {}
 
@@ -130,13 +130,13 @@ getToken(): string | null {
   }
 
   loginWithGoogle(): void {
-    window.location.href = 'http://localhost:8086/HireVision/oauth2/authorization/google';
+    window.location.href = '/HireVision/oauth2/authorization/google';
   }
 
  
   forgotPassword(email: string): Observable<string> {
     return this.http.post(
-      `http://localhost:8086/HireVision/auth/forgot-password`,
+      `/HireVision/auth/forgot-password`,
       { email },
       { responseType: 'text' }
     );
@@ -144,7 +144,7 @@ getToken(): string | null {
 
   resetPassword(token: string, newPassword: string): Observable<string> {
     return this.http.post(
-      `http://localhost:8086/HireVision/auth/reset-password`,
+      `/HireVision/auth/reset-password`,
       { token, newPassword },
       { responseType: 'text' }
     );

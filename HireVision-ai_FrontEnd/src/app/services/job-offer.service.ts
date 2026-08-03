@@ -14,7 +14,7 @@ export interface JobOfferDTO {
 
 @Injectable({ providedIn: 'root' })
 export class JobOfferService {
-  private baseUrl = 'http://localhost:8086/HireVision/job-offers';
+  private baseUrl = '/HireVision/job-offers';
 
   constructor(private http: HttpClient) {}
 

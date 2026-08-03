@@ -37,7 +37,7 @@ export interface CvUploadResponse {
 
 @Injectable({ providedIn: 'root' })
 export class CvService {
-  private baseUrl = 'http://localhost:8086/HireVision/cvs';
+  private baseUrl = '/HireVision/cvs';
 
   constructor(private http: HttpClient) {}
 

@@ -21,7 +21,7 @@ export interface AnalyticsOverview {
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
-  private baseUrl = 'http://localhost:8086/HireVision/admin/analytics';
+  private baseUrl = '/HireVision/admin/analytics';
 
   constructor(private http: HttpClient) {}
 

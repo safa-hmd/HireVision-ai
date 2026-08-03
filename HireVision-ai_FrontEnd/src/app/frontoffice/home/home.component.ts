@@ -94,7 +94,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return this.drsCircumference - (this.drsScore / 100) * this.drsCircumference;
   }
 
-  private readonly javaUrl = 'http://localhost:8086/HireVision';
+  private readonly javaUrl = '/HireVision';
 
   constructor(
     private authService:         AuthService,

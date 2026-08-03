@@ -39,7 +39,7 @@ export interface SubscriptionInfo {
   providedIn: 'root'
 })
 export class SubscriptionService {
-  private baseUrl = 'http://localhost:8086/HireVision/subscriptions';
+  private baseUrl = '/HireVision/subscriptions';
 
   constructor(private http: HttpClient) {}
 

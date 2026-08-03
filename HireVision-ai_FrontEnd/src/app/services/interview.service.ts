@@ -40,7 +40,7 @@ export interface InterviewDTO {
 
 @Injectable({ providedIn: 'root' })
 export class InterviewService {
-  private baseUrl = 'http://localhost:8086/HireVision/interviews';
+  private baseUrl = '/HireVision/interviews';
 
   constructor(private http: HttpClient) {}
 

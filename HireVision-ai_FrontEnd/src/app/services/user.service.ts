@@ -36,7 +36,7 @@ export interface GitHubAnalysis {
   providedIn: 'root'
 })
 export class UserService {
-  private baseUrl = 'http://localhost:8086/HireVision/users';
+  private baseUrl = '/HireVision/users';
 
   constructor(private http: HttpClient) {}
 
@@ -63,7 +63,7 @@ export class UserService {
   }
 
   getPictureUrl(filename: string): string {
-    return `http://localhost:8086/HireVision/users/pictures/${filename}`;
+    return `/HireVision/users/pictures/${filename}`;
   }
 
   create(dto: UserDTO): Observable<UserDTO> {

@@ -31,7 +31,7 @@ export interface SettingsDTO {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private baseUrl = 'http://localhost:8086/HireVision/settings';
+  private baseUrl = '/HireVision/settings';
 
   constructor(private http: HttpClient) {}
 

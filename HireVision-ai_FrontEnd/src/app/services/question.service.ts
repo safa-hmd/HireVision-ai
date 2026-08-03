@@ -19,7 +19,7 @@ export interface QuestionDTO {
 
 @Injectable({ providedIn: 'root' })
 export class QuestionService {
-  private baseUrl = 'http://localhost:8086/HireVision/questions';
+  private baseUrl = '/HireVision/questions';
 
   constructor(private http: HttpClient) {}
 
