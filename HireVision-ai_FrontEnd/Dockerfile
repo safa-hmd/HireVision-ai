@@ -30,8 +30,8 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     location /HireVision/ { \
-        proxy_pass http://hirevision-backend/HireVision/;\
-        proxy_set_header Host $host; \
+        proxy_pass http://hirevision-backend/HireVision/; \
+        proxy_set_header Host hirevision-backend; \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
