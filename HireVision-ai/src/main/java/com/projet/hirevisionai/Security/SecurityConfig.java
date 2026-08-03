@@ -95,7 +95,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "http://localhost:4201",
-                "http://localhost:59619"
+                "http://localhost:59619",
+                "https://hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io"
         ));
 
         config.setAllowedMethods(List.of(
