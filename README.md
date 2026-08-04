@@ -420,9 +420,9 @@ DOCKERHUB_TOKEN
 ### Images Docker Hub
 
 ```
-safahmd/hirevision-backend:latest
-safahmd/hirevision-frontend:latest
-safahmd/hirevision-ai-service:latest
+hamdisafa/hirevision-backend:latest
+hamdisafa/hirevision-frontend:latest
+hamdisafa/hirevision-ai-service:latest
 ```
 
 ---
@@ -524,7 +524,35 @@ Azure Database for MySQL
   <img src="docs/images/screenshots/interview-prep.png" alt="Préparation d'entretien" width="900">
 </p>
 
-*(à ajouter prochainement : session d'entretien IA, pipeline GitHub Actions, Container Apps sur Azure)*
+### Session d'entretien IA (analyse en temps réel)
+
+<p align="center">
+  <img src="docs/images/screenshots/interview-session.png" alt="Session d'entretien IA" width="900">
+</p>
+
+### Dashboard administrateur
+
+<p align="center">
+  <img src="docs/images/screenshots/admin-dashboard.png" alt="Dashboard administrateur" width="900">
+</p>
+
+### Pipeline CI/CD (GitHub Actions)
+
+<p align="center">
+  <img src="docs/images/screenshots/github-actions-ci.png" alt="Pipeline CI GitHub Actions" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/images/screenshots/github-actions-cd.png" alt="Pipeline CD GitHub Actions" width="900">
+</p>
+
+### Images sur Docker Hub
+
+<p align="center">
+  <img src="docs/images/screenshots/dockerhub-repos.png" alt="Repositories Docker Hub" width="900">
+</p>
+
+*(à ajouter prochainement : Container Apps sur Azure)*
 
 ---
 
