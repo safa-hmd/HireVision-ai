@@ -44,9 +44,8 @@ class OAuth2AuthSuccessHandlerTest {
     private OAuth2User oAuth2User;
 
     private OAuth2AuthSuccessHandler handler() {
-        return new OAuth2AuthSuccessHandler(userRepository, jwtService);
+        return new OAuth2AuthSuccessHandler(userRepository, jwtService, "http://localhost:4200");
     }
-
     @Test
     void onAuthenticationSuccess_shouldRedirectWithToken_whenUserAlreadyExists() throws Exception {
         User existing = User.builder()
