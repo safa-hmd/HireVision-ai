@@ -32,7 +32,8 @@ public class IAuthServiceImp implements IAuthService {
    // private final PromoEngineService promoEngineService;
 
 
-    private static final String FRONTEND_URL = "http://localhost:4200";
+    @Value("${app.frontend.url}")
+    private String FRONTEND_URL;
     private final EmailService emailService;
 
 
