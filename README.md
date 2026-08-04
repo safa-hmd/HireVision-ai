@@ -494,15 +494,37 @@ Azure Database for MySQL
 
 ## 🖼️ Captures d'écran
 
-*(à ajouter)*
+### Connexion
 
-- Page d'accueil
-- Analyse de CV
-- Job matching
-- Préparation d'entretien
-- Session d'entretien IA
-- Pipeline GitHub Actions
-- Container Apps sur Azure
+<p align="center">
+  <img src="docs/images/screenshots/login.png" alt="Page de connexion" width="450">
+</p>
+
+### Dashboard — Developer Readiness Score
+
+<p align="center">
+  <img src="docs/images/screenshots/dashboard.png" alt="Dashboard candidat" width="900">
+</p>
+
+### Analyse de CV par IA
+
+<p align="center">
+  <img src="docs/images/screenshots/cv-analysis.png" alt="Analyse de CV" width="900">
+</p>
+
+### Job Matching
+
+<p align="center">
+  <img src="docs/images/screenshots/job-matching.png" alt="Job matching" width="900">
+</p>
+
+### Préparation d'entretien
+
+<p align="center">
+  <img src="docs/images/screenshots/interview-prep.png" alt="Préparation d'entretien" width="900">
+</p>
+
+*(à ajouter prochainement : session d'entretien IA, pipeline GitHub Actions, Container Apps sur Azure)*
 
 ---
 
