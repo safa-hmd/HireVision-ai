@@ -6,6 +6,7 @@ import com.projet.hirevisionai.Security.jwt.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,6 +36,9 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Bean
     public DaoAuthenticationProvider authProvider() {
@@ -82,7 +86,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(new OAuth2AuthSuccessHandler(userRepository, jwtService))
+                        .successHandler(new OAuth2AuthSuccessHandler(userRepository, jwtService, frontendUrl))
                 );
 
         return http.build();

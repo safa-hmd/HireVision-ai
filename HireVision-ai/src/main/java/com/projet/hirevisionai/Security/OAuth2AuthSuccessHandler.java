@@ -19,6 +19,7 @@ public class OAuth2AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(
@@ -37,8 +38,8 @@ public class OAuth2AuthSuccessHandler implements AuthenticationSuccessHandler {
         String token = jwtService.generateToken(user);
 
         String redirectUrl = String.format(
-                "http://localhost:4200/oauth2/callback?token=%s&email=%s&role=ROLE_%s&id=%d",
-                token, user.getEmail(), user.getRole().name(), user.getIdUser()
+                "%s/oauth2/callback?token=%s&email=%s&role=ROLE_%s&id=%d",
+                frontendUrl, token, user.getEmail(), user.getRole().name(), user.getIdUser()
         );
         response.sendRedirect(redirectUrl);
     }
