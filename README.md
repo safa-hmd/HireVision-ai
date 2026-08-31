@@ -8,45 +8,47 @@
 
 ## 📌 Description
 
-**HireVision AI** est une plateforme intelligente de préparation aux entretiens pour développeurs.
+**HireVision AI** is an intelligent recruitment and interview preparation platform that uses AI to analyze resumes, match candidates with job offers, generate personalized interview questions, and provide detailed feedback based on technical, vocal, and behavioral performance.
 
-Elle permet de faire :
+It provides:
 
-- l'analyse intelligente de CV ;
-- le matching entre un candidat et une offre d'emploi ;
-- la simulation d'entretien technique ;
-- le calcul d'un **Developer Readiness Score** ;
-- la génération d'une roadmap personnalisée ;
-- l'analyse vocale et comportementale des réponses.
+- intelligent resume (CV) analysis;
+- candidate–job offer matching;
+- technical interview simulation;
+- a **Developer Readiness Score**;
+- a personalized learning roadmap;
+- voice and behavioral analysis of interview answers.
 
-🔗 **Démo en ligne** : [hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io](https://hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io/frontoffice/home)
+🔗 **Live demo**: [hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io](https://hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io/frontoffice/home)
 
 ---
 
 ## 🏗️ Architecture
 
-HireVision AI repose sur une architecture multi-couches composée d'un frontend Angular, d'un backend Spring Boot, d'une base de données MySQL et d'un microservice IA basé sur FastAPI.
+HireVision AI is built on a multi-layer architecture: an Angular frontend, a Spring Boot backend, a MySQL database, and a FastAPI-based AI microservice.
 
-### Architecture logique
-
-<p align="center">
-  <img src="docs/images/architecture-logique.png" alt="Architecture logique de HireVision AI" width="900">
-</p>
-
-### Architecture physique
+### Logical architecture
 
 <p align="center">
-  <img src="docs/images/architecture-physique.png" alt="Architecture physique de HireVision AI" width="900">
+  <img src="docs/images/architecture-logique.png" alt="HireVision AI logical architecture" width="900">
 </p>
+
+### Physical architecture
+
+<p align="center">
+  <img src="docs/images/architecture-physique.png" alt="HireVision AI physical architecture" width="900">
+</p>
+
+> **⚠️ Important:** these two diagrams are the source of truth for how the three services (Angular, Spring Boot, FastAPI) and the database talk to each other — check them first before changing any service URL, port, or network config.
 
 ---
 
-## 📁 Structure du projet
+## 📁 Project structure
 
 ```
 HireVision-ai/
 │
-├── HireVision-ai/                  # Backend Spring Boot
+├── HireVision-ai/                  # Spring Boot backend
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/projet/hirevisionai/
@@ -64,12 +66,12 @@ HireVision-ai/
 │   │   │       ├── application.properties.example
 │   │   │       └── application.properties
 │   │   │
-│   │   └── test/                   # Tests unitaires + intégration (JUnit5, Mockito, H2)
+│   │   └── test/                   # Unit + integration tests (JUnit5, Mockito, H2)
 │   │
 │   ├── pom.xml
 │   └── Dockerfile
 │
-├── HireVision-ai_FrontEnd/          # Frontend Angular
+├── HireVision-ai_FrontEnd/          # Angular frontend
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── auth/
@@ -88,7 +90,7 @@ HireVision-ai/
 │   ├── tsconfig.json
 │   └── Dockerfile
 │
-├── ai-service/                      # Microservice IA FastAPI
+├── ai-service/                      # FastAPI AI microservice
 │   ├── main.py
 │   ├── extractor.py
 │   ├── ml_model.py
@@ -102,7 +104,7 @@ HireVision-ai/
 │   ├── dataset.csv
 │   ├── dataset_clean.csv
 │   ├── model.joblib
-│   ├── tests/                       # Suite pytest
+│   ├── tests/                       # pytest suite
 │   ├── requirements.txt
 │   └── Dockerfile
 │
@@ -116,40 +118,40 @@ HireVision-ai/
 └── README.md
 ```
 
-### Dossiers principaux
+### Main folders
 
-- `HireVision-ai/` : contient l'API REST Spring Boot, les controllers, services, repositories, entités, DTOs et la configuration de sécurité.
-- `HireVision-ai_FrontEnd/` : contient l'application Angular avec les modules d'authentification, frontoffice, backoffice, guards et services.
-- `ai-service/` : contient le microservice IA FastAPI responsable de l'analyse CV, du matching emploi, des questions d'entretien et du feedback.
-- `docs/images/` : contient les schémas d'architecture utilisés dans le README.
-
----
-
-## ✨ Fonctionnalités
-
-### Candidat
-
-- 📄 **Analyse CV IA** : extraction de compétences, détection du profil, score global et recommandations d'optimisation.
-- 🎯 **Job Matching** : calcul de compatibilité entre le CV du candidat et les offres d'emploi.
-- 🎤 **Simulation d'entretien** : questions adaptatives par spécialité avec analyse des réponses.
-- 📊 **Developer Readiness Score** : score multi-axe : Backend, Frontend, Database, DevOps, Soft Skills et Interview.
-- 🗺️ **Roadmap personnalisée** : plan de carrière hebdomadaire basé sur les lacunes détectées.
-- 🏅 **Gamification** : badges, progression et suivi de performance.
-- 🌙 **Dark Mode** : mode sombre mémorisé.
-- 🌐 **Multilingue** : français, anglais et arabe (RTL).
-
-### Administrateur
-
-- Dashboard analytics.
-- Gestion des utilisateurs.
-- Gestion des offres d'emploi.
-- Gestion des questions d'entretien.
-- Gestion des abonnements.
-- Gestion des paramètres de la plateforme.
+- `HireVision-ai/`: Spring Boot REST API — controllers, services, repositories, entities, DTOs, and security configuration.
+- `HireVision-ai_FrontEnd/`: Angular app with auth, frontoffice, backoffice, guards, and services modules.
+- `ai-service/`: FastAPI AI microservice responsible for resume analysis, job matching, interview questions, and feedback.
+- `docs/images/`: architecture diagrams and screenshots used in this README.
 
 ---
 
-## 🛠️ Technologies utilisées
+## ✨ Features
+
+### Candidate
+
+- 📄 **AI resume analysis**: skill extraction, profile detection, overall score, and optimization recommendations.
+- 🎯 **Job matching**: compatibility score between a candidate's resume and job offers.
+- 🎤 **Interview simulation**: adaptive questions by specialty with answer analysis.
+- 📊 **Developer Readiness Score**: a multi-axis score covering Backend, Frontend, Database, DevOps, Soft Skills, and Interview.
+- 🗺️ **Personalized roadmap**: a weekly career plan based on detected gaps.
+- 🏅 **Gamification**: badges, progress tracking, and performance history.
+- 🌙 **Dark mode**: remembered across sessions.
+- 🌐 **Multilingual**: French, English, and Arabic (RTL).
+
+### Administrator
+
+- Analytics dashboard.
+- User management.
+- Job offer management.
+- Interview question management.
+- Subscription management.
+- Platform settings management.
+
+---
+
+## 🛠️ Tech stack
 
 ### Frontend
 
@@ -172,7 +174,7 @@ HireVision-ai/
 - Maven
 - Swagger / SpringDoc OpenAPI
 
-### IA / Machine Learning
+### AI / Machine Learning
 
 - Python
 - FastAPI
@@ -183,7 +185,7 @@ HireVision-ai/
 - Joblib
 - Groq / LLM API
 
-### Base de données et services externes
+### Database & external services
 
 - MySQL
 - Google OAuth2
@@ -203,13 +205,13 @@ HireVision-ai/
 
 ## ✅ Tests
 
-Le projet est couvert par une suite de tests sur les trois couches :
+The project is covered by tests across all three layers:
 
-| Couche | Outils | Couverture |
+| Layer | Tools | Coverage |
 |---|---|---|
-| Backend | JUnit5, Mockito, H2 (in-memory) | Tests unitaires des services, tests d'intégration (`AbstractIntegrationTest`), tests des controllers (auth, user, CV, offres, sécurité) |
-| Frontend | Jasmine / Karma | 19 fichiers `spec.ts` couvrant services, guards, interceptors et pipes |
-| Service IA | pytest | Job matching, modèle ML, extraction CV, génération de questions, client LLM, analyse GitHub |
+| Backend | JUnit5, Mockito, H2 (in-memory) | Service unit tests, integration tests (`AbstractIntegrationTest`), controller tests (auth, user, CV, job offers, security) |
+| Frontend | Jasmine / Karma | 19 `spec.ts` files covering services, guards, interceptors, and pipes |
+| AI service | pytest | Job matching, ML model, resume extraction, question generation, LLM client, GitHub analysis |
 
 ```bash
 # Backend
@@ -220,27 +222,27 @@ cd HireVision-ai
 cd HireVision-ai_FrontEnd
 npm test
 
-# Service IA
+# AI service
 cd ai-service
 pytest
 ```
 
 ---
 
-## 🚀 Démarrage rapide avec Docker
+## 🚀 Quick start with Docker
 
-### 1. Cloner le projet
+### 1. Clone the project
 ```bash
 git clone https://github.com/safa-hmd/HireVision-ai.git
 cd HireVision-ai
 ```
 
-### 2. Configurer les variables d'environnement
+### 2. Configure environment variables
 ```bash
 cp .env.example .env
 ```
 
-Puis remplir les valeurs nécessaires dans `.env` :
+Then fill in the required values in `.env`:
 
 ```
 GROQ_API_KEY=your_groq_api_key
@@ -251,103 +253,103 @@ MAIL_USERNAME=your_email
 MAIL_PASSWORD=your_app_password
 ```
 
-### 3. Démarrer tous les services
+### 3. Start all services
 ```bash
 docker compose up --build
 ```
 
-### Services accessibles
+### Available services
 
 | Service | URL |
 |---|---|
 | Frontend | `http://localhost:4200` |
 | Backend | `http://localhost:8086/HireVision` |
-| Swagger Backend | `http://localhost:8086/HireVision/swagger-ui.html` |
+| Backend Swagger | `http://localhost:8086/HireVision/swagger-ui.html` |
 | AI Service Docs | `http://localhost:8000/docs` |
 
 ---
 
-## Prérequis pour le développement local
+## Prerequisites for local development
 
-Si tu veux exécuter le projet sans Docker, tu dois installer :
+To run the project without Docker, you'll need:
 
-- Java 17 ou plus ;
-- Maven ;
-- Node.js 18 ou plus ;
-- npm ;
-- Python 3.10 ou plus ;
-- MySQL 8.0.
+- Java 17+
+- Maven
+- Node.js 18+
+- npm
+- Python 3.10+
+- MySQL 8.0
 
 ---
 
-## Installation locale
+## Local installation
 
-### 1. Backend Spring Boot
+### 1. Spring Boot backend
 
 ```bash
 cd HireVision-ai
 cp src/main/resources/application.properties.example src/main/resources/application.properties
 ```
 
-Configurer le fichier `src/main/resources/application.properties`, puis lancer le backend :
+Configure `src/main/resources/application.properties`, then start the backend:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Sur Windows :
+On Windows:
 ```powershell
 mvnw.cmd spring-boot:run
 ```
 
-Le backend démarre sur : `http://localhost:8086/HireVision`
-Swagger UI : `http://localhost:8086/HireVision/swagger-ui.html`
+The backend starts at: `http://localhost:8086/HireVision`
+Swagger UI: `http://localhost:8086/HireVision/swagger-ui.html`
 
 ---
 
-### 2. Service IA FastAPI
+### 2. FastAPI AI service
 
 ```bash
 cd ai-service
 python -m venv venv
 ```
 
-Sur Windows :
+On Windows:
 ```powershell
 venv\Scripts\activate
 ```
 
-Sur Linux / macOS :
+On Linux / macOS:
 ```bash
 source venv/bin/activate
 ```
 
-Installer les dépendances :
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Créer le fichier `.env` :
+Create the `.env` file:
 ```bash
 cp .env.example .env
 ```
 
-Puis renseigner la clé :
+Then set the key:
 ```
 GROQ_API_KEY=your_groq_api_key
 ```
 
-Lancer le service IA :
+Start the AI service:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Le service IA démarre sur : `http://localhost:8000`
-Documentation interactive : `http://localhost:8000/docs`
+The AI service starts at: `http://localhost:8000`
+Interactive docs: `http://localhost:8000/docs`
 
 ---
 
-### 3. Frontend Angular
+### 3. Angular frontend
 
 ```bash
 cd HireVision-ai_FrontEnd
@@ -355,69 +357,69 @@ npm install
 npm start
 ```
 
-Le frontend démarre sur : `http://localhost:4200`
+The frontend starts at: `http://localhost:4200`
 
 ---
 
-## 🔒 Sécurité
+## 🔒 Security
 
-- Les secrets sensibles sont externalisés via des variables d'environnement.
-- Les fichiers `.env` et `application.properties` contenant des valeurs réelles ne doivent jamais être commités.
-- Les fichiers sensibles doivent être ajoutés dans `.gitignore`.
-- Les endpoints protégés exigent un JWT valide.
-- Les endpoints liés au CV et au matching vérifient la propriété des ressources (ownership).
-- Le service IA applique une configuration CORS restreinte.
+- Sensitive secrets are externalized via environment variables.
+- `.env` and `application.properties` files containing real values must never be committed.
+- Sensitive files must be added to `.gitignore`.
+- Protected endpoints require a valid JWT.
+- CV- and matching-related endpoints verify resource ownership.
+- The AI service enforces a restricted CORS configuration.
 
 ---
 
 ## 🐳 Docker
 
-Chaque service possède son propre `Dockerfile`.
+Each service has its own `Dockerfile`.
 
-| Fichier | Service |
+| File | Service |
 |---|---|
-| `HireVision-ai/Dockerfile` | Backend Spring Boot |
-| `HireVision-ai_FrontEnd/Dockerfile` | Frontend Angular + Nginx |
-| `ai-service/Dockerfile` | Service IA FastAPI |
-| `docker-compose.yml` | Orchestration complète |
+| `HireVision-ai/Dockerfile` | Spring Boot backend |
+| `HireVision-ai_FrontEnd/Dockerfile` | Angular frontend + Nginx |
+| `ai-service/Dockerfile` | FastAPI AI service |
+| `docker-compose.yml` | Full orchestration |
 
 ```bash
-docker compose up --build    # Premier démarrage
-docker compose up -d         # Mode daemon (arrière-plan)
-docker compose down          # Arrêter et supprimer les conteneurs
-docker compose down -v       # + Supprimer les volumes (réinitialise la DB)
+docker compose up --build    # First run
+docker compose up -d         # Detached mode (background)
+docker compose down          # Stop and remove containers
+docker compose down -v       # + remove volumes (resets the DB)
 ```
 
 ---
 
 ## 🔄 CI/CD
 
-Le projet utilise **GitHub Actions** pour l'intégration et la livraison continues.
+The project uses **GitHub Actions** for continuous integration and delivery.
 
-### Pipeline CI
+### CI pipeline
 
-Déclenché automatiquement à chaque `push` et `pull request` :
+Triggered automatically on every `push` and `pull request`:
 
-- Build du backend avec Maven
-- Build du frontend avec npm et Angular CLI
-- Build des images Docker via Docker Compose
+- Backend build with Maven
+- Frontend build with npm and Angular CLI
+- Docker image builds via Docker Compose
 
-### Pipeline CD
+### CD pipeline
 
-Déclenché après le succès du pipeline CI :
+Triggered after the CI pipeline succeeds:
 
-- Connexion à Docker Hub via les secrets GitHub
-- Build des images Docker
-- Push des images vers Docker Hub
+- Sign in to Docker Hub via GitHub secrets
+- Build Docker images
+- Push images to Docker Hub
 
-### Secrets GitHub requis
+### Required GitHub secrets
 
 ```
 DOCKERHUB_USERNAME
 DOCKERHUB_TOKEN
 ```
 
-### Images Docker Hub
+### Docker Hub images
 
 ```
 hamdisafa/hirevision-backend:latest
@@ -427,31 +429,31 @@ hamdisafa/hirevision-ai-service:latest
 
 ---
 
-## ☁️ Déploiement Azure
+## ☁️ Azure deployment
 
-L'application est déployée en production sur **Azure Container Apps**, avec une base de données **Azure Database for MySQL**.
+The application is deployed to production on **Azure Container Apps**, backed by an **Azure Database for MySQL**.
 
-### Ressources Azure
+### Azure resources
 
-| Container App | Rôle | Région |
+| Container App | Role | Region |
 |---|---|---|
 | `hirevision-frontend` | Angular + Nginx | Sweden Central |
-| `hirevision-backend` | API Spring Boot | Sweden Central |
-| `hirevision-ai-service` | Microservice FastAPI | Sweden Central |
-| `hirevision-mysql` | Base de données | Sweden Central |
+| `hirevision-backend` | Spring Boot API | Sweden Central |
+| `hirevision-ai-service` | FastAPI microservice | Sweden Central |
+| `hirevision-mysql` | Database | Sweden Central |
 
-- **Resource Group** : `hirevision-rg-swe`
-- **Container Apps Environment** : `managedEnvironment-hirevision...`
-- **Registre de conteneurs** : Docker Hub
+- **Resource Group**: `hirevision-rg-swe`
+- **Container Apps Environment**: `managedEnvironment-hirevision...`
+- **Container registry**: Docker Hub
 
-### URL de production
+### Production URL
 
-Frontend :
+Frontend:
 ```
 https://hirevision-frontend.gentlebay-58ff12f9.swedencentral.azurecontainerapps.io/frontoffice/home
 ```
 
-### Architecture de déploiement
+### Deployment architecture
 
 ```
 GitHub Repository
@@ -473,118 +475,117 @@ Azure Container Apps
 Azure Database for MySQL
 ```
 
-### Points d'attention lors du déploiement Azure
-
-- Les URLs `localhost` codées en dur dans les services Angular doivent être remplacées par des variables d'environnement (`environment.ts` / `environment.prod.ts` + `fileReplacements` dans `angular.json`).
-- Le `Dockerfile` du frontend ne doit pas référencer de `proxy_pass` pointant vers un hostname Docker Compose (invalide sur Azure) ; Nginx doit appeler directement l'URL publique du backend.
-- Les variables `SPRING_DATASOURCE_URL`, `AI_SERVICE_URL` et `FRONTEND_URL` doivent être configurées comme variables d'environnement de chaque Container App plutôt que codées en dur.
+> **⚠️ Important — points to watch during Azure deployment:**
+> - Hardcoded `localhost` URLs in Angular services must be replaced with environment variables (`environment.ts` / `environment.prod.ts` + `fileReplacements` in `angular.json`).
+> - The frontend `Dockerfile` must not reference a `proxy_pass` pointing at a Docker Compose hostname (invalid on Azure) — Nginx must call the backend's public URL directly.
+> - `SPRING_DATASOURCE_URL`, `AI_SERVICE_URL`, and `FRONTEND_URL` must be set as environment variables on each Container App rather than hardcoded.
 
 ---
 
-## 📚 API Documentation
+## 📚 API documentation
 
 | URL | Description |
 |---|---|
-| `http://localhost:8086/HireVision/swagger-ui.html` | Swagger UI Backend |
-| `http://localhost:8000/docs` | Swagger UI FastAPI |
-| `http://localhost:8086/HireVision/actuator/health` | Health Check Backend |
-| `http://localhost:8000/health` | Health Check AI Service |
+| `http://localhost:8086/HireVision/swagger-ui.html` | Backend Swagger UI |
+| `http://localhost:8000/docs` | FastAPI Swagger UI |
+| `http://localhost:8086/HireVision/actuator/health` | Backend health check |
+| `http://localhost:8000/health` | AI service health check |
 
 ---
 
-## 🖼️ Captures d'écran
+## 🖼️ Screenshots
 
-### Connexion
+### Login
 
 <p align="center">
-  <img src="docs/images/screenshots/login.png" alt="Page de connexion" width="450">
+  <img src="docs/images/screenshots/login.png" alt="Login page" width="450">
 </p>
 
 ### Dashboard — Developer Readiness Score
 
 <p align="center">
-  <img src="docs/images/screenshots/dashboard.png" alt="Dashboard candidat" width="900">
+  <img src="docs/images/screenshots/dashboard.png" alt="Candidate dashboard" width="900">
 </p>
 
-### Analyse de CV par IA
+### AI resume analysis
 
 <p align="center">
-  <img src="docs/images/screenshots/cv-analysis.png" alt="Analyse de CV" width="900">
+  <img src="docs/images/screenshots/cv-analysis.png" alt="Resume analysis" width="900">
 </p>
 
-### Job Matching
+### Job matching
 
 <p align="center">
   <img src="docs/images/screenshots/job-matching.png" alt="Job matching" width="900">
 </p>
 
-### Préparation d'entretien
+### Interview preparation
 
 <p align="center">
-  <img src="docs/images/screenshots/interview-prep.png" alt="Préparation d'entretien" width="900">
+  <img src="docs/images/screenshots/interview-prep.png" alt="Interview preparation" width="900">
 </p>
 
-### Session d'entretien IA (analyse en temps réel)
+### AI interview session (real-time analysis)
 
 <p align="center">
-  <img src="docs/images/screenshots/interview-session.png" alt="Session d'entretien IA" width="900">
+  <img src="docs/images/screenshots/interview-session.png" alt="AI interview session" width="900">
 </p>
 
-### Dashboard administrateur
+### Admin dashboard
 
 <p align="center">
-  <img src="docs/images/screenshots/admin-dashboard.png" alt="Dashboard administrateur" width="900">
+  <img src="docs/images/screenshots/admin-dashboard.png" alt="Admin dashboard" width="900">
 </p>
 
-### Pipeline CI/CD (GitHub Actions)
+### CI/CD pipeline (GitHub Actions)
 
 <p align="center">
-  <img src="docs/images/screenshots/github-actions-ci.png" alt="Pipeline CI GitHub Actions" width="900">
+  <img src="docs/images/screenshots/github-actions-ci.png" alt="GitHub Actions CI pipeline" width="900">
 </p>
 
 <p align="center">
-  <img src="docs/images/screenshots/github-actions-cd.png" alt="Pipeline CD GitHub Actions" width="900">
+  <img src="docs/images/screenshots/github-actions-cd.png" alt="GitHub Actions CD pipeline" width="900">
 </p>
 
-### Images sur Docker Hub
+### Docker Hub images
 
 <p align="center">
-  <img src="docs/images/screenshots/dockerhub-repos.png" alt="Repositories Docker Hub" width="900">
+  <img src="docs/images/screenshots/dockerhub-repos.png" alt="Docker Hub repositories" width="900">
 </p>
 
-*(à ajouter prochainement : Container Apps sur Azure)*
+*(coming soon: Azure Container Apps screenshot)*
 
 ---
 
-## ⚠️ Défis rencontrés
+## ⚠️ Challenges faced
 
-- Timeout de build Docker lors de l'installation des dépendances Python.
-- Taille importante de l'image du service IA (dépendances ML).
-- Gestion des URLs `localhost` codées en dur lors du passage au déploiement cloud.
-- Blocage des endpoints de health check par Spring Security.
-- Récursion infinie JSON causée par les relations bidirectionnelles JPA.
-- Déploiement multi-services avec Azure Container Apps.
+- Docker build timeouts when installing Python dependencies.
+- Large image size for the AI service (ML dependencies).
+- Handling hardcoded `localhost` URLs when moving to cloud deployment.
+- Health check endpoints blocked by Spring Security.
+- Infinite JSON recursion caused by bidirectional JPA relationships.
+- Multi-service deployment on Azure Container Apps.
 
-## 🔭 Améliorations futures
+## 🔭 Future improvements
 
-- Optimiser la taille de l'image Docker du service IA.
-- Ajouter le monitoring et les logs sur Azure.
-- Automatiser le déploiement Docker Hub → Azure.
-- Améliorer le feedback des entretiens IA.
-- Renforcer la configuration de sécurité pour la production.
+- Optimize the AI service Docker image size.
+- Add monitoring and logging on Azure.
+- Automate Docker Hub → Azure deployment.
+- Improve AI interview feedback.
+- Harden production security configuration.
 
 ---
 
-## 👤 Auteur
+## 👤 Author
 
 **Safa Hamdi**
 
-Étudiante ingénieure à ESPRIT.
+Engineering student at ESPRIT.
 
-GitHub : [safa-hmd](https://github.com/safa-hmd)
+GitHub: [safa-hmd](https://github.com/safa-hmd)
 
 ---
 
-## 📄 Licence
+## 📄 License
 
-© 2026 HireVision AI — Tous droits réservés.
+© 2026 HireVision AI — All rights reserved.
