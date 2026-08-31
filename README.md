@@ -5,6 +5,7 @@
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
 ![Azure](https://img.shields.io/badge/Azure-Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)
 ![License](https://img.shields.io/badge/license-academic-lightgrey)
+![Status](https://img.shields.io/badge/status-completed-brightgreen)
 
 ## 📌 Description
 
@@ -553,8 +554,6 @@ Azure Database for MySQL
   <img src="docs/images/screenshots/dockerhub-repos.png" alt="Docker Hub repositories" width="900">
 </p>
 
-*(coming soon: Azure Container Apps screenshot)*
-
 ---
 
 ## ⚠️ Challenges faced
@@ -566,7 +565,9 @@ Azure Database for MySQL
 - Infinite JSON recursion caused by bidirectional JPA relationships.
 - Multi-service deployment on Azure Container Apps.
 
-## 🔭 Future improvements
+## 🔭 Possible future enhancements
+
+The project is complete and deployed. Ideas that could extend it further:
 
 - Optimize the AI service Docker image size.
 - Add monitoring and logging on Azure.
