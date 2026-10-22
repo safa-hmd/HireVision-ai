@@ -342,7 +342,7 @@ GROQ_API_KEY=your_groq_api_key
 
 Start the AI service:
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+py -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The AI service starts at: `http://localhost:8000`
